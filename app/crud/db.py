@@ -2,7 +2,7 @@ import dataclasses
 from typing import Any, AnyStr, List, Optional
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import desc, insert, update
+from sqlalchemy import desc, insert, update, or_
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -64,6 +64,18 @@ class DBCrudBase(object):
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
 
+    def select_activity_with_pagination(self, model: Any, filters: Any, order_by: Any, limit: int = 1, page: int = 1):
+        try:
+            return (
+                self.db
+                .query(model)
+                .filter(or_(*filters))
+                .order_by(desc(order_by))
+                .paginate(page=page, per_page=limit))
+        except Exception as e:
+            logger.error(f"Select DB Failure:{e}")
+            raise errorcode.internal_server_error(message="Select DB Failure")
+
 
 @dataclasses.dataclass
 class DBCrud(DBCrudBase):
@@ -71,13 +83,12 @@ class DBCrud(DBCrudBase):
         return self.create_object(models.Activity(**jsonable_encoder(activity)))
 
     def batch_insert_ignore_activity(
-        self,
-        activities: List[schemas.Activity],
+            self,
+            activities: List[schemas.Activity],
     ) -> bool:
 
         db_activities = []
         for activity in activities:
-
             db_activity = models.Activity(**jsonable_encoder(activity))
             db_activities.append(jsonable_encoder(db_activity))
 
@@ -87,9 +98,9 @@ class DBCrud(DBCrudBase):
         )
 
     def update_block_state(
-        self,
-        peak_height: Optional[int] = None,
-        current_height: Optional[int] = None,
+            self,
+            peak_height: Optional[int] = None,
+            current_height: Optional[int] = None,
     ):
         state = models.State()
         if peak_height is not None:
