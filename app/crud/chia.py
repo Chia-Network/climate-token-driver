@@ -1,5 +1,6 @@
 import dataclasses
-from typing import Dict, List
+import urllib.parse
+from typing import Dict, List, Any
 
 import requests
 from blspy import G1Element
@@ -23,9 +24,15 @@ errorcode = ErrorCode()
 class ClimateWareHouseCrud(object):
     url: str
 
-    def get_climate_tokens(self) -> List[Dict]:
+    def get_climate_tokens(self, search: List[Any]) -> List[Dict]:
         try:
-            r = requests.get(self.url + "/v1/units")
+            condition = {}
+            for i, v in search:
+                condition[i] = v
+
+            params = urllib.parse.urlencode(condition)
+
+            r = requests.get(self.url + "/v1/units?"+params)
             if r.status_code != requests.codes.ok:
                 raise errorcode.internal_server_error(
                     message="Call Climate API Failure"
@@ -36,6 +43,38 @@ class ClimateWareHouseCrud(object):
         except TimeoutError as e:
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise errorcode.internal_server_error("Call Climate API Timeout")
+
+    def get_climate_organizations_metadata(self) -> List[Dict]:
+        try:
+            r = requests.get(self.url + "/v1/organizations")
+            if r.status_code != requests.codes.ok:
+                raise errorcode.internal_server_error(
+                    message="Call Climate API Failure"
+                )
+
+            return r.json()
+        except TimeoutError as e:
+            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
+            raise errorcode.internal_server_error("Call Climate API Timeout")
+
+    def combine_climate_units_and_metadata(self, search: List[Any]) -> List[Dict]:
+        unites = self.get_climate_tokens(search)
+        if len(unites) == 0:
+            return []
+
+        organizations = self.get_climate_organizations_metadata()
+        if len(organizations) == 0:
+            return []
+
+        ret = []
+        for ui, uv in unites:
+            row = {}
+            for oi, ov in organizations:
+                if uv["orgUid"] == ov["orgUid"]:
+                    row[ui] = row[uv]
+                    row[oi] = row[ov]
+            ret.append(row)
+        return ret
 
 
 @dataclasses.dataclass
