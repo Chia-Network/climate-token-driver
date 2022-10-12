@@ -67,7 +67,7 @@ async def _scan_token_activity(
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
-    climate_tokens = climate_warehouse.get_climate_tokens()
+    climate_tokens = climate_warehouse.get_climate_tokens(search=[])
     for token in climate_tokens:
         public_key = G1Element.from_bytes(hexstr_to_bytes(token["publicKey"]))
 

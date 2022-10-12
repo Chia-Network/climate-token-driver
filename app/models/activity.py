@@ -27,6 +27,8 @@ class Activity(Base):
     height = Column(BigInteger)
     amount = Column(BigInteger)
     mode = Column(String)
+    beneficiary_name = Column(String)
+    beneficiary_puzzle_hash = Column(String)
     metadata_ = Column("metadata", JSON, default={})
     timestamp = Column(BigInteger)
 
