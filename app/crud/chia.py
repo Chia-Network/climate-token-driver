@@ -32,7 +32,7 @@ class ClimateWareHouseCrud(object):
 
             params = urllib.parse.urlencode(condition)
 
-            r = requests.get(self.url + "/v1/units?"+params)
+            r = requests.get(self.url + "/v1/units?" + params)
             if r.status_code != requests.codes.ok:
                 raise errorcode.internal_server_error(
                     message="Call Climate API Failure"
@@ -67,13 +67,13 @@ class ClimateWareHouseCrud(object):
             return []
 
         ret = []
-        for ui, uv in unites:
+        for uv in unites:
             row = {}
-            for oi, ov in organizations:
-                if uv["orgUid"] == ov["orgUid"]:
-                    row[ui] = row[uv]
-                    row[oi] = row[ov]
+            for ov in organizations:
+                if uv["orgUid"] == ov:
+                    row = dict(uv | organizations[ov])
             ret.append(row)
+
         return ret
 
 

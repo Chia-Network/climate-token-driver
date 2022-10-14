@@ -40,6 +40,6 @@ class ActivitiesResponse(BaseModel):
     amount: int
     height: int
     timestamp: int
-    mode: GatewayMode
+    mode: str
     climate_warehouse: Any
 
