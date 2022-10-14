@@ -71,7 +71,9 @@ class DBCrudBase(object):
                 .query(model)
                 .filter(or_(*filters))
                 .order_by(desc(order_by))
-                .paginate(page=page, per_page=limit))
+                .limit(limit)
+                .offset(page)
+                .all())
         except Exception as e:
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
