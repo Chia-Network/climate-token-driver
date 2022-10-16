@@ -126,6 +126,8 @@ class BlockChainCrud(object):
                 height=coin_record.spent_block_index,
                 amount=coin.amount,
                 mode=mode.name,
+                beneficiary_name=metadata["bn"],
+                beneficiary_puzzle_hash=metadata["bp"],
                 metadata=metadata,
                 timestamp=coin_record.timestamp,
             )
