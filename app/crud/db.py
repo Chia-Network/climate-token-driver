@@ -2,7 +2,8 @@ import dataclasses
 from typing import Any, AnyStr, List, Optional
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import desc, insert, update, or_
+from pydantic import ValidationError
+from sqlalchemy import desc, insert, update, or_, and_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -73,10 +74,10 @@ class DBCrudBase(object):
                     model,
                     func.count(model.id).over().label("total")
                 )
-                .filter(or_(*filters))
-                .order_by(desc(order_by))
+                .filter(or_(*filters["or"]), and_(*filters["and"]))
+                .order_by(order_by.desc())
                 .limit(limit)
-                .offset(page)
+                .offset((page-1)*limit)
                 .all())
         except Exception as e:
             logger.error(f"Select DB Failure:{e}")
