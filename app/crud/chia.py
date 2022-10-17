@@ -1,6 +1,6 @@
 import dataclasses
 import urllib.parse
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 import requests
 from blspy import G1Element
@@ -90,7 +90,7 @@ class BlockChainCrud(object):
         public_key: G1Element,
         start_height: int,
         end_height: int,
-        mode: GatewayMode,
+        mode: Optional[GatewayMode] = None,
     ) -> List[schemas.Activity]:
 
         token_index = ClimateTokenIndex(
