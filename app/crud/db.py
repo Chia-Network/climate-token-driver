@@ -4,6 +4,7 @@ from typing import Any, AnyStr, List, Optional
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import desc, insert, update, or_
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from app import models, schemas
 from app.db.base import Base
@@ -68,7 +69,10 @@ class DBCrudBase(object):
         try:
             return (
                 self.db
-                .query(model)
+                .query(
+                    model,
+                    func.count(model.id).over().label("total")
+                )
                 .filter(or_(*filters))
                 .order_by(desc(order_by))
                 .limit(limit)

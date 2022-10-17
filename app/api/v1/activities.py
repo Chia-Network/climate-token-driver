@@ -3,18 +3,18 @@ from typing import Optional, List
 from fastapi import APIRouter
 
 from app import crud, schemas, models
-from app.config import ExecutionMode
-from app.utils import disallow
-from app.utils import as_async_contextmanager
 from app.api import dependencies as deps
+from app.config import ExecutionMode
 from app.config import Settings
-from app.errors import ErrorCode
 from app.core.types import GatewayMode
+from app.errors import ErrorCode
+from app.utils import as_async_contextmanager
+from app.utils import disallow
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.ActivitiesResponse])
+@router.get("/", response_model=schemas.ActivitiesResponse)
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
         asset_id: str,
@@ -43,7 +43,7 @@ async def get_activity(
         match search_by:
             case "activities":
                 if search is not None:
-                    activity_filters.append(models.Activity.beneficiary_name.like("%"+search+"%"))
+                    activity_filters.append(models.Activity.beneficiary_name.like("%" + search + "%"))
                     activity_filters.append(models.Activity.beneficiary_puzzle_hash.like("%" + search + "%"))
             case "climatewarehouse":
                 if search is not None:
@@ -51,7 +51,8 @@ async def get_activity(
             case _:
                 raise ErrorCode().bad_request_error(message="search_by is invalid")
 
-        climate_data = crud.ClimateWareHouseCrud(url=Settings().CLIMATE_API_URL).combine_climate_units_and_metadata(search=cw_filters)
+        climate_data = crud.ClimateWareHouseCrud(url=Settings().CLIMATE_API_URL).combine_climate_units_and_metadata(
+            search=cw_filters)
         if len(climate_data) == 0:
             return []
 
@@ -65,17 +66,20 @@ async def get_activity(
         if len(activities) == 0:
             return
 
-        ret: List[schemas.ActivitiesResponse] = []
+        detail_list: List[schemas.ActivitiesDetail] = []
         for unit in climate_data:
             for activity in activities:
-                if unit["orgUid"] == activity.org_uid:
-                    activity_res = schemas.ActivitiesResponse(
-                        amount=activity.amount,
-                        height=activity.height,
-                        timestamp=activity.timestamp,
-                        mode=activity.mode,
+                if unit["orgUid"] == activity[0].org_uid:
+                    detail = schemas.ActivitiesDetail(
+                        amount=activity[0].amount,
+                        height=activity[0].height,
+                        timestamp=activity[0].timestamp,
+                        mode=activity[0].mode,
                         climate_warehouse=unit
                     )
-                ret.append(activity_res)
+                    detail_list.append(detail)
 
-        return ret
+        return schemas.ActivitiesResponse(
+            list=detail_list,
+            total=activities[0][1]
+        )

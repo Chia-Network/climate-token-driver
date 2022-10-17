@@ -1,4 +1,4 @@
-from app.schemas.activity import Activities, Activity, ActivityInDB, ActivitiesResponse  # noqa
+from app.schemas.activity import Activities, Activity, ActivityInDB, ActivitiesDetail, ActivitiesResponse  # noqa
 from app.schemas.key import Key  # noqa
 from app.schemas.payment import PaymentBase, PaymentWithPayee, PaymentWithPayer  # noqa
 from app.schemas.state import State  # noqa

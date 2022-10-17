@@ -36,10 +36,16 @@ class Activities(BaseModel):
     end_height: Optional[int]
 
 
-class ActivitiesResponse(BaseModel):
+class ActivitiesDetail(BaseModel):
     amount: int
     height: int
     timestamp: int
     mode: str
     climate_warehouse: Any
+
+
+class ActivitiesResponse(BaseModel):
+    list: List[ActivitiesDetail]
+    total: int
+
 
