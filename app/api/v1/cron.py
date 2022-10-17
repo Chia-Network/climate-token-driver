@@ -79,7 +79,6 @@ async def _scan_token_activity(
             public_key=public_key,
             start_height=start_height,
             end_height=end_height,
-            mode=GatewayMode.PERMISSIONLESS_RETIREMENT,
         )
 
         if len(activities) == 0:
