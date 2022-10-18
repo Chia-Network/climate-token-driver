@@ -1,6 +1,4 @@
 import dataclasses
-import urllib.parse
-from typing import Dict, List, Any, Optional
 
 import requests
 from blspy import G1Element
@@ -8,6 +6,7 @@ from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.coin_record import CoinRecord
 from fastapi.encoders import jsonable_encoder
+from typing import Dict, List, Any, Optional
 
 from app import schemas
 from app.config import Settings
@@ -15,6 +14,7 @@ from app.core.climate_wallet.wallet import ClimateObserverWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
+from urllib.parse import urlencode, urlparse
 
 settings = Settings()
 errorcode = ErrorCode()
@@ -30,9 +30,10 @@ class ClimateWareHouseCrud(object):
             for i, v in search:
                 condition[i] = v
 
-            params = urllib.parse.urlencode(condition)
+            params = urlencode(condition)
+            url = urlparse(self.url + "/v1/units")
 
-            r = requests.get(self.url + "/v1/units?" + params)
+            r = requests.get(url.geturl(), params=params)
             if r.status_code != requests.codes.ok:
                 raise errorcode.internal_server_error(
                     message="Call Climate API Failure"
@@ -46,7 +47,9 @@ class ClimateWareHouseCrud(object):
 
     def get_climate_organizations_metadata(self) -> List[Dict]:
         try:
-            r = requests.get(self.url + "/v1/organizations")
+            url = urlparse(self.url + "/v1/organizations")
+
+            r = requests.get(url.geturl())
             if r.status_code != requests.codes.ok:
                 raise errorcode.internal_server_error(
                     message="Call Climate API Failure"
@@ -82,16 +85,16 @@ class BlockChainCrud(object):
     full_node_client: FullNodeRpcClient
 
     async def get_activities(
-        self,
-        org_uid: str,
-        warehouse_project_id: str,
-        vintage_year: int,
-        sequence_num: int,
-        public_key: G1Element,
-        start_height: int,
-        end_height: int,
-        peak_height: int,
-        mode: Optional[GatewayMode] = None,
+            self,
+            org_uid: str,
+            warehouse_project_id: str,
+            vintage_year: int,
+            sequence_num: int,
+            public_key: G1Element,
+            start_height: int,
+            end_height: int,
+            peak_height: int,
+            mode: Optional[GatewayMode] = None,
     ) -> List[schemas.Activity]:
 
         token_index = ClimateTokenIndex(
@@ -117,7 +120,7 @@ class BlockChainCrud(object):
             metadata: Dict = jsonable_encoder(obj["metadata"])
             coin: Coin = coin_record.coin
 
-            if peak_height-coin_record.spent_block_index+1 < Settings.MIN_DEPTH:
+            if peak_height - coin_record.spent_block_index + 1 < Settings.MIN_DEPTH:
                 continue
 
             activity = schemas.Activity(

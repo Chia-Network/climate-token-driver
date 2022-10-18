@@ -4,6 +4,8 @@ from chia.util.byte_types import hexstr_to_bytes
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import root_validator
 
+from app.core.types import GatewayMode
+
 
 class BaseModel(PydanticBaseModel):
     @root_validator(pre=True)
@@ -24,4 +26,7 @@ class BaseModel(PydanticBaseModel):
         return return_values
 
     class Config:
-        json_encoders = {bytes: lambda b: "0x" + b.hex()}
+        json_encoders = {
+            bytes: lambda b: "0x" + b.hex(),
+            GatewayMode: lambda v: v.name,
+        }

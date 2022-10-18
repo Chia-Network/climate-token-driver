@@ -1,8 +1,10 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 
-from app.core.types import GatewayMode
+from pydantic import Field
+from typing import Dict, List, Any
+
 from app.schemas.core import BaseModel
+from app.core.types import GatewayMode
 
 
 class Activity(BaseModel):
@@ -29,23 +31,14 @@ class ActivityInDB(Activity):
     updated_at: datetime
 
 
-class Activities(BaseModel):
-    asset_id: str
-    mode: GatewayMode
-    start_height: Optional[int]
-    end_height: Optional[int]
-
-
 class ActivitiesDetail(BaseModel):
     amount: int
     height: int
     timestamp: int
-    mode: str
-    climate_warehouse: Any
+    mode: GatewayMode
+    climate_warehouse: Dict[str, Any]
 
 
 class ActivitiesResponse(BaseModel):
-    list: List[ActivitiesDetail]
-    total: int
-
-
+    list: List[ActivitiesDetail] = Field(default_factory=list)
+    total: int = 0

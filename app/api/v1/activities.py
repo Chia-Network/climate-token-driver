@@ -1,6 +1,5 @@
-from typing import Optional, List, Dict, Any
-
 from fastapi import APIRouter
+from typing import List, Optional
 
 from app import crud, schemas, models
 from app.api import dependencies as deps
@@ -12,6 +11,7 @@ from app.utils import as_async_contextmanager
 from app.utils import disallow
 
 router = APIRouter()
+settings = Settings()
 
 
 @router.get("/", response_model=schemas.ActivitiesResponse)
@@ -19,7 +19,7 @@ router = APIRouter()
 async def get_activity(
         search: str,
         search_by: str,
-        mode: GatewayMode = 2,
+        mode: Optional[GatewayMode] = None,
         page: int = 1,
         limit: int = 1,
 ):
@@ -31,9 +31,6 @@ async def get_activity(
         as_async_contextmanager(deps.get_db_session) as db,
     ):
         db_crud = crud.DBCrud(db=db)
-
-        if mode not in GatewayMode:
-            raise ErrorCode().bad_request_error(message="mode is invalid")
 
         activity_filters = {"or": [], "and": []}
         cw_filters = []
@@ -48,13 +45,13 @@ async def get_activity(
             case _:
                 raise ErrorCode().bad_request_error(message="search_by is invalid")
 
-        climate_data = crud.ClimateWareHouseCrud(url=Settings().CLIMATE_API_URL).combine_climate_units_and_metadata(
+        climate_data = crud.ClimateWareHouseCrud(url=settings.CLIMATE_API_URL).combine_climate_units_and_metadata(
             search=cw_filters)
         if len(climate_data) == 0:
-            return schemas.ActivitiesResponse(
-                list=[],
-                total=0
-            )
+            return schemas.ActivitiesResponse()
+
+        if mode is not None:
+            activity_filters["and"].append(models.Activity.mode.ilike(mode.name))
 
         activities: List[models.activity] = db_crud.select_activity_with_pagination(
             model=models.Activity,
@@ -64,25 +61,28 @@ async def get_activity(
             limit=limit,
         )
         if len(activities) == 0:
-            return schemas.ActivitiesResponse(
-                list=[],
-                total=0
-            )
+            return schemas.ActivitiesResponse()
 
+        total = activities[0][1]
         detail_list: List[schemas.ActivitiesDetail] = []
         for unit in climate_data:
-            for activity in activities:
-                if unit["orgUid"] == activity[0].org_uid:
+            i = 0
+            for activity in activities[0]:
+                if i == len(activities[0]) - 1:
+                    break
+
+                if unit["orgUid"] == activity.org_uid:
                     detail = schemas.ActivitiesDetail(
-                        amount=activity[0].amount,
-                        height=activity[0].height,
-                        timestamp=activity[0].timestamp,
-                        mode=activity[0].mode,
-                        climate_warehouse=unit
+                        amount=activity.amount,
+                        height=activity.height,
+                        timestamp=activity.timestamp,
+                        mode=GatewayMode[activity.mode],
+                        climate_warehouse=unit,
                     )
                     detail_list.append(detail)
+                i += 1
 
         return schemas.ActivitiesResponse(
             list=detail_list,
-            total=activities[0][1]
+            total=total
         )

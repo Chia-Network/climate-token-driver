@@ -13,7 +13,6 @@ from sqlalchemy_utils import create_database, database_exists
 from app import crud, schemas
 from app.api import dependencies as deps
 from app.config import ExecutionMode, Settings
-from app.core.types import GatewayMode
 from app.db.base import Base
 from app.db.session import Engine
 from app.errors import ErrorCode
