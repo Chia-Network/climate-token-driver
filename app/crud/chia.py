@@ -90,6 +90,7 @@ class BlockChainCrud(object):
         public_key: G1Element,
         start_height: int,
         end_height: int,
+        peak_height: int,
         mode: Optional[GatewayMode] = None,
     ) -> List[schemas.Activity]:
 
@@ -115,6 +116,9 @@ class BlockChainCrud(object):
             coin_record: CoinRecord = obj["coin_record"]
             metadata: Dict = jsonable_encoder(obj["metadata"])
             coin: Coin = coin_record.coin
+
+            if peak_height-coin_record.spent_block_index+1 < Settings.MIN_DEPTH:
+                continue
 
             activity = schemas.Activity(
                 org_uid=token_index.org_uid,

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     SERVER_PORT: int = 31313
     BLOCK_START: int = 1500000
     BLOCK_RANGE: int = 10000
+    MIN_DEPTH: int = 32
     CLIMATE_API_URL: str = "https://api.climatewarehouse.chia.net"
     CHIA_ROOT: Path = Path.home() / ".chia" / "mainnet"
     CHIA_HOSTNAME: str = "localhost"

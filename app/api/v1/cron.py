@@ -79,6 +79,7 @@ async def _scan_token_activity(
             public_key=public_key,
             start_height=start_height,
             end_height=end_height,
+            peak_height=state.peak_height,
         )
 
         if len(activities) == 0:
