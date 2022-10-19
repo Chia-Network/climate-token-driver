@@ -1,0 +1,24 @@
+(mod
+  (
+    MINT_PUBLIC_KEY
+    GATEWAY_PUZZLE_HASH
+    cat_truths
+    parent_is_cat
+    lineage_proof
+    delta
+    inner_conditions
+    _
+  )
+
+  (include cat_truths.clib)
+  (include condition_codes.clib)
+  (include utility_macros.clib)
+
+  (assert
+    (= delta 0)
+    (= (my_inner_puzzle_hash_cat_truth cat_truths) GATEWAY_PUZZLE_HASH)
+    (list
+      (list AGG_SIG_ME MINT_PUBLIC_KEY "+")
+    )
+  )
+)

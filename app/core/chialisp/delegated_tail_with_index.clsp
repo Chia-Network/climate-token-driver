@@ -1,0 +1,34 @@
+(mod
+  (
+    PUBLIC_KEY
+    INDEX
+    cat_truths
+    parent_is_cat
+    lineage_proof
+    delta
+    inner_conditions
+    (
+      delegated_puzzle
+      delegated_solution
+    )
+  )
+
+  (include condition_codes.clib)
+  (include sha256tree.clib)
+  (include utility_macros.clib)
+
+  (c
+    (list AGG_SIG_UNSAFE PUBLIC_KEY (sha256tree (list INDEX delegated_puzzle)))
+    (a
+      delegated_puzzle
+      (cat
+        cat_truths
+        parent_is_cat
+        lineage_proof
+        delta
+        inner_conditions
+        delegated_solution
+      )
+    )
+  )
+)

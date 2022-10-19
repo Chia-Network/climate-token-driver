@@ -1,0 +1,11 @@
+(mod
+  (conditions)
+
+  (include condition_codes.clib)
+  (include sha256tree.clib)
+
+  (c
+    (list CREATE_COIN_ANNOUNCEMENT (sha256tree conditions))
+    conditions
+  )
+)

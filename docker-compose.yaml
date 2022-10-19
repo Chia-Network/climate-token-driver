@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  chia-node-testnet10:
+    build:
+      context: .
+      dockerfile: dockerfile/Dockerfile.chia-blockchain
+      args:
+        - REPO=https://github.com/hashgreen/chia-blockchain.git
+        - BRANCH=enable-more-cat-wallet-rpc
+    container_name: chia-node-testnet10
+    restart: always
+    ports:
+      - 8556:8555
+      - 55401:55400
+      - 9256:9256
+      - 58444:58444
+    environment:
+      CHIA_ROOT: $CHIA_ROOT_TESTNET10
+      service: "farmer"
+      log_level: "INFO"
+      testnet: "true"
+      self_hostname: "0.0.0.0"
+      keys: "/key"
+    volumes:
+      - ${HOME}/.chia/testnet10:/root/.chia/testnet10
+      - ./key:/key

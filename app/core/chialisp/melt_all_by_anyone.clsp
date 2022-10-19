@@ -1,0 +1,29 @@
+(mod
+  ;; Permission-less retirement TAIL
+
+  ; At spend time, provide a key_value_list that would be announced in the gateway:
+  ;
+  ; key_value_list:
+  ;   - ("bp" . beneficiary_puzzle_hash) for beneficiary key
+  ;   - ("bn" . beneficiary_name) for beneficiary name
+
+  (
+    GATEWAY_PUZZLE_HASH
+    cat_truths
+    parent_is_cat
+    lineage_proof
+    delta
+    inner_conditions
+    key_value_list
+  )
+
+  (include cat_truths.clib)
+  (include utility_macros.clib)
+
+  (assert
+    parent_is_cat
+    (= 0 (+ delta (my_amount_cat_truth cat_truths)))
+    (= (my_inner_puzzle_hash_cat_truth cat_truths) GATEWAY_PUZZLE_HASH)
+    ()
+  )
+)
