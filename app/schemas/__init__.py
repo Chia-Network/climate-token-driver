@@ -1,19 +1,26 @@
-from app.schemas.activity import Activity, ActivityInDB, ActivitiesDetail, ActivitiesResponse  # noqa
+from app.schemas.activity import (  # noqa
+    ActivitiesDetail,
+    ActivitiesResponse,
+    Activity,
+    ActivityInDB,
+)
 from app.schemas.key import Key  # noqa
+from app.schemas.metadata import (  # noqa
+    DetokenizationTailMetadata,
+    PermissionlessRetirementTailMetadata,
+    TailMetadataBase,
+    TokenizationTailMetadata,
+)
 from app.schemas.payment import PaymentBase, PaymentWithPayee, PaymentWithPayer  # noqa
 from app.schemas.state import State  # noqa
 from app.schemas.token import (  # noqa
     DetokenizationFileRequest,
     DetokenizationFileResponse,
-    DetokenizationTailMetadata,
     DetokenizationTxRequest,
     DetokenizationTxResponse,
-    PermissionlessRetirementTailMetadata,
     PermissionlessRetirementTxRequest,
     PermissionlessRetirementTxResponse,
-    TailMetadataBase,
     Token,
-    TokenizationTailMetadata,
     TokenizationTxRequest,
     TokenizationTxResponse,
     TokenOnChain,

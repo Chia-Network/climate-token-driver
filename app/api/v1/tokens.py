@@ -89,8 +89,10 @@ async def create_tokenization_tx(
                 signature=bytes(signature),
             )
 
+    token = schemas.TokenOnChain(**token_obj)
     return schemas.TokenizationTxResponse(
-        token=schemas.TokenOnChain(**token_obj),
+        token=token,
+        token_hexstr=token.hexstr(),
         tx=schemas.Transaction(
             id=transaction_record.name, record=transaction_record.to_json_dict()
         ),
