@@ -1,25 +1,14 @@
+from chia.util.byte_types import hexstr_to_bytes
 from pydantic import Field
 
 from app.schemas.core import BaseModel
+from app.schemas.metadata import (
+    DetokenizationTailMetadata,
+    PermissionlessRetirementTailMetadata,
+    TokenizationTailMetadata,
+)
 from app.schemas.payment import PaymentBase, PaymentWithPayee, PaymentWithPayer
 from app.schemas.transaction import Transaction
-
-
-class TailMetadataBase(BaseModel):
-    mod_hash: bytes
-
-
-class TokenizationTailMetadata(TailMetadataBase):
-    public_key: bytes
-
-
-class DetokenizationTailMetadata(TailMetadataBase):
-    public_key: bytes
-    signature: bytes
-
-
-class PermissionlessRetirementTailMetadata(TailMetadataBase):
-    signature: bytes
 
 
 class Token(BaseModel):
@@ -36,6 +25,13 @@ class TokenOnChainBase(Token):
     public_key: bytes
     asset_id: bytes
 
+    @classmethod
+    def parse_hexstr(cls, hexstr: str) -> "TokenOnChainBase":
+        return cls.parse_raw(hexstr_to_bytes(hexstr).decode())
+
+    def hexstr(self) -> str:
+        return self.json().encode().hex()
+
 
 class TokenOnChain(TokenOnChainBase):
     tokenization: TokenizationTailMetadata
@@ -50,6 +46,7 @@ class TokenizationTxRequest(BaseModel):
 
 class TokenizationTxResponse(BaseModel):
     token: TokenOnChain
+    token_hexstr: str
     tx: Transaction
 
 
