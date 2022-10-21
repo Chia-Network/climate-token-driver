@@ -9,7 +9,6 @@ from app.core.types import GatewayMode
 
 class Activity(BaseModel):
     org_uid: str
-    sid: str
     warehouse_project_id: str
     vintage_year: int
     sequence_num: int

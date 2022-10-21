@@ -1,4 +1,5 @@
 import dataclasses
+import json
 
 import requests
 from blspy import G1Element
@@ -24,17 +25,14 @@ errorcode = ErrorCode()
 class ClimateWareHouseCrud(object):
     url: str
 
-    def get_climate_tokens(self, search: List[Any]) -> List[Dict]:
+    def get_climate_tokens(self, search: Dict[str, Any]) -> List[Dict]:
         try:
-            condition = {}
-            for i, v in search:
-                condition[i] = v
-
-            params = urlencode(condition)
+            params = urlencode(search)
             url = urlparse(self.url + "/v1/units")
 
             r = requests.get(url.geturl(), params=params)
             if r.status_code != requests.codes.ok:
+                logger.error(f"Request Url: {r.url} Error Message: {r.text}")
                 raise errorcode.internal_server_error(
                     message="Call Climate API Failure"
                 )
@@ -45,12 +43,13 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise errorcode.internal_server_error("Call Climate API Timeout")
 
-    def get_climate_organizations_metadata(self) -> List[Dict]:
+    def get_climate_organizations(self) -> List[Dict]:
         try:
             url = urlparse(self.url + "/v1/organizations")
 
             r = requests.get(url.geturl())
             if r.status_code != requests.codes.ok:
+                logger.error(f"Request Url: {r.url} Error Message: {r.text}")
                 raise errorcode.internal_server_error(
                     message="Call Climate API Failure"
                 )
@@ -60,12 +59,31 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise errorcode.internal_server_error("Call Climate API Timeout")
 
-    def combine_climate_units_and_metadata(self, search: List[Any]) -> List[Dict]:
+    def get_climate_organizations_metadata(self, org_uid: str) -> List[Dict]:
+        try:
+            condition = {"orgUid": org_uid}
+
+            params = urlencode(condition)
+            url = urlparse(self.url + "/v1/organizations/metadata")
+
+            r = requests.get(url.geturl(), params=params)
+            if r.status_code != requests.codes.ok:
+                logger.error(f"Request Url: {r.url} Error Message: {r.text}")
+                raise errorcode.internal_server_error(
+                    message="Call Climate API Failure"
+                )
+
+            return r.json()
+        except TimeoutError as e:
+            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
+            raise errorcode.internal_server_error("Call Climate API Timeout")
+
+    def combine_climate_units_and_metadata(self, search: Dict[str, Any]) -> List[Dict]:
         unites = self.get_climate_tokens(search)
         if len(unites) == 0:
             return []
 
-        organizations = self.get_climate_organizations_metadata()
+        organizations = self.get_climate_organizations()
         if len(organizations) == 0:
             return []
 
@@ -75,6 +93,9 @@ class ClimateWareHouseCrud(object):
             for ov in organizations:
                 if uv["orgUid"] == ov:
                     row = dict(uv | organizations[ov])
+                    metadata = self.get_climate_organizations_metadata(uv["orgUid"])
+                    metadata_to_dic = json.loads(metadata.get("meta_"+uv["marketplaceIdentifier"], "{}"))
+                    row["token"] = metadata_to_dic
             ret.append(row)
 
         return ret

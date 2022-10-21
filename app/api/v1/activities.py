@@ -33,7 +33,7 @@ async def get_activity(
         db_crud = crud.DBCrud(db=db)
 
         activity_filters = {"or": [], "and": []}
-        cw_filters = []
+        cw_filters = {}
         match search_by:
             case "activities":
                 if search is not None:
@@ -41,7 +41,7 @@ async def get_activity(
                     activity_filters["or"].append(models.Activity.beneficiary_puzzle_hash.like("%" + search + "%"))
             case "climatewarehouse":
                 if search is not None:
-                    cw_filters.append(search)
+                    cw_filters["search"] = search
             case _:
                 raise ErrorCode().bad_request_error(message="search_by is invalid")
 

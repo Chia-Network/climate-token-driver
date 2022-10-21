@@ -66,15 +66,15 @@ async def _scan_token_activity(
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
-    climate_tokens = climate_warehouse.get_climate_tokens(search=[])
+    climate_tokens = climate_warehouse.combine_climate_units_and_metadata(search={})
     for token in climate_tokens:
-        public_key = G1Element.from_bytes(hexstr_to_bytes(token["publicKey"]))
+        public_key = G1Element.from_bytes(hexstr_to_bytes(token["token"]["public_key"]))
 
         activities: List[schemas.Activity] = await blockchain.get_activities(
             org_uid=token["orgUid"],
             warehouse_project_id=token["issuance"]["warehouseProjectId"],
             vintage_year=token["vintageYear"],
-            sequence_num=token["sequenceNum"],
+            sequence_num=token["token"]["sequence_num"],
             public_key=public_key,
             start_height=start_height,
             end_height=end_height,
