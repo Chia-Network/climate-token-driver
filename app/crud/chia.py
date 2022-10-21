@@ -140,9 +140,15 @@ class BlockChainCrud(object):
             coin_record: CoinRecord = obj["coin_record"]
             metadata: Dict = jsonable_encoder(obj["metadata"])
             coin: Coin = coin_record.coin
+            mode: str = obj["mode"]
 
-            if peak_height - coin_record.spent_block_index + 1 < Settings.MIN_DEPTH:
+            if peak_height - coin_record.spent_block_index + 1 < settings.MIN_DEPTH:
                 continue
+
+            bp = bn = ""
+            if len(metadata) > 0:
+                bn = metadata["bn"]
+                bp = metadata["bp"]
 
             activity = schemas.Activity(
                 org_uid=token_index.org_uid,
@@ -153,9 +159,9 @@ class BlockChainCrud(object):
                 coin_id=coin_record.name,
                 height=coin_record.spent_block_index,
                 amount=coin.amount,
-                mode=mode.name,
-                beneficiary_name=metadata["bn"],
-                beneficiary_puzzle_hash=metadata["bp"],
+                mode=mode,
+                beneficiary_name=bn,
+                beneficiary_puzzle_hash=bp,
                 metadata=metadata,
                 timestamp=coin_record.timestamp,
             )

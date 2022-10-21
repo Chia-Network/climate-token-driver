@@ -38,7 +38,6 @@ async def init_db():
     Base.metadata.create_all(Engine)
 
     async with as_async_contextmanager(deps.get_db_session) as db:
-
         state = State(id=1, current_height=settings.BLOCK_START, peak_height=None)
         db_state = [jsonable_encoder(state)]
 
@@ -47,11 +46,10 @@ async def init_db():
 
 
 async def _scan_token_activity(
-    db_crud: crud.DBCrud,
-    climate_warehouse: crud.ClimateWareHouseCrud,
-    blockchain: crud.BlockChainCrud,
+        db_crud: crud.DBCrud,
+        climate_warehouse: crud.ClimateWareHouseCrud,
+        blockchain: crud.BlockChainCrud,
 ) -> bool:
-
     state = db_crud.select_block_state_first()
     if state.peak_height is None:
         logger.warning("Full node state has not been retrieved.")
@@ -68,6 +66,10 @@ async def _scan_token_activity(
 
     climate_tokens = climate_warehouse.combine_climate_units_and_metadata(search={})
     for token in climate_tokens:
+
+        if token["token"].get("public_key", "") == "":
+            continue
+
         public_key = G1Element.from_bytes(hexstr_to_bytes(token["token"]["public_key"]))
 
         activities: List[schemas.Activity] = await blockchain.get_activities(
@@ -109,9 +111,9 @@ async def scan_token_activity() -> None:
 
         try:
             while await _scan_token_activity(
-                db_crud=db_crud,
-                climate_warehouse=climate_warehouse,
-                blockchain=blockchain,
+                    db_crud=db_crud,
+                    climate_warehouse=climate_warehouse,
+                    blockchain=blockchain,
             ):
                 pass
 
@@ -129,8 +131,8 @@ async def scan_token_activity() -> None:
 
 
 async def _scan_blockchain_state(
-    db_crud: crud.DBCrud,
-    full_node_client: FullNodeRpcClient,
+        db_crud: crud.DBCrud,
+        full_node_client: FullNodeRpcClient,
 ):
     state: Dict = await full_node_client.get_blockchain_state()
     peak: Dict = state.get("peak")
