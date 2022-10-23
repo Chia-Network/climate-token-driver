@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from blspy import G1Element, PrivateKey
 from chia.consensus.constants import ConsensusConstants

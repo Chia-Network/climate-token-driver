@@ -2,8 +2,7 @@ import dataclasses
 from typing import Any, AnyStr, List, Optional
 
 from fastapi.encoders import jsonable_encoder
-from pydantic import ValidationError
-from sqlalchemy import desc, insert, update, or_, and_
+from sqlalchemy import and_, desc, insert, or_, update
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -66,19 +65,18 @@ class DBCrudBase(object):
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
 
-    def select_activity_with_pagination(self, model: Any, filters: Any, order_by: Any, limit: int = 1, page: int = 1):
+    def select_activity_with_pagination(
+        self, model: Any, filters: Any, order_by: Any, limit: int = 1, page: int = 1
+    ):
         try:
             return (
-                self.db
-                .query(
-                    model,
-                    func.count(model.id).over().label("total")
-                )
+                self.db.query(model, func.count(model.id).over().label("total"))
                 .filter(or_(*filters["or"]), and_(*filters["and"]))
                 .order_by(order_by.desc())
                 .limit(limit)
-                .offset((page-1)*limit)
-                .all())
+                .offset((page - 1) * limit)
+                .all()
+            )
         except Exception as e:
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
@@ -90,8 +88,8 @@ class DBCrud(DBCrudBase):
         return self.create_object(models.Activity(**jsonable_encoder(activity)))
 
     def batch_insert_ignore_activity(
-            self,
-            activities: List[schemas.Activity],
+        self,
+        activities: List[schemas.Activity],
     ) -> bool:
 
         db_activities = []
@@ -105,9 +103,9 @@ class DBCrud(DBCrudBase):
         )
 
     def update_block_state(
-            self,
-            peak_height: Optional[int] = None,
-            current_height: Optional[int] = None,
+        self,
+        peak_height: Optional[int] = None,
+        current_height: Optional[int] = None,
     ):
         state = models.State()
         if peak_height is not None:

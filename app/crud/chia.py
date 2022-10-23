@@ -1,5 +1,7 @@
 import dataclasses
 import json
+from typing import Any, Dict, List, Optional
+from urllib.parse import urlencode, urlparse
 
 import requests
 from blspy import G1Element
@@ -7,7 +9,6 @@ from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.coin_record import CoinRecord
 from fastapi.encoders import jsonable_encoder
-from typing import Dict, List, Any, Optional
 
 from app import schemas
 from app.config import Settings
@@ -15,7 +16,6 @@ from app.core.climate_wallet.wallet import ClimateObserverWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
-from urllib.parse import urlencode, urlparse
 
 settings = Settings()
 errorcode = ErrorCode()
@@ -94,7 +94,9 @@ class ClimateWareHouseCrud(object):
                 if uv["orgUid"] == ov:
                     row = dict(uv | organizations[ov])
                     metadata = self.get_climate_organizations_metadata(uv["orgUid"])
-                    metadata_to_dic = json.loads(metadata.get("meta_"+uv["marketplaceIdentifier"], "{}"))
+                    metadata_to_dic = json.loads(
+                        metadata.get("meta_" + uv["marketplaceIdentifier"], "{}")
+                    )
                     row["token"] = metadata_to_dic
             ret.append(row)
 
@@ -106,16 +108,16 @@ class BlockChainCrud(object):
     full_node_client: FullNodeRpcClient
 
     async def get_activities(
-            self,
-            org_uid: str,
-            warehouse_project_id: str,
-            vintage_year: int,
-            sequence_num: int,
-            public_key: G1Element,
-            start_height: int,
-            end_height: int,
-            peak_height: int,
-            mode: Optional[GatewayMode] = None,
+        self,
+        org_uid: str,
+        warehouse_project_id: str,
+        vintage_year: int,
+        sequence_num: int,
+        public_key: G1Element,
+        start_height: int,
+        end_height: int,
+        peak_height: int,
+        mode: Optional[GatewayMode] = None,
     ) -> List[schemas.Activity]:
 
         token_index = ClimateTokenIndex(

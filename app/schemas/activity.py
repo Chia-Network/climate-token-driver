@@ -1,10 +1,10 @@
 from datetime import datetime
+from typing import Any, Dict, List
 
 from pydantic import Field
-from typing import Dict, List, Any
 
-from app.schemas.core import BaseModel
 from app.core.types import GatewayMode
+from app.schemas.core import BaseModel
 
 
 class Activity(BaseModel):
