@@ -3,6 +3,7 @@ from app.schemas.activity import (  # noqa
     ActivitiesResponse,
     Activity,
     ActivityInDB,
+    SearchBy,
 )
 from app.schemas.key import Key  # noqa
 from app.schemas.metadata import (  # noqa

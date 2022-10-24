@@ -16,8 +16,8 @@ settings = Settings()
 @router.get("/", response_model=schemas.ActivitiesResponse)
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
-    search: str,
-    search_by: str,
+    search: Optional[str] = None,
+    search_by: Optional[schemas.SearchBy] = None,
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 1,
@@ -31,20 +31,21 @@ async def get_activity(
 
         activity_filters = {"or": [], "and": []}
         cw_filters = {}
-        match search_by:
-            case "activities":
-                if search is not None:
-                    activity_filters["or"].append(
-                        models.Activity.beneficiary_name.like("%" + search + "%")
-                    )
-                    activity_filters["or"].append(
-                        models.Activity.beneficiary_puzzle_hash.like("%" + search + "%")
-                    )
-            case "climatewarehouse":
-                if search is not None:
-                    cw_filters["search"] = search
-            case _:
-                raise ErrorCode().bad_request_error(message="search_by is invalid")
+        if search_by is not None:
+            match search_by:
+                case "activities":
+                    if search is not None:
+                        activity_filters["or"].append(
+                            models.Activity.beneficiary_name.like("%" + search + "%")
+                        )
+                        activity_filters["or"].append(
+                            models.Activity.beneficiary_puzzle_hash.like("%" + search + "%")
+                        )
+                case "climatewarehouse":
+                    if search is not None:
+                        cw_filters["search"] = search
+                case _:
+                    raise ErrorCode().bad_request_error(message="search_by is invalid")
 
         climate_data = crud.ClimateWareHouseCrud(
             url=settings.CLIMATE_API_URL

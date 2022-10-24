@@ -1,10 +1,17 @@
 from datetime import datetime
+
+import enum
 from typing import Any, Dict, List
 
 from pydantic import Field
 
 from app.core.types import GatewayMode
 from app.schemas.core import BaseModel
+
+
+class SearchBy(enum.Enum):
+    ACTIVITIES = "activities"
+    CLIMATEWAREHOUSE = "clmatewarehouse"
 
 
 class Activity(BaseModel):
