@@ -26,13 +26,13 @@ async def get_activity(
 
     This endpoint is to be called by the explorer.
     """
-    async with (as_async_contextmanager(deps.get_db_session) as db,):
+    async with (as_async_contextmanager(deps.get_db_session) as db):
         db_crud = crud.DBCrud(db=db)
 
         activity_filters = {"or": [], "and": []}
         cw_filters = {}
         if search_by is not None:
-            match search_by:
+            match search_by.value:
                 case "activities":
                     if search is not None:
                         activity_filters["or"].append(
@@ -53,6 +53,10 @@ async def get_activity(
         if len(climate_data) == 0:
             return schemas.ActivitiesResponse()
 
+        units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
+        if len(units) != 0:
+            activity_filters["and"].append(models.Activity.asset_id.in_(units.keys()))
+
         if mode is not None:
             activity_filters["and"].append(models.Activity.mode.ilike(mode.name))
 
@@ -68,16 +72,14 @@ async def get_activity(
 
         total = activities["total"]
         detail_list: List[schemas.ActivitiesDetail] = []
-        for unit in climate_data:
-            for activity in activities["list"]:
-                if unit["orgUid"] == activity.org_uid:
-                    detail = schemas.ActivitiesDetail(
-                        amount=activity.amount,
-                        height=activity.height,
-                        timestamp=activity.timestamp,
-                        mode=GatewayMode[activity.mode],
-                        climate_warehouse=unit,
-                    )
-                    detail_list.append(detail)
+        for activity in activities["list"]:
+            detail = schemas.ActivitiesDetail(
+                amount=activity.amount,
+                height=activity.height,
+                timestamp=activity.timestamp,
+                mode=GatewayMode[activity.mode],
+                climate_warehouse=units[activity.asset_id],
+            )
+            detail_list.append(detail)
 
         return schemas.ActivitiesResponse(list=detail_list, total=total)

@@ -4,7 +4,6 @@ from typing import Any, AnyStr, List, Optional
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, desc, insert, or_, update
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
 
 from app import models, schemas
 from app.db.base import Base
