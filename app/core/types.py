@@ -12,10 +12,17 @@ from chia.wallet.payment import Payment
 CLIMATE_WALLET_INDEX = 2050
 
 
-class GatewayMode(enum.IntEnum):
-    TOKENIZATION = 0
-    DETOKENIZATION = 1
-    PERMISSIONLESS_RETIREMENT = 2
+class GatewayMode(enum.Enum):
+    TOKENIZATION = "tokenization"
+    DETOKENIZATION = "detokenization"
+    PERMISSIONLESS_RETIREMENT = "permissionless_retirement"
+
+    def to_int(self) -> int:
+        return {
+            GatewayMode.TOKENIZATION: 0,
+            GatewayMode.DETOKENIZATION: 1,
+            GatewayMode.PERMISSIONLESS_RETIREMENT: 2,
+        }[self]
 
 
 @dataclasses.dataclass

@@ -251,7 +251,7 @@ class ClimateWallet(ClimateWalletBase):
             spend_bundle=spend_bundle,
             additions=spend_bundle.additions(),
             removals=spend_bundle.removals(),
-            type=uint32(CLIMATE_WALLET_INDEX + mode.value),
+            type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
             name=spend_bundle.name(),
             memos=list(compute_memos(spend_bundle).items()),
         )
@@ -492,7 +492,7 @@ class ClimateWallet(ClimateWalletBase):
             wallet_id=uint32(wallet_id),
             sent_to=[],
             trade_id=None,
-            type=uint32(CLIMATE_WALLET_INDEX + mode.value),
+            type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
             name=spend_bundle.name(),
             memos=list(compute_memos(spend_bundle).items()),
         )
@@ -617,7 +617,7 @@ class ClimateObserverWallet(ClimateWalletBase):
             activity: Dict = {
                 "coin_record": coin_record,
                 "coin_spend": coin_spend,
-                "mode": mode.name,
+                "mode": mode,
                 "metadata": metadata,
             }
             activities.append(activity)

@@ -146,7 +146,7 @@ async def get_transactions(
         (mode, tail_spend) = parse_gateway_spend(coin_spend=coin_spend, is_cat=True)
 
         transaction: Dict = transaction_record.to_json_dict()
-        transaction["type"] = CLIMATE_WALLET_INDEX + mode.value
+        transaction["type"] = CLIMATE_WALLET_INDEX + mode.to_int()
         transaction["type_name"] = mode.name
 
         transactions.append(transaction)

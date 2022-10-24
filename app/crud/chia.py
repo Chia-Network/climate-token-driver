@@ -158,7 +158,7 @@ class BlockChainCrud(object):
             coin_record: CoinRecord = obj["coin_record"]
             metadata: Dict = jsonable_encoder(obj["metadata"])
             coin: Coin = coin_record.coin
-            mode = GatewayMode[obj["mode"]]
+            mode: GatewayMode = obj["mode"]
 
             if peak_height - coin_record.spent_block_index + 1 < settings.MIN_DEPTH:
                 continue
@@ -169,12 +169,12 @@ class BlockChainCrud(object):
                 vintage_year=token_index.vintage_year,
                 sequence_num=token_index.sequence_num,
                 asset_id=bytes(wallet.tail_program_hash),
+                beneficiary_name=metadata.get("bn"),
+                beneficiary_puzzle_hash=metadata.get("bp"),
                 coin_id=coin_record.name,
                 height=coin_record.spent_block_index,
                 amount=coin.amount,
                 mode=mode,
-                beneficiary_name=metadata.get("bn"),
-                beneficiary_puzzle_hash=metadata.get("bp"),
                 metadata=metadata,
                 timestamp=coin_record.timestamp,
             )
