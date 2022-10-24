@@ -1,9 +1,8 @@
 from app.schemas.activity import (  # noqa
-    ActivitiesDetail,
     ActivitiesResponse,
     Activity,
-    ActivityInDB,
     ActivitySearchBy,
+    ActivityWithCW,
 )
 from app.schemas.key import Key  # noqa
 from app.schemas.metadata import (  # noqa

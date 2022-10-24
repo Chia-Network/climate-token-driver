@@ -1,17 +1,15 @@
-from datetime import datetime
-
 import enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from pydantic import Field
+from pydantic import Field, validator
 
 from app.core.types import GatewayMode
 from app.schemas.core import BaseModel
 
 
 class ActivitySearchBy(enum.Enum):
-    ACTIVITIES = "activities"
-    CLIMATEWAREHOUSE = "climatewarehouse"
+    ONCHAIN_METADATA = "onchain_metadata"
+    CLIMATE_WAREHOUSE = "climate_warehouse"
 
 
 class Activity(BaseModel):
@@ -20,31 +18,32 @@ class Activity(BaseModel):
     vintage_year: int
     sequence_num: int
     asset_id: bytes
-    beneficiary_name: str
-    beneficiary_puzzle_hash: str
+    beneficiary_name: Optional[str]
+    beneficiary_puzzle_hash: Optional[str]
 
     coin_id: bytes
     height: int
     amount: int
-    mode: str
-    metadata: Dict[str, str]
+    mode: GatewayMode | str
+    metadata_: Dict[str, str]
     timestamp: int
 
+    @validator("mode")
+    def convert_mode_str(cls, v):
+        if isinstance(v, str):
+            return GatewayMode[v]
+        elif isinstance(v, int):
+            return GatewayMode(v)
 
-class ActivityInDB(Activity):
-    id: int
-    created_at: datetime
-    updated_at: datetime
+        return v
 
 
-class ActivitiesDetail(BaseModel):
-    amount: int
-    height: int
-    timestamp: int
-    mode: GatewayMode
-    climate_warehouse: Dict[str, Any]
+class ActivityWithCW(Activity):
+    cw_unit: Dict[str, Any]
+    cw_org: Dict[str, Any]
+    cw_token: Dict[str, Any]
 
 
 class ActivitiesResponse(BaseModel):
-    list: List[ActivitiesDetail] = Field(default_factory=list)
+    activities: List[ActivityWithCW] = Field(default_factory=list)
     total: int = 0

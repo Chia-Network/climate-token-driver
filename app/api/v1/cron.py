@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from blspy import G1Element
 from chia.consensus.block_record import BlockRecord
@@ -50,6 +50,7 @@ async def _scan_token_activity(
     climate_warehouse: crud.ClimateWareHouseCrud,
     blockchain: crud.BlockChainCrud,
 ) -> bool:
+
     state = db_crud.select_block_state_first()
     if state.peak_height is None:
         logger.warning("Full node state has not been retrieved.")
@@ -59,24 +60,28 @@ async def _scan_token_activity(
         logger.info("Activity synced.")
         return False
 
-    start_height = state.current_height + 1
-    end_height = min(start_height + settings.BLOCK_RANGE - 1, state.peak_height)
+    start_height = state.current_height
+    end_height = min(start_height + settings.BLOCK_RANGE, state.peak_height + 1)
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
-    climate_tokens = climate_warehouse.combine_climate_units_and_metadata(search={})
-    for token in climate_tokens:
+    climate_units: Dict[
+        str, Any
+    ] = climate_warehouse.combine_climate_units_and_metadata(search={})
+    for unit in climate_units:
+        token: Optional[Dict] = unit.get("token")
 
-        if token["token"].get("public_key", "") == "":
+        # is None or empty
+        if not token:
             continue
 
-        public_key = G1Element.from_bytes(hexstr_to_bytes(token["token"]["public_key"]))
+        public_key = G1Element.from_bytes(hexstr_to_bytes(token["public_key"]))
 
         activities: List[schemas.Activity] = await blockchain.get_activities(
-            org_uid=token["orgUid"],
-            warehouse_project_id=token["issuance"]["warehouseProjectId"],
-            vintage_year=token["vintageYear"],
-            sequence_num=token["token"]["sequence_num"],
+            org_uid=token["org_uid"],
+            warehouse_project_id=token["warehouse_project_id"],
+            vintage_year=token["vintage_year"],
+            sequence_num=token["sequence_num"],
             public_key=public_key,
             start_height=start_height,
             end_height=end_height,
@@ -88,7 +93,8 @@ async def _scan_token_activity(
 
         db_crud.batch_insert_ignore_activity(activities)
 
-    db_crud.update_block_state(current_height=end_height)
+    # make sure shallow records (<`MIN_DEPTH`) are revisited
+    db_crud.update_block_state(current_height=end_height - settings.MIN_DEPTH)
     return True
 
 

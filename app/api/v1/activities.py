@@ -1,13 +1,15 @@
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.api import dependencies as deps
 from app.config import ExecutionMode, Settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
-from app.utils import as_async_contextmanager, disallow
+from app.utils import disallow
 
 router = APIRouter()
 settings = Settings()
@@ -20,66 +22,73 @@ async def get_activity(
     search_by: Optional[schemas.ActivitySearchBy] = None,
     mode: Optional[GatewayMode] = None,
     page: int = 1,
-    limit: int = 1,
+    limit: int = 10,
+    db: Session = Depends(deps.get_db_session),
 ):
     """Get activity.
 
     This endpoint is to be called by the explorer.
     """
-    async with (as_async_contextmanager(deps.get_db_session) as db):
-        db_crud = crud.DBCrud(db=db)
 
-        activity_filters = {"or": [], "and": []}
-        cw_filters = {}
-        if search_by is not None:
-            match search_by.value:
-                case "activities":
-                    if search is not None:
-                        activity_filters["or"].append(
-                            models.Activity.beneficiary_name.like("%" + search + "%")
-                        )
-                        activity_filters["or"].append(
-                            models.Activity.beneficiary_puzzle_hash.like("%" + search + "%")
-                        )
-                case "climatewarehouse":
-                    if search is not None:
-                        cw_filters["search"] = search
-                case _:
-                    raise ErrorCode().bad_request_error(message="search_by is invalid")
+    db_crud = crud.DBCrud(db=db)
 
-        climate_data = crud.ClimateWareHouseCrud(
-            url=settings.CLIMATE_API_URL
-        ).combine_climate_units_and_metadata(search=cw_filters)
-        if len(climate_data) == 0:
-            return schemas.ActivitiesResponse()
+    activity_filters = {"or": [], "and": []}
+    cw_filters = {}
+    match search_by:
+        case schemas.ActivitySearchBy.ONCHAIN_METADATA:
+            if search is not None:
+                activity_filters["or"].extend(
+                    [
+                        models.Activity.beneficiary_name.like(f"%{search}%"),
+                        models.Activity.beneficiary_puzzle_hash.like(f"%{search}%"),
+                    ]
+                )
+        case schemas.ActivitySearchBy.CLIMATE_WAREHOUSE:
+            if search is not None:
+                cw_filters["search"] = search
+        case None:
+            pass
+        case _:
+            raise ErrorCode().bad_request_error(message="search_by is invalid")
 
-        units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
-        if len(units) != 0:
-            activity_filters["and"].append(models.Activity.asset_id.in_(units.keys()))
+    climate_data = crud.ClimateWareHouseCrud(
+        url=settings.CLIMATE_API_URL
+    ).combine_climate_units_and_metadata(search=cw_filters)
+    if len(climate_data) == 0:
+        return schemas.ActivitiesResponse()
 
-        if mode is not None:
-            activity_filters["and"].append(models.Activity.mode.ilike(mode.name))
+    units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
+    if len(units) != 0:
+        activity_filters["and"].append(models.Activity.asset_id.in_(units.keys()))
 
-        activities: Dict[str, list[tuple[models.Activity]] | int] = db_crud.select_activity_with_pagination(
-            model=models.Activity,
-            filters=activity_filters,
-            order_by=models.Activity.height,
-            page=page,
-            limit=limit,
+    if mode is not None:
+        activity_filters["and"].append(models.Activity.mode.ilike(mode.name))
+
+    activities: List[models.Activity]
+    total: int
+
+    (activities, total) = db_crud.select_activity_with_pagination(
+        model=models.Activity,
+        filters=activity_filters,
+        order_by=models.Activity.height,
+        page=page,
+        limit=limit,
+    )
+    if len(activities) == 0:
+        return schemas.ActivitiesResponse()
+
+    activities_with_cw: List[schemas.ActivityWithCW] = []
+    for activity in activities:
+        unit: Dict = units.get(activity.asset_id).copy()
+        org = unit.pop("organization", None)
+        token = unit.pop("token", None)
+
+        activity_with_cw = schemas.ActivityWithCW(
+            cw_unit=unit,
+            cw_org=org,
+            cw_token=token,
+            **jsonable_encoder(activity),
         )
-        if len(activities) == 0:
-            return schemas.ActivitiesResponse()
+        activities_with_cw.append(activity_with_cw)
 
-        total = activities["total"]
-        detail_list: List[schemas.ActivitiesDetail] = []
-        for activity in activities["list"]:
-            detail = schemas.ActivitiesDetail(
-                amount=activity.amount,
-                height=activity.height,
-                timestamp=activity.timestamp,
-                mode=GatewayMode[activity.mode],
-                climate_warehouse=units[activity.asset_id],
-            )
-            detail_list.append(detail)
-
-        return schemas.ActivitiesResponse(list=detail_list, total=total)
+    return schemas.ActivitiesResponse(activities=activities_with_cw, total=total)
