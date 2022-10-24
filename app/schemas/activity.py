@@ -11,7 +11,7 @@ from app.schemas.core import BaseModel
 
 class SearchBy(enum.Enum):
     ACTIVITIES = "activities"
-    CLIMATEWAREHOUSE = "clmatewarehouse"
+    CLIMATEWAREHOUSE = "climatewarehouse"
 
 
 class Activity(BaseModel):
