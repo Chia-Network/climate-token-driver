@@ -69,14 +69,11 @@ class DBCrudBase(object):
         self, model: Any, filters: Any, order_by: Any, limit: int = 1, page: int = 1
     ):
         try:
-            return (
-                self.db.query(model, func.count(model.id).over().label("total"))
-                .filter(or_(*filters["or"]), and_(*filters["and"]))
-                .order_by(order_by.desc())
-                .limit(limit)
-                .offset((page - 1) * limit)
-                .all()
-            )
+            query = self.db.query(model).filter(or_(*filters["or"]), and_(*filters["and"]))
+            return {
+                "list": query.order_by(order_by.desc()).limit(limit).offset((page - 1) * limit).all(),
+                "total": query.count(),
+            }
         except Exception as e:
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")

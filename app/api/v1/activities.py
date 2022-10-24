@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from fastapi import APIRouter
 
@@ -56,7 +56,7 @@ async def get_activity(
         if mode is not None:
             activity_filters["and"].append(models.Activity.mode.ilike(mode.name))
 
-        activities: List[models.activity] = db_crud.select_activity_with_pagination(
+        activities: Dict[str, list[tuple[models.Activity]] | int] = db_crud.select_activity_with_pagination(
             model=models.Activity,
             filters=activity_filters,
             order_by=models.Activity.height,
@@ -66,14 +66,10 @@ async def get_activity(
         if len(activities) == 0:
             return schemas.ActivitiesResponse()
 
-        total = activities[0][1]
+        total = activities["total"]
         detail_list: List[schemas.ActivitiesDetail] = []
         for unit in climate_data:
-            i = 0
-            for activity in activities[0]:
-                if i == len(activities[0]) - 1:
-                    break
-
+            for activity in activities["list"]:
                 if unit["orgUid"] == activity.org_uid:
                     detail = schemas.ActivitiesDetail(
                         amount=activity.amount,
@@ -83,6 +79,5 @@ async def get_activity(
                         climate_warehouse=unit,
                     )
                     detail_list.append(detail)
-                i += 1
 
         return schemas.ActivitiesResponse(list=detail_list, total=total)
