@@ -9,7 +9,7 @@ from app.core.types import GatewayMode
 from app.schemas.core import BaseModel
 
 
-class SearchBy(enum.Enum):
+class ActivitySearchBy(enum.Enum):
     ACTIVITIES = "activities"
     CLIMATEWAREHOUSE = "climatewarehouse"
 

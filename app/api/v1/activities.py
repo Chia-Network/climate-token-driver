@@ -17,7 +17,7 @@ settings = Settings()
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
     search: Optional[str] = None,
-    search_by: Optional[schemas.SearchBy] = None,
+    search_by: Optional[schemas.ActivitySearchBy] = None,
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 1,
