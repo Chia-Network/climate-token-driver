@@ -22,13 +22,13 @@ class Activity(Base):
     vintage_year = Column(Integer)
     sequence_num = Column(Integer)
     asset_id = Column(String)
+    beneficiary_name = Column(String)
+    beneficiary_puzzle_hash = Column(String)
 
     coin_id = Column(String)
     height = Column(BigInteger)
     amount = Column(BigInteger)
     mode = Column(String)
-    beneficiary_name = Column(String)
-    beneficiary_puzzle_hash = Column(String)
     metadata_ = Column("metadata", JSON, default={})
     timestamp = Column(BigInteger)
 
