@@ -25,15 +25,14 @@ class Activity(BaseModel):
     height: int
     amount: int
     mode: GatewayMode | str
-    metadata_: Dict[str, str]
+    metadata: Dict[str, str]
     timestamp: int
 
     @validator("mode")
-    def convert_mode_str(cls, v):
-        if isinstance(v, str):
-            return GatewayMode[v]
-        elif isinstance(v, int):
-            return GatewayMode(v)
+    def mode_from_str(cls, v):
+        for mode in GatewayMode:
+            if (v == mode.name) or (v == mode.value):
+                return mode
 
         return v
 

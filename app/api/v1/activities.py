@@ -87,6 +87,7 @@ async def get_activity(
             cw_unit=unit,
             cw_org=org,
             cw_token=token,
+            metadata=activity.metadata_,
             **jsonable_encoder(activity),
         )
         activities_with_cw.append(activity_with_cw)

@@ -321,7 +321,8 @@ class TestCATWorkflow:
             mode=GatewayMode.PERMISSIONLESS_RETIREMENT
         )
 
-        assert activities[0]["metadata"][b"bn"] == beneficiary_name
-        assert activities[0]["metadata"][b"bp"] == await get_first_puzzle_hash(
-            wallet_client_2
+        assert activities[0]["metadata"]["bn"] == beneficiary_name.decode()
+        assert (
+            activities[0]["metadata"]["bp"]
+            == "0x" + (await get_first_puzzle_hash(wallet_client_2)).hex()
         )
