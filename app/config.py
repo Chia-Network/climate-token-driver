@@ -3,7 +3,7 @@ import os
 import sys
 from pathlib import Path
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, validator
 
 IN_PYINSTALLER = getattr(sys, "frozen", False)
 
@@ -22,11 +22,15 @@ class Settings(BaseSettings):
     BLOCK_RANGE: int = 10000
     MIN_DEPTH: int = 32
     CLIMATE_API_URL: str = "https://api.climatewarehouse.chia.net"
-    CHIA_ROOT: Path = Path.home() / ".chia" / "mainnet"
+    CHIA_ROOT: Path = Path("~/.chia/mainnet")
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
     MODE: ExecutionMode
+
+    @validator("CHIA_ROOT")
+    def convert_path(cls, v):
+        return Path(v).expanduser()
 
     class Config:
         env_file = os.path.join(sys._MEIPASS, ".env") if IN_PYINSTALLER else ".env"
