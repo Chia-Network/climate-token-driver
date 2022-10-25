@@ -8,7 +8,7 @@ from typing import Callable, List
 from fastapi import status
 from fastapi.concurrency import contextmanager_in_threadpool
 
-from app.config import ExecutionMode, Settings
+from app.config import ExecutionMode, settings
 from app.logger import logger
 
 
@@ -22,8 +22,6 @@ def as_async_contextmanager(func: Callable, *args, **kwargs):
 
 def disallow(modes: List[ExecutionMode]):
     def _disallow(f: Callable):
-        settings = Settings()
-
         if settings.MODE in modes:
 
             async def _f(*args, **kargs):

@@ -11,13 +11,12 @@ from chia.types.coin_record import CoinRecord
 from fastapi.encoders import jsonable_encoder
 
 from app import schemas
-from app.config import Settings
+from app.config import settings
 from app.core.climate_wallet.wallet import ClimateObserverWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
 
-settings = Settings()
 error_code = ErrorCode()
 
 
