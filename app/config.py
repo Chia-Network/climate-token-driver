@@ -1,10 +1,10 @@
 import enum
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import yaml
-from pydantic import BaseSettings, validator
+from pydantic import BaseSettings, root_validator, validator
 
 
 class ExecutionMode(enum.Enum):
@@ -14,20 +14,28 @@ class ExecutionMode(enum.Enum):
     EXPLORER = "explorer"
 
 
+class ServerPort(enum.Enum):
+    DEV = 31999
+    CLIMATE_WAREHOUSE = 31310
+    CLIMATE_PORTAL = 31311
+    CLIMATE_TOKEN = 31312
+    CLIMATE_EXPLORER = 31313
+
+
 class Settings(BaseSettings):
-    _HIDDEN_FIELDS = ["MODE", "CHIA_ROOT", "CONFIG_PATH"]
+    _HIDDEN_FIELDS = ["MODE", "CHIA_ROOT", "CONFIG_PATH", "SERVER_PORT"]
 
     # Hidden configs: not exposed in config.yaml
     MODE: ExecutionMode
     CHIA_ROOT: Path = Path("~/.chia/mainnet")
     CONFIG_PATH: Path = Path("climate_token/config/config.yaml")
+    SERVER_PORT: Optional[int]
 
     # Visiable configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
     DB_PATH: Path = Path("climate_explorer/db/climate_activity_{CHALLENGE}.sqlite")
 
     SERVER_HOST: str = "0.0.0.0"
-    SERVER_PORT: int = 31313
     BLOCK_START: int = 1500000
     BLOCK_RANGE: int = 10000
     MIN_DEPTH: int = 4
@@ -35,6 +43,19 @@ class Settings(BaseSettings):
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
+
+    @root_validator
+    def configure_port(cls, values):
+        if values["MODE"] in [ExecutionMode.REGISTRY, ExecutionMode.CLIENT]:
+            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN.value
+        elif values["MODE"] in [ExecutionMode.EXPLORER]:
+            values["SERVER_PORT"] = ServerPort.CLIMATE_EXPLORER.value
+        elif values["MODE"] in [ExecutionMode.DEV]:
+            values["SERVER_PORT"] = ServerPort.DEV.value
+        else:
+            raise ValueError(f"Invalid mode {values['MODE']}!")
+
+        return values
 
     @validator("CHIA_ROOT", pre=True)
     def expand_root(cls, v):

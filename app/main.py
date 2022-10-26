@@ -8,7 +8,7 @@ from starlette.responses import Response
 
 from app.api import v1
 from app.config import ExecutionMode, settings
-from app.logger import log_config
+from app.logger import log_config, logger
 from app.utils import wait_until_dir_exists
 
 app = FastAPI(
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(v1.router)
 
 if __name__ == "__main__":
+    logger.info(f"Using settings {settings.dict()}")
     wait_until_dir_exists(settings.CHIA_ROOT)
 
     uvicorn.run(
