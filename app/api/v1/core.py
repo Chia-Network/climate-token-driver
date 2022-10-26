@@ -7,6 +7,15 @@ router = APIRouter(
     tags=["v1"],
 )
 
+
+@router.get("/info")
+async def get_info():
+    return {
+        "blockchain_name": "Chia Network",
+        "blockchain_name_short": "chia",
+    }
+
+
 router.include_router(cron.router)
 router.include_router(
     tokens.router,
