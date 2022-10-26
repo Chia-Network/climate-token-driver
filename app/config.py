@@ -75,7 +75,7 @@ def get_settings() -> Settings:
 
     default_env_file: Path
     if in_pyinstaller:
-        default_env_file = Path(sys._MEIPASS / ".env")
+        default_env_file = Path(sys._MEIPASS) / ".env"
     else:
         default_env_file = Path(".env")
 
