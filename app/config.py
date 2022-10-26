@@ -1,6 +1,7 @@
 import enum
 import sys
 from pathlib import Path
+from typing import Dict
 
 import yaml
 from pydantic import BaseSettings, validator
@@ -16,6 +17,8 @@ class ExecutionMode(enum.Enum):
 class Settings(BaseSettings):
     CHIA_ROOT: Path = Path("~/.chia/mainnet")
     MODE: ExecutionMode
+    DB_PATH: Path = Path(f"{Path.home()}/.chia/mainnet/climate_explorer")
+    DB_URL: str = f"sqlite:////{DB_PATH}/mainnet_"
 
     SERVER_HOST: str = "0.0.0.0"
     SERVER_PORT: int = 31313

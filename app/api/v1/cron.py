@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from blspy import G1Element
 from chia.consensus.block_record import BlockRecord
