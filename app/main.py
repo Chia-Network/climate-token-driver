@@ -7,11 +7,9 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from app.api import v1
-from app.config import ExecutionMode, Settings
+from app.config import ExecutionMode, settings
 from app.logger import log_config
 from app.utils import wait_until_dir_exists
-
-settings = Settings()
 
 app = FastAPI(
     title="Ivern Chia Service Suite",

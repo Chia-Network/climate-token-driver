@@ -9,11 +9,9 @@ from chia.util.config import load_config
 from chia.util.default_root import DEFAULT_ROOT_PATH
 from sqlalchemy.orm import Session
 
-from app.config import Settings
+from app.config import settings
 from app.db.session import SessionLocal
 from app.logger import logger
-
-settings = Settings()
 
 
 def get_db_session() -> Session:

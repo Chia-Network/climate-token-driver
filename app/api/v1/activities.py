@@ -6,13 +6,12 @@ from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.api import dependencies as deps
-from app.config import ExecutionMode, Settings
+from app.config import ExecutionMode, settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
 from app.utils import disallow
 
 router = APIRouter()
-settings = Settings()
 
 
 @router.get("/", response_model=schemas.ActivitiesResponse)

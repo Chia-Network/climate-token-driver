@@ -12,7 +12,7 @@ from sqlalchemy_utils import create_database, database_exists
 
 from app import crud, schemas
 from app.api import dependencies as deps
-from app.config import ExecutionMode, Settings
+from app.config import ExecutionMode, settings
 from app.db.base import Base
 from app.db.session import Engine
 from app.errors import ErrorCode
@@ -21,7 +21,6 @@ from app.models import State
 from app.utils import as_async_contextmanager, disallow
 
 router = APIRouter()
-settings = Settings()
 errorcode = ErrorCode()
 lock = asyncio.Lock()
 
