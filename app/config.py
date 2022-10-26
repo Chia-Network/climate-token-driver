@@ -1,4 +1,5 @@
 import enum
+import shutil
 import sys
 from pathlib import Path
 from typing import Dict, Optional
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
     CONFIG_PATH: Path = Path("climate_token/config/config.yaml")
     SERVER_PORT: Optional[int]
 
-    # Visiable configs: configurable through config.yaml
+    # Visible configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
     DB_PATH: Path = Path("climate_explorer/db/climate_activity_{CHALLENGE}.sqlite")
 
@@ -65,8 +66,7 @@ class Settings(BaseSettings):
     def prepend_root(cls, v, values):
         v: Path = values["CHIA_ROOT"] / v
         parent: Path = v.parent
-        if not parent.is_dir():
-            parent.mkdir(parents=True)
+        parent.mkdir(parents=True, exist_ok=True)
         return v
 
 
@@ -74,34 +74,28 @@ def get_settings() -> Settings:
     in_pyinstaller: bool = getattr(sys, "frozen", False)
 
     default_env_file: Path
+    default_config_file: Path
     if in_pyinstaller:
         default_env_file = Path(sys._MEIPASS) / ".env"
+        default_config_file = Path(sys._MEIPASS) / "config.yaml"
     else:
         default_env_file = Path(".env")
+        default_config_file = Path("config.yaml")
 
     default_settings = Settings(_env_file=default_env_file)
     config_file: Path = default_settings.CONFIG_PATH
 
     settings: Settings
     settings_dict: Dict
-    if config_file.is_file():
-        with open(config_file, "r") as f:
-            settings_dict = yaml.safe_load(f)
+    if not config_file.is_file():
+        config_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(default_config_file, config_file)
 
-        settings_dict = default_settings.dict() | settings_dict
-        settings = Settings(**settings_dict)
+    with open(config_file, "r") as f:
+        settings_dict = yaml.safe_load(f)
 
-    else:
-        config_file.parent.mkdir(parents=True)
-
-        settings_dict = default_settings.dict()
-        for field in Settings._HIDDEN_FIELDS:
-            del settings_dict[field]
-
-        with open(config_file, "w") as f:
-            yaml.safe_dump(settings_dict, f)
-
-        settings = default_settings
+    settings_dict = default_settings.dict() | (settings_dict or {})
+    settings = Settings(**settings_dict)
 
     return settings
 

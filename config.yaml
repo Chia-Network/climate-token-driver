@@ -1,0 +1,10 @@
+LOG_PATH: climate_token/log/debug.log
+DB_PATH: climate_explorer/db/climate_activity_CHALLENGE.sqlite
+SERVER_HOST: 0.0.0.0
+BLOCK_START: 1500000
+BLOCK_RANGE: 10000
+MIN_DEPTH: 4
+CLIMATE_API_URL: https://api.climatewarehouse.chia.net
+CHIA_HOSTNAME: localhost
+CHIA_FULL_NODE_RPC_PORT: 8555
+CHIA_WALLET_RPC_PORT: 9256
