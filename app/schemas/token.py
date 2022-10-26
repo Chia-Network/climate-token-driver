@@ -1,14 +1,21 @@
 from chia.util.byte_types import hexstr_to_bytes
 from pydantic import Field
 
+from app.core.types import GatewayMode
 from app.schemas.core import BaseModel
 from app.schemas.metadata import (
     DetokenizationTailMetadata,
     PermissionlessRetirementTailMetadata,
     TokenizationTailMetadata,
 )
-from app.schemas.payment import PaymentBase, PaymentWithPayee, PaymentWithPayer
+from app.schemas.payment import (
+    PaymentBase,
+    PaymentWithPayee,
+    PaymentWithPayer,
+    RetirementPaymentWithPayer,
+)
 from app.schemas.transaction import Transaction
+from app.schemas.types import ChiaJsonObject
 
 
 class Token(BaseModel):
@@ -18,6 +25,10 @@ class Token(BaseModel):
     warehouse_project_id: str = Field(example="GS1")
     vintage_year: int = Field(example=2099)
     sequence_num: int = Field(example=0)
+
+
+class TokenOnChainSimple(BaseModel):
+    asset_id: bytes
 
 
 class TokenOnChainBase(Token):
@@ -60,6 +71,14 @@ class DetokenizationTxResponse(BaseModel):
     tx: Transaction
 
 
+class DetokenizationFileParseResponse(BaseModel):
+    mode: GatewayMode
+    token: TokenOnChainSimple
+    payment: PaymentWithPayer
+    spend_bundle: ChiaJsonObject
+    gateway_coin_spend: ChiaJsonObject
+
+
 class DetokenizationFileRequest(BaseModel):
     class _TokenOnChain(TokenOnChainBase):
         detokenization: DetokenizationTailMetadata
@@ -79,7 +98,7 @@ class PermissionlessRetirementTxRequest(BaseModel):
         permissionless_retirement: PermissionlessRetirementTailMetadata
 
     token: _TokenOnChain
-    payment: PaymentWithPayer
+    payment: RetirementPaymentWithPayer
 
 
 class PermissionlessRetirementTxResponse(BaseModel):

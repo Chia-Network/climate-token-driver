@@ -22,6 +22,10 @@ class PaymentWithPayee(PaymentBase):
 
 
 class PaymentWithPayer(PaymentBase):
+    from_puzzle_hash: bytes
+
+
+class RetirementPaymentWithPayer(PaymentBase):
     beneficiary_name: str
     beneficiary_address: str
 
