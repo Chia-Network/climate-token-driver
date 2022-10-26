@@ -5,6 +5,7 @@ from pydantic import Field, validator
 
 from app.core.types import GatewayMode
 from app.schemas.core import BaseModel
+from app.schemas.token import TokenOnChain
 
 
 class ActivitySearchBy(enum.Enum):
@@ -12,12 +13,8 @@ class ActivitySearchBy(enum.Enum):
     CLIMATE_WAREHOUSE = "climate_warehouse"
 
 
-class Activity(BaseModel):
-    org_uid: str
-    warehouse_project_id: str
-    vintage_year: int
-    sequence_num: int
-    asset_id: bytes
+class ActivityBase(BaseModel):
+    metadata: Dict[str, str]
     beneficiary_name: Optional[str]
     beneficiary_puzzle_hash: Optional[str]
 
@@ -25,7 +22,6 @@ class Activity(BaseModel):
     height: int
     amount: int
     mode: GatewayMode | str
-    metadata: Dict[str, str]
     timestamp: int
 
     @validator("mode")
@@ -37,11 +33,20 @@ class Activity(BaseModel):
         return v
 
 
-class ActivityWithCW(Activity):
+class Activity(ActivityBase):
+    org_uid: str
+    warehouse_project_id: str
+    vintage_year: int
+    sequence_num: int
+    asset_id: bytes
+
+
+class ActivityWithCW(ActivityBase):
+    token: TokenOnChain
+
     cw_unit: Dict[str, Any]
     cw_org: Dict[str, Any]
     cw_project: Dict[str, Any]
-    cw_token: Dict[str, Any]
 
 
 class ActivitiesResponse(BaseModel):

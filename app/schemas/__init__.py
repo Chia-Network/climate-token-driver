@@ -1,6 +1,7 @@
 from app.schemas.activity import (  # noqa
     ActivitiesResponse,
     Activity,
+    ActivityBase,
     ActivitySearchBy,
     ActivityWithCW,
 )
