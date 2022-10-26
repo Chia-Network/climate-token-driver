@@ -1,6 +1,6 @@
 import dataclasses
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.consensus.constants import ConsensusConstants
@@ -17,10 +17,12 @@ from chia.util.ints import uint32, uint64
 from chia.wallet.cat_wallet.cat_utils import (
     construct_cat_puzzle,
     get_innerpuzzle_from_puzzle,
+    match_cat_puzzle,
 )
 from chia.wallet.payment import Payment
 from chia.wallet.puzzles.cat_loader import CAT_MOD
 from chia.wallet.transaction_record import TransactionRecord
+from chia.wallet.uncurried_puzzle import uncurry_puzzle
 from chia.wallet.util.compute_memos import compute_memos
 from chia.wallet.util.wallet_types import WalletType
 
@@ -77,7 +79,7 @@ class ClimateWallet(ClimateWalletBase):
     )
     mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]]
 
-    wallet_client: WalletRpcClient
+    wallet_client: Optional[WalletRpcClient]
     constants: ConsensusConstants
 
     @classmethod
@@ -148,6 +150,10 @@ class ClimateWallet(ClimateWalletBase):
         return self.mode_to_secret_key is not None
 
     @property
+    def has_wallet_client(self) -> bool:
+        return self.wallet_client is not None
+
+    @property
     def delegated_signatures(self) -> Dict[Tuple[bytes, bytes], G2Element]:
         return {
             (bytes(self.root_public_key), message): signature
@@ -177,6 +183,9 @@ class ClimateWallet(ClimateWalletBase):
         wallet_id: int,
         wallet_type: WalletType,
     ) -> None:
+
+        if not self.has_wallet_client:
+            raise ValueError("No wallet client provided!")
 
         wallet_info = await get_wallet_info_by_id(
             wallet_id=wallet_id,
@@ -431,6 +440,92 @@ class ClimateWallet(ClimateWalletBase):
             }
         )
 
+        return result
+
+    @classmethod
+    async def parse_detokenization_request(
+        cls,
+        content: str,
+    ) -> Dict:
+
+        (_, data) = bech32_decode(content, max_length=len(content))
+        if data is None:
+            raise ValueError(f"Invalid detokenization file!")
+
+        data_bytes = bytes(convertbits(data, 5, 8, False))
+        spend_bundle = SpendBundle.from_bytes(data_bytes)
+
+        result: Dict = {
+            "spend_bundle": spend_bundle,
+        }
+
+        gateway_puzzle: Program = create_gateway_puzzle()
+
+        coin_spend: CoinSpend
+        gateway_coin_spend: Optional[CoinSpend] = None
+        mode: Optional[GatewayMode] = None
+        for coin_spend in spend_bundle.coin_spends:
+            puzzle: Program = coin_spend.puzzle_reveal.to_program()
+            solution: Program = coin_spend.solution.to_program()
+            coin: Coin = coin_spend.coin
+
+            puzzle_args: Optional[Iterator[Program]] = match_cat_puzzle(
+                uncurry_puzzle(puzzle)
+            )
+
+            # gateway spend is a CAT
+            if puzzle_args is None:
+                continue
+
+            (_, asset_id, inner_puzzle) = puzzle_args
+            asset_id: bytes = asset_id.as_atom()
+            inner_solution = solution.at("f")
+
+            # check for gateway puzzle
+            if inner_puzzle != gateway_puzzle:
+                continue
+
+            inner_coin_spend = CoinSpend(
+                coin=coin,
+                puzzle_reveal=inner_puzzle,
+                solution=inner_solution,
+            )
+            (mode, _) = parse_gateway_spend(coin_spend=inner_coin_spend, is_cat=False)
+            gateway_coin_spend = coin_spend
+
+            # only one gateway per SpendBundle
+            break
+
+        if gateway_coin_spend is None:
+            return result
+
+        origin_coin_id: bytes32 = gateway_coin_spend.coin.parent_coin_info
+
+        inner_puzzle_hash: Optional[bytes32] = None
+        for coin_spend in spend_bundle.coin_spends:
+            coin: Coin = coin_spend.coin
+            if coin.name() == origin_coin_id:
+                puzzle: Program = coin_spend.puzzle_reveal.to_program()
+                puzzle_args: Optional[Iterator[Program]] = match_cat_puzzle(
+                    uncurry_puzzle(puzzle)
+                )
+                (_, _, inner_puzzle) = puzzle_args
+                inner_puzzle_hash = inner_puzzle.get_tree_hash()
+
+        assert inner_puzzle_hash is not None
+
+        amount: int = gateway_coin_spend.coin.amount
+
+        result.update(
+            {
+                "mode": mode,
+                "from_puzzle_hash": inner_puzzle_hash,
+                "amount": amount,
+                "fee": spend_bundle.fees() - amount,
+                "asset_id": asset_id,
+                "gateway_coin_spend": coin_spend,
+            }
+        )
         return result
 
     async def sign_and_send_detokenization_request(

@@ -11,9 +11,15 @@ from app.schemas.metadata import (  # noqa
     TailMetadataBase,
     TokenizationTailMetadata,
 )
-from app.schemas.payment import PaymentBase, PaymentWithPayee, PaymentWithPayer  # noqa
+from app.schemas.payment import (  # noqa
+    PaymentBase,
+    PaymentWithPayee,
+    PaymentWithPayer,
+    RetirementPaymentWithPayer,
+)
 from app.schemas.state import State  # noqa
 from app.schemas.token import (  # noqa
+    DetokenizationFileParseResponse,
     DetokenizationFileRequest,
     DetokenizationFileResponse,
     DetokenizationTxRequest,
@@ -25,5 +31,6 @@ from app.schemas.token import (  # noqa
     TokenizationTxResponse,
     TokenOnChain,
     TokenOnChainBase,
+    TokenOnChainSimple,
 )
 from app.schemas.transaction import Transaction, Transactions  # noqa

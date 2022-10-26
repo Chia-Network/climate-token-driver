@@ -196,6 +196,7 @@ class TestCATWorkflow:
 
         # block:
         #   - client: create detokenization request
+        #   - registry: check detokenization request
         #   - registry: sign detokenization request and push
 
         climate_wallet_2 = ClimateWallet(
@@ -213,6 +214,14 @@ class TestCATWorkflow:
         )
         content: str = result["content"]
         transaction_records: List[TransactionRecord] = result["transaction_records"]
+
+        result: Dict = await ClimateWallet.parse_detokenization_request(
+            content=content,
+        )
+        assert result["mode"] == GatewayMode.DETOKENIZATION
+        assert result["amount"] == amount
+        assert result["fee"] == fee
+        assert result["asset_id"] == climate_wallet_1.tail_program_hash
 
         result: Dict = await climate_wallet_1.sign_and_send_detokenization_request(
             content=content,

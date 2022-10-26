@@ -214,6 +214,41 @@ async def create_detokenization_file(
     )
 
 
+@router.get(
+    "/parse-detokenization",
+)
+@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+async def parse_detokenization_file(
+    content: str,
+):
+    """Parse detokenization file.
+
+    This endpoint is to be called by the registry.
+    """
+
+    result: Dict = await ClimateWallet.parse_detokenization_request(content=content)
+    mode: GatewayMode = result["mode"]
+    gateway_coin_spend: CoinSpend = result["gateway_coin_spend"]
+    spend_bundle: SpendBundle = result["spend_bundle"]
+
+    token = schemas.TokenOnChainSimple(
+        asset_id=result["asset_id"],
+    )
+    payment = schemas.PaymentWithPayer(
+        from_puzzle_hash=result["from_puzzle_hash"],
+        amount=result["amount"],
+        fee=result["fee"],
+    )
+
+    return schemas.DetokenizationFileParseResponse(
+        mode=mode,
+        token=token,
+        payment=payment,
+        spend_bundle=spend_bundle.to_json_dict(),
+        gateway_coin_spend=gateway_coin_spend.to_json_dict(),
+    )
+
+
 @router.put(
     "/{asset_id}/permissionless-retire",
     response_model=schemas.PermissionlessRetirementTxResponse,
@@ -230,7 +265,7 @@ async def create_permissionless_retirement_tx(
     """
 
     token: schemas.TokenOnChain = request.token
-    payment: schemas.PaymentWithPayer = request.payment
+    payment: schemas.RetirementPaymentWithPayer = request.payment
 
     token_index = ClimateTokenIndex(
         org_uid=token.org_uid,
