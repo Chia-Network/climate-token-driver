@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     MODE: ExecutionMode
     DB_PATH: Path = Path(f"{Path.home()}/.chia/mainnet/climate_explorer")
     DB_URL: str = f"sqlite:////{DB_PATH}/mainnet_"
+    LOG_FILE_PATH = Path(f"{Path.home()}/.chia/mainnet/climate_token/debug.log")
 
     SERVER_HOST: str = "0.0.0.0"
     SERVER_PORT: int = 31313
