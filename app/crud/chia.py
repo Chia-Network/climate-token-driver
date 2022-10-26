@@ -42,6 +42,23 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("Call Climate API Timeout")
 
+    def get_climate_projects(self) -> List[Dict]:
+        try:
+            url = urlparse(self.url + "/v1/projects")
+
+            r = requests.get(url.geturl())
+            if r.status_code != requests.codes.ok:
+                logger.error(f"Request Url: {r.url} Error Message: {r.text}")
+                raise error_code.internal_server_error(
+                    message="Call Climate API Failure"
+                )
+
+            return r.json()
+
+        except TimeoutError as e:
+            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
+            raise error_code.internal_server_error("Call Climate API Timeout")
+
     def get_climate_organizations(self) -> Dict[str, Dict]:
         try:
             url = urlparse(self.url + "/v1/organizations")
@@ -85,6 +102,10 @@ class ClimateWareHouseCrud(object):
         if len(units) == 0:
             return []
 
+        projects: List[Dict] = self.get_climate_projects()
+        if len(projects) == 0:
+            return []
+
         # organization_by_id: {org_uid -> org}
         organization_by_id: Dict[str, Dict] = self.get_climate_organizations()
         if len(organization_by_id) == 0:
@@ -94,6 +115,8 @@ class ClimateWareHouseCrud(object):
         metadata_by_id: Dict[str, Dict[str, str]] = {}
         for org_uid in organization_by_id.keys():
             metadata_by_id[org_uid] = self.get_climate_organizations_metadata(org_uid)
+
+        project_by_id = {project["orgUid"]: project for project in projects}
 
         onchain_units: List[Dict] = []
         for unit in units:
@@ -107,11 +130,16 @@ class ClimateWareHouseCrud(object):
             if org is None:
                 continue
 
+            project: Optional[Dict] = project_by_id.get(org_uid)
+            if project is None:
+                continue
+
             org_metadata: Dict[str, str] = metadata_by_id.get(org_uid)
             metadata: Dict = json.loads(org_metadata.get(f"meta_{asset_id}", "{}"))
 
             unit["organization"] = org
             unit["token"] = metadata
+            unit["project"] = project
 
             onchain_units.append(unit)
 

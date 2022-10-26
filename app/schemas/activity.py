@@ -40,6 +40,7 @@ class Activity(BaseModel):
 class ActivityWithCW(Activity):
     cw_unit: Dict[str, Any]
     cw_org: Dict[str, Any]
+    cw_project: Dict[str, Any]
     cw_token: Dict[str, Any]
 
 
