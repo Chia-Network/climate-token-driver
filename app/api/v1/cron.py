@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from blspy import G1Element
 from chia.consensus.block_record import BlockRecord
@@ -14,7 +14,7 @@ from app import crud, schemas
 from app.api import dependencies as deps
 from app.config import ExecutionMode, settings
 from app.db.base import Base
-from app.db.session import Engine
+from app.db.session import get_engine_cls
 from app.errors import ErrorCode
 from app.logger import logger
 from app.models import State
@@ -28,6 +28,8 @@ lock = asyncio.Lock()
 @router.on_event("startup")
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def init_db():
+    Engine = await get_engine_cls()
+
     if not database_exists(Engine.url):
         create_database(Engine.url)
         logger.info(f"Create database {Engine.url}")

@@ -81,10 +81,12 @@ async def get_activity(
         unit: Dict = units.get(activity.asset_id).copy()
         org = unit.pop("organization", None)
         token = unit.pop("token", None)
+        project = unit.pop("project", None)
 
         activity_with_cw = schemas.ActivityWithCW(
             cw_unit=unit,
             cw_org=org,
+            cw_project=project,
             cw_token=token,
             metadata=activity.metadata_,
             **jsonable_encoder(activity),
