@@ -150,6 +150,10 @@ class ClimateWareHouseCrud(object):
 class BlockChainCrud(object):
     full_node_client: FullNodeRpcClient
 
+    async def get_challenge(self) -> str:
+        result: Dict = await self.full_node_client.fetch("get_network_info", {})
+        return result["network_name"]
+
     async def get_activities(
         self,
         org_uid: str,

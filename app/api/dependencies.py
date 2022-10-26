@@ -10,11 +10,13 @@ from chia.util.default_root import DEFAULT_ROOT_PATH
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.db.session import SessionLocal
+from app.db.session import get_session_local_cls
 from app.logger import logger
 
 
-def get_db_session() -> Session:
+async def get_db_session() -> Session:
+    SessionLocal = await get_session_local_cls()
+
     db = SessionLocal()
     try:
         yield db

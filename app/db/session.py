@@ -1,18 +1,31 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from typing import Type
+
+from sqlalchemy import create_engine, engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from app import crud
+from app.api import dependencies as deps
 from app.config import settings
+from app.utils import as_async_contextmanager
 
-if not settings.DB_PATH.exists():
-    settings.DB_PATH.mkdir()
 
-orgs = crud.ClimateWareHouseCrud(url=settings.CLIMATE_API_URL).get_climate_organizations()
+async def get_engine_cls() -> Type[engine.Engine]:
+    async with as_async_contextmanager(
+        deps.get_full_node_rpc_client
+    ) as full_node_client:
+        blockchain_crud = crud.BlockChainCrud(full_node_client)
+        challenge: str = await blockchain_crud.get_challenge()
 
-for org in orgs.values():
-    if org["isHome"]:
-        settings.DB_URL = settings.DB_URL + org["orgUid"] + ".sqlite"
+    db_url: str = "sqlite:////" + str(settings.DB_PATH).format(CHALLENGE=challenge)
+    Engine = create_engine(
+        db_url, connect_args={"check_same_thread": False, "timeout": 15}
+    )
 
-Engine = create_engine(settings.DB_URL, connect_args={"check_same_thread": False, "timeout": 15})
+    return Engine
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
+
+async def get_session_local_cls() -> Type[Session]:
+    Engine = await get_engine_cls()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=Engine)
+
+    return SessionLocal
