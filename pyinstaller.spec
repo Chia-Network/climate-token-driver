@@ -9,6 +9,7 @@ datas = []
 datas.append((f"{ROOT}/chia/wallet/puzzles/*.hex", "./chia/wallet/puzzles"))
 datas.append(("./app/core/chialisp/*.hex", "./app/core/chialisp"))
 datas.append(("./.env", "./"))
+datas.append(("./config.yaml", "./"))
 
 block_cipher = None
 

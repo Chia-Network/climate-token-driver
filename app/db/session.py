@@ -16,7 +16,7 @@ async def get_engine_cls() -> Type[engine.Engine]:
         blockchain_crud = crud.BlockChainCrud(full_node_client)
         challenge: str = await blockchain_crud.get_challenge()
 
-    db_url: str = "sqlite:////" + str(settings.DB_PATH).format(CHALLENGE=challenge)
+    db_url: str = "sqlite:////" + str(settings.DB_PATH).replace("CHALLENGE", challenge)
     Engine = create_engine(
         db_url, connect_args={"check_same_thread": False, "timeout": 15}
     )
