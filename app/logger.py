@@ -5,7 +5,7 @@ import uvicorn
 from app.config import settings
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     filename=settings.LOG_PATH,
     format="%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
     filemode="w",

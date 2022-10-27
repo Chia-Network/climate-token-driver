@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     # Visible configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
-    DB_PATH: Path = Path("climate_explorer/db/climate_activity_{CHALLENGE}.sqlite")
+    DB_PATH: Path = Path("climate_explorer/db/climate_activity_CHALLENGE.sqlite")
 
     SERVER_HOST: str = "0.0.0.0"
     BLOCK_START: int = 1500000
