@@ -6,7 +6,7 @@ from app import crud, models, schemas
 
 
 class TestActivities:
-    def test_activities_with_search_by_than_error(self, fastapi_client, monkeypatch):
+    def test_activities_with_search_by_then_error(self, fastapi_client, monkeypatch):
         test_request = {"search_by": "error", "search": ""}
 
         params = urlencode(test_request)
@@ -14,7 +14,7 @@ class TestActivities:
 
         assert response.status_code == fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def test_activities_with_empty_climate_warehouse_than_success(self, fastapi_client, monkeypatch):
+    def test_activities_with_empty_climate_warehouse_then_success(self, fastapi_client, monkeypatch):
         test_request = {}
         test_response = schemas.activity.ActivitiesResponse()
 
@@ -30,7 +30,7 @@ class TestActivities:
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == test_response
 
-    def test_activities_with_empty_db_than_success(self, fastapi_client, monkeypatch):
+    def test_activities_with_empty_db_then_success(self, fastapi_client, monkeypatch):
         test_request = {}
         test_response = schemas.activity.ActivitiesResponse()
 
@@ -45,7 +45,7 @@ class TestActivities:
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == test_response
 
-    def test_activities_than_success(self, fastapi_client, monkeypatch):
+    def test_activities_then_success(self, fastapi_client, monkeypatch):
         test_request = {}
         test_response = schemas.activity.ActivitiesResponse(
             activities=[
@@ -241,7 +241,7 @@ class TestActivities:
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json()["total"] == test_response.total
 
-    def test_activities_with_mode_search_search_by_than_success(self, fastapi_client, monkeypatch):
+    def test_activities_with_mode_search_search_by_then_success(self, fastapi_client, monkeypatch):
         test_request = {"mode": "permissionless_retirement", "search_by": "onchain_metadata",
                         "search": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966"}
         test_response = schemas.activity.ActivitiesResponse(
