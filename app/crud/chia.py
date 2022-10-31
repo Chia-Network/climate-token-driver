@@ -100,6 +100,7 @@ class ClimateWareHouseCrud(object):
         # units: [unit]
         units: List[Dict] = self.get_climate_units(search)
         if len(units) == 0:
+            logger.warning(f"Search climate warehouse units by search is empty. search:{search}")
             return []
 
         projects: List[Dict] = self.get_climate_projects()
@@ -124,14 +125,17 @@ class ClimateWareHouseCrud(object):
 
             org_uid: Optional[str] = unit.get("orgUid")
             if org_uid is None:
+                logger.warning(f"Can not get climate warehouse orgUid in unit. unit:{unit}")
                 continue
 
             org: Optional[Dict] = organization_by_id.get(org_uid)
             if org is None:
+                logger.warning(f"Can not get organization by org_uid. org_uid:{org_uid}")
                 continue
 
             project: Optional[Dict] = project_by_id.get(org_uid)
             if project is None:
+                logger.warning(f"Can not get project by orgUid. orgUid:{org_uid}")
                 continue
 
             org_metadata: Dict[str, str] = metadata_by_id.get(org_uid)
