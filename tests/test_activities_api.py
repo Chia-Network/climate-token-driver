@@ -1,10 +1,7 @@
-from unittest import mock
-from urllib.parse import urlencode
-
 import fastapi
 
-# from app.models import activity
-# from app.schemas import activity
+from unittest import mock
+from urllib.parse import urlencode
 from app import crud, models, schemas
 
 
@@ -245,7 +242,8 @@ class TestActivities:
         assert response.json()["total"] == test_response.total
 
     def test_activities_with_mode_search_search_by_than_success(self, fastapi_client, monkeypatch):
-        test_request = {"mode": "permissionless_retirement", "search_by": "onchain_metadata", "search": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966"}
+        test_request = {"mode": "permissionless_retirement", "search_by": "onchain_metadata",
+                        "search": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966"}
         test_response = schemas.activity.ActivitiesResponse(
             activities=[
                 schemas.activity.ActivityWithCW(
