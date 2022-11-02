@@ -1,5 +1,8 @@
+# import tests from submodule `chia-blockchain`
 PY = PYTHONPATH=$(PYTHONPATH):./chia-blockchain:. python
-CHIALISP_DIR = app/core/chialisp
+PYTEST = $(PY) -m pytest
+PYINSTALLER = pyinstaller --clean
+CHIALISP_DIR = ./app/core/chialisp
 RUN = run --include $(CHIALISP_DIR)
 OPC = opc
 
@@ -32,11 +35,10 @@ clean-clvm:
 .PHONY: compile-clvm
 compile-clvm: $(targets)
 
-
 .PHONY: test-app
 test-app:
-	@$(PY) -m pytest tests
+	@$(PYTEST) ./tests
 
 .PHONY: package-app
 package-app: ## package python app via pyinstaller
-	@pyinstaller --clean pyinstaller.spec
+	@$(PYINSTALLER) pyinstaller.spec
