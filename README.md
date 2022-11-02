@@ -2,9 +2,9 @@
 
 This repository is intended to be used in multiple components in the Climate Portal system, including
 
-- Climate Portal
-- Climate Wallet
-- Climate Explorer
+- Climate Portal (as token driver)
+- Climate Wallet (as token driver)
+- Climate Explorer (as token driver and backend)
 
 ## Hierarchy
 
@@ -19,7 +19,16 @@ This repository is intended to be used in multiple components in the Climate Por
 
 ## Usage
 
-### Run from source for developement
+### Installation
+
+- Clone this repo
+  ```sh
+  git clone --recurse-submodules https://github.com/hashgreen/ivern-chia.git
+  ```
+
+Note that `chia-blockchain` is used as a submodule of this repo to involve its test suites from the source file.
+
+### Run from source for development
 
 - [Install Poetry](https://python-poetry.org/docs/)
 
@@ -50,4 +59,10 @@ This repository is intended to be used in multiple components in the Climate Por
 - Run the binary/executable
   ```sh
   MODE=dev CHIA_ROOT=~/.chia/testnet10 ./dist/main
+  ```
+
+### Run test cases
+- Invoke `pytest`
+  ```sh
+  make test-app
   ```
