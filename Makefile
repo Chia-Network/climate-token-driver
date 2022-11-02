@@ -1,4 +1,4 @@
-PY = PYTHONPATH=$(PYTHONPATH):. python
+PY = PYTHONPATH=$(PYTHONPATH):./chia-blockchain:. python
 CHIALISP_DIR = app/core/chialisp
 RUN = run --include $(CHIALISP_DIR)
 OPC = opc
@@ -25,11 +25,17 @@ targets = $(call clsp_target_for_scheme,$(CHIALISP_DIR),\
 	gateway_with_conditions \
 )
 
-.PHONY: clean
-clean:
+.PHONY: clean-clvm
+clean-clvm:
 	rm $(targets)
 
-compile: $(targets)
+.PHONY: compile-clvm
+compile-clvm: $(targets)
+
+
+.PHONY: test-app
+test-app:
+	@$(PY) -m pytest tests
 
 .PHONY: package-app
 package-app: ## package python app via pyinstaller
