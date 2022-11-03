@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
+
 import importlib
 import pathlib
-
 
 ROOT = pathlib.Path(importlib.import_module("chia").__file__).absolute().parent.parent
 
@@ -14,8 +14,8 @@ datas.append(("./config.yaml", "./"))
 block_cipher = None
 
 a = Analysis(
-    ['app/main.py'],
-    pathex=[],
+    ["app/main.py"],
+    pathex=["./chia-blockchain"],
     binaries=[],
     datas=datas,
     hiddenimports=[],
@@ -28,7 +28,11 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+pyz = PYZ(
+    a.pure,
+    a.zipped_data,
+    cipher=block_cipher)
 
 exe = EXE(
     pyz,
@@ -37,7 +41,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='main',
+    name="main",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
