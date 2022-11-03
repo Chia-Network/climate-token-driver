@@ -1,7 +1,7 @@
 # import tests from submodule `chia-blockchain`
 PY = PYTHONPATH=$(PYTHONPATH):./chia-blockchain:. python
 PYTEST = MODE=dev $(PY) -m pytest
-PYINSTALLER = pyinstaller --clean
+PYINSTALLER = $(PY) -m PyInstaller --clean
 CHIALISP_DIR = ./app/core/chialisp
 RUN = run --include $(CHIALISP_DIR)
 OPC = opc
