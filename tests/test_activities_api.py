@@ -2,6 +2,9 @@ import fastapi
 
 from unittest import mock
 from urllib.parse import urlencode
+
+from fastapi.encoders import jsonable_encoder
+
 from app import crud, models, schemas
 
 
@@ -47,13 +50,27 @@ class TestActivities:
 
     def test_activities_then_success(self, fastapi_client, monkeypatch):
         test_request = {}
+
+        test_activity_data = models.activity.Activity(
+            org_uid="cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
+            amount=10000,
+            asset_id="0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
+            coin_id="0x40fd5fec70b2e7e3ab110a0ac22feb67f24fe989d7f2c7018c694faeea41c40f",
+            height=1720476,
+            mode="PERMISSIONLESS_RETIREMENT",
+            sequence_num=0,
+            timestamp=1666843885,
+            vintage_year=2096,
+            warehouse_project_id="c9b98579-debb-49f3-b417-0adbae4ed5c7",
+            beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
+            beneficiary_name="",
+            metadata_={"bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966", "bn": ""},
+        )
+
         test_response = schemas.activity.ActivitiesResponse(
             activities=[
                 schemas.activity.ActivityWithCW(
-                    amount=10000,
-                    beneficiary_name="",
-                    beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
-                    coin_id="0x40fd5fec70b2e7e3ab110a0ac22feb67f24fe989d7f2c7018c694faeea41c40f",
+                    **jsonable_encoder(test_activity_data),
                     cw_org={
                         "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"
                     },
@@ -102,13 +119,10 @@ class TestActivities:
                             "updatedAt": "2022-10-24T06:25:13.440Z"
                         },
                     },
-                    height=1720476,
                     metadata={
                         "bn": "",
                         "bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
                     },
-                    mode="PERMISSIONLESS_RETIREMENT",
-                    timestamp=1666843885,
                     token={
                         "org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
                         "warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
@@ -140,21 +154,7 @@ class TestActivities:
         mock_climate_warehouse_data = mock.MagicMock()
         mock_db_data.return_value = (
             [
-                models.activity.Activity(
-                    org_uid="cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
-                    amount=10000,
-                    asset_id="0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
-                    coin_id="0x40fd5fec70b2e7e3ab110a0ac22feb67f24fe989d7f2c7018c694faeea41c40f",
-                    height=1720476,
-                    mode="PERMISSIONLESS_RETIREMENT",
-                    sequence_num=0,
-                    timestamp=1666843885,
-                    vintage_year=2096,
-                    warehouse_project_id="c9b98579-debb-49f3-b417-0adbae4ed5c7",
-                    beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
-                    beneficiary_name="",
-                    metadata_={"bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966", "bn": ""},
-                ),
+                test_activity_data,
             ],
             1
         )
@@ -239,18 +239,34 @@ class TestActivities:
         response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
+        assert response.json() == jsonable_encoder(test_response)
         assert response.json()["total"] == test_response.total
 
     def test_activities_with_mode_search_search_by_then_success(self, fastapi_client, monkeypatch):
         test_request = {"mode": "permissionless_retirement", "search_by": "onchain_metadata",
                         "search": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966"}
+
+        test_activity_data = models.activity.Activity(
+            org_uid="cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
+            amount=10000,
+            asset_id="0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
+            coin_id="0x40fd5fec70b2e7e3ab110a0ac22feb67f24fe989d7f2c7018c694faeea41c40f",
+            height=1720476,
+            mode="PERMISSIONLESS_RETIREMENT",
+            sequence_num=0,
+            timestamp=1666843885,
+            vintage_year=2096,
+            warehouse_project_id="c9b98579-debb-49f3-b417-0adbae4ed5c7",
+            beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
+            beneficiary_name="",
+            metadata_={"bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966", "bn": ""},
+        )
+
         test_response = schemas.activity.ActivitiesResponse(
             activities=[
                 schemas.activity.ActivityWithCW(
-                    amount=10000,
-                    beneficiary_name="",
-                    beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
-                    coin_id="0x40fd5fec70b2e7e3ab110a0ac22feb67f24fe989d7f2c7018c694faeea41c40f",
+                    metadata={"bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966", "bn": ""},
+                    **jsonable_encoder(test_activity_data),
                     cw_org={
                         "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"
                     },
@@ -299,13 +315,6 @@ class TestActivities:
                             "updatedAt": "2022-10-24T06:25:13.440Z"
                         },
                     },
-                    height=1720476,
-                    metadata={
-                        "bn": "",
-                        "bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
-                    },
-                    mode="PERMISSIONLESS_RETIREMENT",
-                    timestamp=1666843885,
                     token={
                         "org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
                         "warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
@@ -337,21 +346,7 @@ class TestActivities:
         mock_climate_warehouse_data = mock.MagicMock()
         mock_db_data.return_value = (
             [
-                models.activity.Activity(
-                    org_uid="cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
-                    amount=10000,
-                    asset_id="0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
-                    coin_id="0x40fd5fec70b2e7e3ab110a0ac22feb67f24fe989d7f2c7018c694faeea41c40f",
-                    height=1720476,
-                    mode="PERMISSIONLESS_RETIREMENT",
-                    sequence_num=0,
-                    timestamp=1666843885,
-                    vintage_year=2096,
-                    warehouse_project_id="c9b98579-debb-49f3-b417-0adbae4ed5c7",
-                    beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
-                    beneficiary_name="",
-                    metadata_={"bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966", "bn": ""},
-                ),
+                test_activity_data,
             ],
             1
         )
@@ -436,4 +431,5 @@ class TestActivities:
         response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
+        assert response.json() == jsonable_encoder(test_response)
         assert response.json()["total"] == test_response.total
