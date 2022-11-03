@@ -23,6 +23,8 @@ if settings.MODE == ExecutionMode.DEV:
         return Response(content, status_code=500)
 
 
+app.include_router(v1.router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,7 +33,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(v1.router)
 
 if __name__ == "__main__":
     logger.info(f"Using settings {settings.dict()}")

@@ -74,6 +74,7 @@ async def _scan_token_activity(
 
         # is None or empty
         if not token:
+            logger.warning(f"Can not get token in climate warehouse unit. unit:{unit}")
             continue
 
         public_key = G1Element.from_bytes(hexstr_to_bytes(token["public_key"]))

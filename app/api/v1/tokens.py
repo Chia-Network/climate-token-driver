@@ -216,6 +216,7 @@ async def create_detokenization_file(
 
 @router.get(
     "/parse-detokenization",
+    response_model=schemas.DetokenizationFileParseResponse,
 )
 @disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
 async def parse_detokenization_file(

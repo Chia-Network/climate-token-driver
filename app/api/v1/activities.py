@@ -10,6 +10,7 @@ from app.config import ExecutionMode, settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
 from app.utils import disallow
+from app.logger import logger
 
 router = APIRouter()
 
@@ -54,6 +55,7 @@ async def get_activity(
         url=settings.CLIMATE_API_URL
     ).combine_climate_units_and_metadata(search=cw_filters)
     if len(climate_data) == 0:
+        logger.warning(f"No data to get from climate warehouse. search:{cw_filters}")
         return schemas.ActivitiesResponse()
 
     units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
@@ -74,6 +76,7 @@ async def get_activity(
         limit=limit,
     )
     if len(activities) == 0:
+        logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
         return schemas.ActivitiesResponse()
 
     activities_with_cw: List[schemas.ActivityWithCW] = []
