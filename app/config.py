@@ -19,8 +19,9 @@ class ServerPort(enum.Enum):
     DEV = 31999
     CLIMATE_WAREHOUSE = 31310
     CLIMATE_PORTAL = 31311
-    CLIMATE_TOKEN = 31312
+    CLIMATE_TOKEN_REGISTRY = 31312
     CLIMATE_EXPLORER = 31313
+    CLIMATE_TOKEN_CLIENT = 31314
 
 
 class Settings(BaseSettings):
@@ -47,11 +48,13 @@ class Settings(BaseSettings):
 
     @root_validator
     def configure_port(cls, values):
-        if values["MODE"] in [ExecutionMode.REGISTRY, ExecutionMode.CLIENT]:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN.value
-        elif values["MODE"] in [ExecutionMode.EXPLORER]:
+        if values["MODE"] == ExecutionMode.REGISTRY:
+            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_REGISTRY.value
+        elif values["MODE"] == ExecutionMode.CLIENT:
+            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_CLIENT.value
+        elif values["MODE"] == ExecutionMode.EXPLORER:
             values["SERVER_PORT"] = ServerPort.CLIMATE_EXPLORER.value
-        elif values["MODE"] in [ExecutionMode.DEV]:
+        elif values["MODE"] == ExecutionMode.DEV:
             values["SERVER_PORT"] = ServerPort.DEV.value
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
