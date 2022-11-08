@@ -213,7 +213,7 @@ class ClimateWallet(ClimateWalletBase):
 
         unsigned_gateway_coin_spend: CoinSpend
         signature: G2Element
-        memos: List[bytes] = [mode.name.lower().encode()]
+        memos: List[bytes] = []
 
         (
             transaction_request,
