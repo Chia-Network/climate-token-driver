@@ -606,6 +606,7 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         fee: int = 0,
         beneficiary_name: Optional[bytes] = None,
+        beneficiary_address: Optional[bytes] = None,
         beneficiary_puzzle_hash: Optional[bytes32] = None,
         wallet_id: int = 1,
     ) -> Dict:
@@ -613,7 +614,15 @@ class ClimateWallet(ClimateWalletBase):
         mode = GatewayMode.PERMISSIONLESS_RETIREMENT
 
         if beneficiary_puzzle_hash is None:
-            beneficiary_puzzle_hash = await get_first_puzzle_hash(self.wallet_client)
+            # no beneficiary supplied at all
+            if beneficiary_address is None:
+                beneficiary_puzzle_hash = await get_first_puzzle_hash(
+                    self.wallet_client
+                )
+
+            # `beneficiary_address` is not decode-able with bech32m
+            else:
+                beneficiary_puzzle_hash = b""
 
         result: Dict = await self._create_client_transaction(
             mode=mode,
@@ -621,8 +630,9 @@ class ClimateWallet(ClimateWalletBase):
             fee=fee,
             wallet_id=wallet_id,
             gateway_key_values={
-                "bp": beneficiary_puzzle_hash,
                 "bn": beneficiary_name,
+                "ba": beneficiary_address,
+                "bp": beneficiary_puzzle_hash,
             },
         )
         transaction_records: List[TransactionRecord] = result["transaction_records"]
@@ -701,7 +711,7 @@ class ClimateObserverWallet(ClimateWalletBase):
                 if key in ["bp"]:
                     value = f"0x{value.hex()}"
 
-                elif key in ["bn"]:
+                elif key in ["ba", "bn"]:
                     value = value.decode()
 
                 else:

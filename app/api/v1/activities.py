@@ -9,8 +9,8 @@ from app.api import dependencies as deps
 from app.config import ExecutionMode, settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
-from app.utils import disallow
 from app.logger import logger
+from app.utils import disallow
 
 router = APIRouter()
 
@@ -40,6 +40,7 @@ async def get_activity(
                 activity_filters["or"].extend(
                     [
                         models.Activity.beneficiary_name.like(f"%{search}%"),
+                        models.Activity.beneficiary_address.like(f"%{search}%"),
                         models.Activity.beneficiary_puzzle_hash.like(f"%{search}%"),
                     ]
                 )
@@ -76,7 +77,9 @@ async def get_activity(
         limit=limit,
     )
     if len(activities) == 0:
-        logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
+        logger.warning(
+            f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}"
+        )
         return schemas.ActivitiesResponse()
 
     activities_with_cw: List[schemas.ActivityWithCW] = []

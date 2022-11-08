@@ -2,6 +2,8 @@ from typing import Any, Dict, Tuple
 
 from blspy import G1Element, G2Element
 from chia.rpc.wallet_rpc_client import WalletRpcClient
+from chia.types.coin_spend import CoinSpend
+from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
 from fastapi import APIRouter, Depends
 
@@ -304,6 +306,7 @@ async def create_permissionless_retirement_tx(
         amount=payment.amount,
         fee=payment.fee,
         beneficiary_name=payment.beneficiary_name.encode(),
+        beneficiary_address=payment.beneficiary_address.encode(),
         beneficiary_puzzle_hash=payment.beneficiary_puzzle_hash,
         wallet_id=cat_wallet_info.id,
     )

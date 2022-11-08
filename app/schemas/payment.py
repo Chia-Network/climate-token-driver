@@ -1,3 +1,5 @@
+from typing import Optional
+
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.bech32m import decode_puzzle_hash
 from pydantic import Field
@@ -30,5 +32,8 @@ class RetirementPaymentWithPayer(PaymentBase):
     beneficiary_address: str
 
     @property
-    def beneficiary_puzzle_hash(self) -> bytes32:
-        return decode_puzzle_hash(self.beneficiary_address)
+    def beneficiary_puzzle_hash(self) -> Optional[bytes32]:
+        try:
+            return decode_puzzle_hash(self.beneficiary_address)
+        except ValueError:
+            return None

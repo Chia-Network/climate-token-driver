@@ -100,7 +100,9 @@ class ClimateWareHouseCrud(object):
         # units: [unit]
         units: List[Dict] = self.get_climate_units(search)
         if len(units) == 0:
-            logger.warning(f"Search climate warehouse units by search is empty. search:{search}")
+            logger.warning(
+                f"Search climate warehouse units by search is empty. search:{search}"
+            )
             return []
 
         projects: List[Dict] = self.get_climate_projects()
@@ -123,20 +125,28 @@ class ClimateWareHouseCrud(object):
         for unit in units:
             asset_id: str = unit["marketplaceIdentifier"]
 
-            warehouse_project_id: Optional[str] = unit.get("issuance").get("warehouseProjectId")
+            warehouse_project_id: Optional[str] = unit.get("issuance").get(
+                "warehouseProjectId"
+            )
             org_uid: Optional[str] = unit.get("orgUid")
             if org_uid is None:
-                logger.warning(f"Can not get climate warehouse orgUid in unit. unit:{unit}")
+                logger.warning(
+                    f"Can not get climate warehouse orgUid in unit. unit:{unit}"
+                )
                 continue
 
             org: Optional[Dict] = organization_by_id.get(org_uid)
             if org is None:
-                logger.warning(f"Can not get organization by org_uid. org_uid:{org_uid}")
+                logger.warning(
+                    f"Can not get organization by org_uid. org_uid:{org_uid}"
+                )
                 continue
 
             project: Optional[Dict] = project_by_id.get(warehouse_project_id)
             if project is None:
-                logger.warning(f"Can not get project by warehouse_project_id. warehouse_project_id:{warehouse_project_id}")
+                logger.warning(
+                    f"Can not get project by warehouse_project_id. warehouse_project_id:{warehouse_project_id}"
+                )
                 continue
 
             org_metadata: Dict[str, str] = metadata_by_id.get(org_uid)
@@ -205,6 +215,7 @@ class BlockChainCrud(object):
                 vintage_year=token_index.vintage_year,
                 sequence_num=token_index.sequence_num,
                 asset_id=bytes(wallet.tail_program_hash),
+                beneficiary_address=metadata.get("ba"),
                 beneficiary_name=metadata.get("bn"),
                 beneficiary_puzzle_hash=metadata.get("bp"),
                 coin_id=coin_record.name,

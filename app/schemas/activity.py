@@ -16,6 +16,7 @@ class ActivitySearchBy(enum.Enum):
 class ActivityBase(BaseModel):
     metadata: Dict[str, str]
     beneficiary_name: Optional[str]
+    beneficiary_address: Optional[str]
     beneficiary_puzzle_hash: Optional[str]
 
     coin_id: bytes
