@@ -23,6 +23,7 @@ class Activity(Base):
     sequence_num = Column(Integer)
     asset_id = Column(String)
     beneficiary_name = Column(String)
+    beneficiary_address = Column(String)
     beneficiary_puzzle_hash = Column(String)
 
     coin_id = Column(String)
