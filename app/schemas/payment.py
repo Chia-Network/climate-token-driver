@@ -4,12 +4,13 @@ from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.bech32m import decode_puzzle_hash
 from pydantic import Field
 
+from app.config import settings
 from app.schemas.core import BaseModel
 
 
 class PaymentBase(BaseModel):
     amount: int = Field(example=100)
-    fee: int = Field(example=100)
+    fee: int = Field(example=100, default=settings.DEFAULT_FEE)
 
 
 class PaymentWithPayee(PaymentBase):

@@ -38,9 +38,10 @@ class Settings(BaseSettings):
     DB_PATH: Path = Path("climate_explorer/db/climate_activity_CHALLENGE.sqlite")
 
     SERVER_HOST: str = "0.0.0.0"
-    BLOCK_START: int = 1500000
-    BLOCK_RANGE: int = 10000
+    BLOCK_START: int = 1_500_000
+    BLOCK_RANGE: int = 10_000
     MIN_DEPTH: int = 4
+    DEFAULT_FEE: int = 1_000_000_000
     CLIMATE_API_URL: str = "https://api.climatewarehouse.chia.net"
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
