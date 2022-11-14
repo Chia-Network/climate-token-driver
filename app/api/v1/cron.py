@@ -95,8 +95,12 @@ async def _scan_token_activity(
 
         db_crud.batch_insert_ignore_activity(activities)
 
-    # make sure shallow records (<`MIN_DEPTH`) are revisited
-    db_crud.update_block_state(current_height=end_height - settings.MIN_DEPTH)
+    # make sure
+    # - shallow records (<`MIN_DEPTH`) are revisited
+    # - lookback 36 hours to compensate for CW metadata delay
+    db_crud.update_block_state(
+        current_height=end_height - settings.MIN_DEPTH - settings.LOOKBACK_DEPTH
+    )
     return True
 
 
