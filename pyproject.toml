@@ -20,6 +20,11 @@ pydantic = { extras = ["dotenv"], version = "^1.10.2" }
 # chia-dev-tools = "^1.1.1"
 pytest = "^7.1.2"
 pytest-asyncio = "^0.19.0"
+commitizen = "^2.27.1"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
