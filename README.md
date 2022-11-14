@@ -31,7 +31,7 @@ This repository is intended to be used in multiple components in the Climate Por
   Include `chia-blockchain` in python search path with:
 
   ```sh
-  export PYTHONPATH=$PYTHONPATH:./chia-blockchain
+  export PYTHONPATH=.:./chia-blockchain:$PYTHONPATH
   ```
 
 - Make a `.env` file for your environment variables.
