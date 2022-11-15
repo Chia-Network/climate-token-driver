@@ -24,7 +24,7 @@ This repository is intended to be used in multiple components in the Climate Por
 - Clone this repo.
 
   ```sh
-  git clone --recurse-submodules https://github.com/hashgreen/ivern-chia.git
+  git clone --recurse-submodules https://github.com/Chia-Network/climate-token-driver.git
   ```
 
 - Note that `chia-blockchain` is used as a submodule of this repo to involve its test suites from the source file.
