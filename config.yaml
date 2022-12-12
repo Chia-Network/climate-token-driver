@@ -8,8 +8,10 @@ CLIMATE_API_URL: https://api.climatewarehouse.chia.net
 CHIA_HOSTNAME: localhost
 CHIA_FULL_NODE_RPC_PORT: 8555
 CHIA_WALLET_RPC_PORT: 9256
+ORG_UID: "1"
 SMTP_HOST: smtp.mailgun.org
 SMTP_PORT: 587
 EMAIL_FROM_USER: tokenization@carbon-retirement.chia.net
+RETIREMENT_EMAIL_TO: f.coleman@chia.net,k.griggs@chia.net,c.cornick@chia.net
 RETIREMENT_EMAIL_SUBJECT: Retirement detected {org_uid}
 RETIREMENT_EMAIL_BODY: Retirement detected {org_uid}

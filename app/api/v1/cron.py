@@ -97,12 +97,12 @@ async def _scan_token_activity(
 
         db_crud.batch_insert_ignore_activity(activities)
 
-        retirements = [activity for activity in activities if activity.mode == GatewayMode.DETOKENIZATION or activity.mode == GatewayMode.PERMISSIONLESS_RETIREMENT]
+        retirements = [activity for activity in activities if (activity.mode == GatewayMode.DETOKENIZATION or activity.mode == GatewayMode.PERMISSIONLESS_RETIREMENT) and activity.org_uid == settings.ORG_UID]
 
         for retirement in retirements:
             # TODO: replace hardcoded with emails with email of registry
             send_email(
-                ["f.coleman@chia.net", "k.griggs@chia.net", "c.cornick@chia.net"],
+                settings.RETIREMENT_EMAIL_TO.split(","),
                 settings.RETIREMENT_EMAIL_SUBJECT.format(org_uid=retirement.org_uid),
                 settings.RETIREMENT_EMAIL_BODY.format(org_uid=retirement.org_uid)
             )

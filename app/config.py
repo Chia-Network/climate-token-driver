@@ -51,9 +51,11 @@ class Settings(BaseSettings):
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
 
+    ORG_UID: str = "1"
     SMTP_HOST: str = "smtp.mailgun.org"
     SMTP_PORT: int = 587
     EMAIL_FROM_USER: str = "tokenization@carbon-retirement.chia.net"
+    RETIREMENT_EMAIL_TO: str = "f.coleman@chia.net,k.griggs@chia.net,c.cornick@chia.net"
     RETIREMENT_EMAIL_SUBJECT: str = "Retirement detected {org_uid}"
     RETIREMENT_EMAIL_BODY: str = "Retirement detected {org_uid}"
 
