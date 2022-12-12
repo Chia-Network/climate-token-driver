@@ -100,11 +100,10 @@ async def _scan_token_activity(
         retirements = [activity for activity in activities if (activity.mode == GatewayMode.DETOKENIZATION or activity.mode == GatewayMode.PERMISSIONLESS_RETIREMENT) and activity.org_uid == settings.ORG_UID]
 
         for retirement in retirements:
-            # TODO: replace hardcoded with emails with email of registry
             send_email(
                 settings.RETIREMENT_EMAIL_TO.split(","),
-                settings.RETIREMENT_EMAIL_SUBJECT.format(org_uid=retirement.org_uid),
-                settings.RETIREMENT_EMAIL_BODY.format(org_uid=retirement.org_uid)
+                settings.RETIREMENT_EMAIL_SUBJECT.format(org_uid=settings.ORG_UID),
+                settings.RETIREMENT_EMAIL_BODY.format(org_uid=settings.ORG_UID)
             )
 
     # make sure
