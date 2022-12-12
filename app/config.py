@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     CHIA_ROOT: Path = Path("~/.chia/mainnet")
     CONFIG_PATH: Path = Path("climate_token/config/config.yaml")
     SERVER_PORT: Optional[int]
+    EMAIL_FROM_PASSWORD: str
 
     # Visible configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
@@ -49,6 +50,12 @@ class Settings(BaseSettings):
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
+
+    SMTP_HOST: str = "smtp.mailgun.org"
+    SMTP_PORT: int = 587
+    EMAIL_FROM_USER: str = "tokenization@carbon-retirement.chia.net"
+    RETIREMENT_EMAIL_SUBJECT: str = "Retirement detected {org_uid}"
+    RETIREMENT_EMAIL_BODY: str = "Retirement detected {org_uid}"
 
     @root_validator
     def configure_port(cls, values):

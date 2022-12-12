@@ -13,6 +13,8 @@ from sqlalchemy_utils import create_database, database_exists
 from app import crud, schemas
 from app.api import dependencies as deps
 from app.config import ExecutionMode, settings
+from app.core.email.smtp import send_email
+from app.core.types import GatewayMode
 from app.db.base import Base
 from app.db.session import get_engine_cls
 from app.errors import ErrorCode
@@ -94,6 +96,16 @@ async def _scan_token_activity(
             continue
 
         db_crud.batch_insert_ignore_activity(activities)
+
+        retirements = [activity for activity in activities if activity.mode == GatewayMode.DETOKENIZATION or activity.mode == GatewayMode.PERMISSIONLESS_RETIREMENT]
+
+        for retirement in retirements:
+            # TODO: replace hardcoded with emails with email of registry
+            send_email(
+                ["f.coleman@chia.net", "k.griggs@chia.net", "c.cornick@chia.net"],
+                settings.RETIREMENT_EMAIL_SUBJECT.format(org_uid=retirement.org_uid),
+                settings.RETIREMENT_EMAIL_BODY.format(org_uid=retirement.org_uid)
+            )
 
     # make sure
     # - shallow records (<`MIN_DEPTH`) are revisited
