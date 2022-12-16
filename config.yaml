@@ -13,5 +13,5 @@ SMTP_HOST: smtp.mailgun.org
 SMTP_PORT: 587
 EMAIL_FROM_USER: tokenization@carbon-retirement.chia.net
 RETIREMENT_EMAIL_TO: f.coleman@chia.net,k.griggs@chia.net,c.cornick@chia.net
-RETIREMENT_EMAIL_SUBJECT: Retirement detected {org_uid}
-RETIREMENT_EMAIL_BODY: Retirement detected {org_uid}
+RETIREMENT_EMAIL_SUBJECT: Retirement detected - {org_uid} {warehouse_project_id} {vintage_year} {sequence_num}
+RETIREMENT_EMAIL_BODY: Retirement detected - {org_uid} {warehouse_project_id} {vintage_year} {sequence_num}

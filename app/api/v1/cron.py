@@ -102,8 +102,18 @@ async def _scan_token_activity(
         for retirement in retirements:
             send_email(
                 settings.RETIREMENT_EMAIL_TO.split(","),
-                settings.RETIREMENT_EMAIL_SUBJECT.format(org_uid=settings.ORG_UID),
-                settings.RETIREMENT_EMAIL_BODY.format(org_uid=settings.ORG_UID)
+                settings.RETIREMENT_EMAIL_SUBJECT.format(
+                    org_uid=settings.ORG_UID,
+                    warehouse_project_id=retirement.warehouse_project_id,
+                    vintage_year=retirement.vintage_year,
+                    sequence_num=retirement.sequence_num,
+                ),
+                settings.RETIREMENT_EMAIL_BODY.format(
+                    org_uid=settings.ORG_UID,
+                    warehouse_project_id=retirement.warehouse_project_id,
+                    vintage_year=retirement.vintage_year,
+                    sequence_num=retirement.sequence_num,
+                )
             )
 
     # make sure
