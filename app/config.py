@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     # we always look back ~36 hours since the climate warehouse waits 24 hours before
     # setting metadata to be readable
     LOOKBACK_DEPTH: int = 6_912
+    # fee is in mojos
     DEFAULT_FEE: int = 1_000_000_000
     CLIMATE_API_URL: str = "https://api.climatewarehouse.chia.net"
     CHIA_HOSTNAME: str = "localhost"

@@ -45,8 +45,10 @@ This repository is intended to be used in multiple components in the Climate Por
 ### Configurations
 
 Note there are two steps the application loads the configurations:
-1. First the `.env` environment is opened via `python-dotenv`, where `${CHIA_ROOT}` and `${CONFIG_PATH}` are pre-loaded.
-   This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the *flavor* for the binary.
+1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, `CONFIG_PATH`, and `SERVER_PORT`.
+   Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}` 
+   and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the 
+   default *flavor* for the binary (though it is overridden by system environment variables).
 
 1. Then, a `config.yaml` file located at `${CHIA_ROOT}/${CONFIG_PATH}` is loaded, which adds to the configurations after `.env`.
    This part of the configuration is free to change by end binary users.
