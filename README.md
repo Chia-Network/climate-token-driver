@@ -27,6 +27,12 @@ This repository is intended to be used in multiple components in the Climate Por
   git clone --recurse-submodules https://github.com/Chia-Network/climate-token-driver.git
   ```
 
+  or, using SSH...
+
+  ```sh
+  git clone --recurse-submodules git@github.com:Chia-Network/climate-token-driver.git
+  ```
+
 - Note that `chia-blockchain` is used as a submodule of this repo to involve its test suites from the source file.
   Include `chia-blockchain` in python search path with:
 
