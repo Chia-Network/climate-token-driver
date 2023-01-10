@@ -87,6 +87,7 @@ jobs:
           chmod +x deb/$DEB_BASE/usr/local/bin/${{ matrix.app-name }}
           mkdir -p deb/$DEB_BASE/DEBIAN
           j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
+          dpkg-deb --build --root-owner-group "deb/$CLI_DEB_BASE"
 
       - name: Upload deb
         uses: actions/upload-artifact@v3
