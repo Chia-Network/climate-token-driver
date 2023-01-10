@@ -41,10 +41,10 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install pyinstaller and poetry
-        run: |
-          pip install pyinstaller
-          pip install poetry
+#      - name: Install pyinstaller and poetry
+#        run: |
+#          pip install pyinstaller
+#          pip install poetry
 
       - name: Create .env file
         run: |
@@ -56,6 +56,8 @@ jobs:
         run: |
           python -m virtualenv venv
           source venv/bin/activate
+          pip install pyinstaller
+          pip install poetry
           poetry install
           python -m PyInstaller --clean pyinstaller.spec
 
