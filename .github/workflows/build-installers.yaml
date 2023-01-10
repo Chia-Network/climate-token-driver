@@ -92,7 +92,7 @@ jobs:
       - name: Upload deb
         uses: actions/upload-artifact@v3
         with:
-          name: $${{ matrix.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
+          name: ${{ matrix.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
 
 
