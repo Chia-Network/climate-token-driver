@@ -81,18 +81,18 @@ jobs:
           APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME || github.sha  }}
           PLATFORM: ${{ matrix.platform }}
         run: |
-          DEB_BASE="${{ matrix.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.architecture }}"
+          DEB_BASE="${{ matrix.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}"
           mkdir -p deb/$DEB_BASE/usr/local/bin
           cp dist/main deb/$DEB_BASE/usr/local/bin/${{ matrix.app-name }}
           chmod +x deb/$DEB_BASE/usr/local/bin/${{ matrix.app-name }}
           mkdir -p deb/$DEB_BASE/DEBIAN
           j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
-          dpkg-deb --build --root-owner-group "deb/$CLI_DEB_BASE"
+          dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
 
       - name: Upload deb
         uses: actions/upload-artifact@v3
         with:
-          name: $${{ matrix.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.architecture }}.deb
+          name: $${{ matrix.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
 
 
