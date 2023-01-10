@@ -70,6 +70,7 @@ jobs:
         id: tag-name
         run: |
           echo "TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+          echo "Tag is ${TAGNAME}"
 
       - name: Install j2
         run: |
