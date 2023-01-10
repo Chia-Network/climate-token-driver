@@ -54,6 +54,7 @@ jobs:
 
       - name: Install with poetry and package application
         run: |
+          pip install virtualenv
           python -m virtualenv venv
           source venv/bin/activate
           pip install pyinstaller
