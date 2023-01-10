@@ -52,15 +52,16 @@ jobs:
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
           echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
 
-      - name: Install with poetry
+      - name: Install with poetry and package application
         run: |
           python -m virtualenv venv
           source venv/bin/activate
           poetry install
-
-      - name: Package the app
-        run: |
           python -m PyInstaller --clean pyinstaller.spec
+
+#      - name: Package the app
+#        run: |
+#          python -m PyInstaller --clean pyinstaller.spec
 
       - name: Get tag name
         id: tag-name
