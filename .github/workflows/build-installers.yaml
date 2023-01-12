@@ -50,7 +50,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "MODE=\"${{ matrix.config.app-mode }}\"" > .env
+          echo "MODE=${{ matrix.config.app-mode }}" > .env
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
           echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
 
