@@ -27,8 +27,10 @@ jobs:
         config:
           - app-name: climate-tokenization-chia
             app-mode: registry
+            app-description: "Carbon tokenization engine on the Chia blockchain"
           - app-name: climate-explorer-chia
             app-mode: explorer
+            app-description: "Interface for viewing Chia on-chain carbon tokens"
 
     steps:
       - name: Checkout Code
@@ -81,6 +83,7 @@ jobs:
           APP_NAME: ${{ matrix.config.app-name }}
           APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME || github.sha  }}
           PLATFORM: ${{ matrix.platform }}
+          APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
           DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}"
           mkdir -p deb/$DEB_BASE/usr/local/bin
