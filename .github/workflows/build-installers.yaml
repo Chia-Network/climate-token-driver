@@ -1,0 +1,96 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+concurrency:
+  # SHA is added to the end if on `main` to let all main workflows run
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.sha || '' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+#        runs-on: [ ubuntu-latest, macos-latest, windows-2019]
+        runs-on: [ ubuntu-latest ]
+        platform: [ amd64 ]
+        config:
+          - app-name: climate-tokenization-chia
+            app-mode: registry
+            app-description: "Carbon tokenization engine on the Chia blockchain"
+          - app-name: climate-explorer-chia
+            app-mode: explorer
+            app-description: "Interface for viewing Chia on-chain carbon tokens"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Python
+        uses: Chia-Network/actions/setup-python@main
+        with:
+          python-version: '3.10'
+
+      - name: Create .env file
+        run: |
+          echo "MODE=${{ matrix.config.app-mode }}" > .env
+          echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
+          echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
+
+      - name: Install with poetry and package application
+        run: |
+          pip install virtualenv
+          python -m virtualenv venv
+          source venv/bin/activate
+          pip install pyinstaller
+          pip install poetry
+          poetry install
+          python -m PyInstaller --clean pyinstaller.spec
+
+      - name: Get tag name
+        id: tag-name
+        run: |
+          echo "TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+          echo "Tag is ${TAGNAME}"
+
+      - name: Install j2
+        run: |
+          pip install j2cli
+
+      - name: Create .deb Package
+        env:
+          APP_NAME: ${{ matrix.config.app-name }}
+          APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME || github.sha  }}
+          PLATFORM: ${{ matrix.platform }}
+          APP_DESCRIPTION: ${{ matrix.config.app-description }}
+        run: |
+          DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}"
+          mkdir -p deb/$DEB_BASE/usr/local/bin
+          cp dist/main deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
+          chmod +x deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
+          mkdir -p deb/$DEB_BASE/DEBIAN
+          j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
+          dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
+
+      - name: Upload deb
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
+          path: ${{ github.workspace }}/deb/*.deb
+
+
+
+
+
