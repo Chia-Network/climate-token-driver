@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
 #        runs-on: [ ubuntu-latest, macos-latest, windows-2019]
-        runs-on: [ ubuntu-latest ]
+        runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
           - app-name: climate-tokenization-chia
@@ -83,13 +83,14 @@ jobs:
           mkdir -p deb/$DEB_BASE/DEBIAN
           j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
           dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
+        if: matrix.runs-on == 'ubuntu-latest'
 
       - name: Upload deb
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
-
+        if: matrix.runs-on == 'ubuntu-latest'
 
 
 
