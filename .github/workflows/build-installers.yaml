@@ -64,7 +64,7 @@ jobs:
         run: |
           pip install virtualenv
           python -m virtualenv venv
-          venv/bin/Activate.ps1
+          .\venv\Scripts\activate
           pip install pyinstaller
           pip install poetry
           poetry install
