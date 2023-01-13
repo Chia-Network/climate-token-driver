@@ -80,6 +80,7 @@ jobs:
       - name: Install j2
         run: |
           pip install j2cli
+        if: matrix.runs-on == 'ubuntu-latest'
 
       - name: Create .deb Package
         env:
