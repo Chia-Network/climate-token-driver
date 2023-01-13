@@ -49,7 +49,7 @@ jobs:
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
           echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
 
-      - name: Install with poetry and package application
+      - name: Install with poetry and package application (Linux)
         run: |
           pip install virtualenv
           python -m virtualenv venv
@@ -58,6 +58,18 @@ jobs:
           pip install poetry
           poetry install
           python -m PyInstaller --clean pyinstaller.spec
+        if: matrix.runs-on != 'windows-2019'
+
+      - name: Install with poetry and package application (Windows)
+        run: |
+          pip install virtualenv
+          python -m virtualenv venv
+          venv/bin/Activate.ps1
+          pip install pyinstaller
+          pip install poetry
+          poetry install
+          python -m PyInstaller --clean pyinstaller.spec
+        if: matrix.runs-on == 'windows-2019'
 
       - name: Get tag name
         id: tag-name
