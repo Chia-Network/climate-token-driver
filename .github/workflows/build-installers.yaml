@@ -72,7 +72,7 @@ jobs:
       - name: Create .deb Package
         env:
           APP_NAME: ${{ matrix.config.app-name }}
-          APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME || github.sha  }}
+          APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME }}
           PLATFORM: ${{ matrix.platform }}
           APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
