@@ -80,7 +80,6 @@ jobs:
       - name: Install j2
         run: |
           pip install j2cli
-        if: matrix.runs-on == 'ubuntu-latest'
 
       - name: Create .deb Package
         env:
@@ -105,6 +104,11 @@ jobs:
           path: ${{ github.workspace }}/deb/*.deb
         if: matrix.runs-on == 'ubuntu-latest'
 
-
+      - name: Upload exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.exe
+          path: ${{ github.workspace }}/dist/main.exe
+        if: matrix.runs-on == 'windows-2019'
 
 
