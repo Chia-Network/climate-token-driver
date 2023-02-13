@@ -62,12 +62,12 @@ jobs:
 
       - name: Install with poetry and package application (Windows)
         run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
           pip install virtualenv
           python -m virtualenv venv
           .\venv\Scripts\activate
           pip install pyinstaller
-          pip install poetry
-          poetry install
+          C:\Users\User\AppData\Roaming\Python\Scripts\poetry install
           python -m PyInstaller --clean pyinstaller.spec
         if: matrix.runs-on == 'windows-2019'
 
