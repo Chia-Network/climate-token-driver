@@ -67,7 +67,7 @@ jobs:
           python -m virtualenv venv
           .\venv\Scripts\activate
           pip install pyinstaller
-          C:\Users\User\AppData\Roaming\Python\Scripts\poetry install
+          C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
           python -m PyInstaller --clean pyinstaller.spec
         if: matrix.runs-on == 'windows-2019'
 
