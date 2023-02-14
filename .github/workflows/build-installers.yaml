@@ -83,7 +83,7 @@ jobs:
 
       - name: Rename Windows exe file
         run: |
-          mv /dist/main.exe /dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+          mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
         if: matrix.runs-on == 'windows-2019'
 
       - name: Create .deb Package
