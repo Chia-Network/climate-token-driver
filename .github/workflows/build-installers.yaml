@@ -81,6 +81,11 @@ jobs:
         run: |
           pip install j2cli
 
+      - name: Rename Windows exe file
+        run: |
+          mv /dist/main.exe /dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+        if: matrix.runs-on == 'windows-2019'
+
       - name: Create .deb Package
         env:
           APP_NAME: ${{ matrix.config.app-name }}
@@ -102,13 +107,15 @@ jobs:
         with:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
+          if-no-files-found: error
         if: matrix.runs-on == 'ubuntu-latest'
 
       - name: Upload exe
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.exe
-          path: ${{ github.workspace }}/dist/main.exe
+          name: ${{ matrix.config.app-name }}_windows_${{ matrix.platform }}
+          path: ${{ github.workspace }}/dist/*.exe
+          if-no-files-found: error
         if: matrix.runs-on == 'windows-2019'
 
 
