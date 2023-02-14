@@ -86,6 +86,23 @@ jobs:
           mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
         if: matrix.runs-on == 'windows-2019'
 
+      # Windows Code Signing
+      - name: Decode code signing cert into an encrypted file
+        uses: kitek/decode-base64-into-file-action@1.0
+        with:
+          encoded-value: ${{ secrets.WIN_CODE_SIGN_CERT }}
+          destination-file: .\win_code_sign_cert.pfx
+        if: matrix.runs-on == 'windows-2019'
+
+
+      - name: Sign windows artifacts
+        uses: chia-network/actions/sign/windows@main
+        with:
+          certificate_path: .\win_code_sign_cert.pfx
+          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
+          file: ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+        if: matrix.runs-on == 'windows-2019'
+
       - name: Create .deb Package
         env:
           APP_NAME: ${{ matrix.config.app-name }}
@@ -117,5 +134,3 @@ jobs:
           path: ${{ github.workspace }}/dist/*.exe
           if-no-files-found: error
         if: matrix.runs-on == 'windows-2019'
-
-
