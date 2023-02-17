@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
 #        runs-on: [ ubuntu-latest, macos-latest, windows-2019]
-        runs-on: [ ubuntu-latest ]
+        runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
           - app-name: climate-tokenization-chia
@@ -49,7 +49,7 @@ jobs:
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
           echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
 
-      - name: Install with poetry and package application
+      - name: Install with poetry and package application (Linux)
         run: |
           pip install virtualenv
           python -m virtualenv venv
@@ -58,6 +58,18 @@ jobs:
           pip install poetry
           poetry install
           python -m PyInstaller --clean pyinstaller.spec
+        if: matrix.runs-on != 'windows-2019'
+
+      - name: Install with poetry and package application (Windows)
+        run: |
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+          pip install virtualenv
+          python -m virtualenv venv
+          .\venv\Scripts\activate
+          pip install pyinstaller
+          C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
+          python -m PyInstaller --clean pyinstaller.spec
+        if: matrix.runs-on == 'windows-2019'
 
       - name: Get tag name
         id: tag-name
@@ -69,10 +81,32 @@ jobs:
         run: |
           pip install j2cli
 
+      - name: Rename Windows exe file
+        run: |
+          mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+        if: matrix.runs-on == 'windows-2019'
+
+      # Windows Code Signing
+      - name: Decode code signing cert into an encrypted file
+        uses: kitek/decode-base64-into-file-action@1.0
+        with:
+          encoded-value: ${{ secrets.WIN_CODE_SIGN_CERT }}
+          destination-file: .\win_code_sign_cert.pfx
+        if: matrix.runs-on == 'windows-2019'
+
+
+      - name: Sign windows artifacts
+        uses: chia-network/actions/sign/windows@main
+        with:
+          certificate_path: .\win_code_sign_cert.pfx
+          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
+          file: ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+        if: matrix.runs-on == 'windows-2019'
+
       - name: Create .deb Package
         env:
           APP_NAME: ${{ matrix.config.app-name }}
-          APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME || github.sha  }}
+          APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME }}
           PLATFORM: ${{ matrix.platform }}
           APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
@@ -83,14 +117,20 @@ jobs:
           mkdir -p deb/$DEB_BASE/DEBIAN
           j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
           dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
+        if: matrix.runs-on == 'ubuntu-latest'
 
       - name: Upload deb
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
+          if-no-files-found: error
+        if: matrix.runs-on == 'ubuntu-latest'
 
-
-
-
-
+      - name: Upload exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.app-name }}_windows_${{ matrix.platform }}
+          path: ${{ github.workspace }}/dist/*.exe
+          if-no-files-found: error
+        if: matrix.runs-on == 'windows-2019'
