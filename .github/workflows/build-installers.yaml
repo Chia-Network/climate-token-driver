@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix-deb-versioning-for-main
     tags:
       - '**'
   pull_request:
@@ -77,6 +78,7 @@ jobs:
         run: |
           echo "TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
           echo "Tag is ${TAGNAME}"
+          echo "github.sha is ${{ github.sha }}"
 
       - name: Install j2
         run: |
