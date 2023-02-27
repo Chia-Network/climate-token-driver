@@ -113,6 +113,8 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
+          echo "Tag is ${{ steps.tag-name.outputs.TAGNAME }}"
+          echo "github.sha is ${{ github.sha }}"
           DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}"
           mkdir -p deb/$DEB_BASE/usr/local/bin
           cp dist/main deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
