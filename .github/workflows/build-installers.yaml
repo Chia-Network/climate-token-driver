@@ -65,12 +65,6 @@ jobs:
           (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
           echo "~~~~~ Update PIP and related packages ~~~~~"
           pip install --upgrade pip setuptools wheel
-          echo "~~~~~ Pip installing virtualenv ~~~~~"
-          pip install virtualenv
-          echo "~~~~~ Creating the virtualenv ~~~~~"
-          python -m virtualenv venv
-          "echo ~~~~~ Activating the virtualenv ~~~~~"
-          .\venv\Scripts\activate
           echo "~~~~~ Installing pyinstaller with pip ~~~~~"
           pip install pyinstaller setuptools
           echo "~~~~~ Running poetry install"
