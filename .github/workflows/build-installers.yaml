@@ -61,12 +61,18 @@ jobs:
 
       - name: Install with poetry and package application (Windows)
         run: |
-          echo "~~~~~ Installing Poetry ~~~~~"
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+          echo "~~~~~ Pip installing virtualenv ~~~~~"
+          pip install virtualenv
+          echo "~~~~~ Creating the virtualenv ~~~~~"
+          python -m virtualenv venv
+          "echo ~~~~~ Activating the virtualenv ~~~~~"
+          .\venv\Scripts\activate
           echo "~~~~~ Update PIP and related packages ~~~~~"
           pip install --upgrade pip setuptools wheel
           echo "~~~~~ Installing pyinstaller with pip ~~~~~"
           pip install pyinstaller setuptools
+          echo "~~~~~ Installing Poetry ~~~~~"
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
           echo "~~~~~ Running poetry install"
           C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
           echo "~~~~~ Running PyInstaller ~~~~~"
