@@ -72,7 +72,7 @@ jobs:
           "echo ~~~~~ Activating the virtualenv ~~~~~"
           .\venv\Scripts\activate
           echo "~~~~~ Installing pyinstaller with pip ~~~~~"
-          pip install pyinstaller
+          pip install pyinstaller setuptools
           echo "~~~~~ Running poetry install"
           C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
           echo "~~~~~ Running PyInstaller ~~~~~"
