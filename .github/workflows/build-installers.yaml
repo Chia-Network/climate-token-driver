@@ -2,9 +2,6 @@ name: Build & Release
 
 on:
   push:
-    branches:
-      - main
-      - fix-deb-versioning-for-main
     tags:
       - '**'
   pull_request:
@@ -23,7 +20,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        runs-on: [ ubuntu-latest, macos-latest, windows-2019]
         runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
@@ -76,9 +72,11 @@ jobs:
       - name: Get tag name
         id: tag-name
         run: |
-          echo "TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+          TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)
+          echo "TAGNAME=${TAGNAME}" >> $GITHUB_OUTPUT
           echo "Tag is ${TAGNAME}"
           echo "github.sha is ${{ github.sha }}"
+
 
       - name: Install j2
         run: |
