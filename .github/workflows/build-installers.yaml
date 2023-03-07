@@ -29,6 +29,9 @@ jobs:
           - app-name: climate-explorer-chia
             app-mode: explorer
             app-description: "Interface for viewing Chia on-chain carbon tokens"
+          - app-name: dev-token-driver-chia
+            app-mode: dev
+            app-description: "Token driver in dev mode"
 
     steps:
       - name: Checkout Code
