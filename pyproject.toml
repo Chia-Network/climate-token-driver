@@ -6,7 +6,8 @@ authors = ["Harry Hsu <stmharry@hashgreen.net>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-chia-blockchain = { path = "./chia-blockchain", develop = true }
+#chia-blockchain = { path = "./chia-blockchain", develop = true }
+chia-blockchain = "^1.7.1"
 fastapi = "^0.83.0"
 uvicorn = "^0.18.3"
 SQLAlchemy = "^1.4.41"
