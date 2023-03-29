@@ -90,9 +90,15 @@ def get_settings() -> Settings:
         default_env_file = Path(".env")
         default_config_file = Path("config.yaml")
 
+    print(f"{default_env_file=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
     default_settings = Settings(_env_file=default_env_file)
+    print(f"{default_settings.CONFIG_PATH=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
     config_file: Path = default_settings.CONFIG_PATH
 
+    print(f"{default_config_file=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
+    print(f"{config_file=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
+    import time
+    # time.sleep(999999)
     settings: Settings
     settings_dict: Dict
     if not config_file.is_file():
@@ -105,6 +111,7 @@ def get_settings() -> Settings:
     settings_dict = default_settings.dict() | (settings_dict or {})
     settings = Settings(**settings_dict)
 
+    print(f"{settings.LOG_PATH=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
     return settings
 
 

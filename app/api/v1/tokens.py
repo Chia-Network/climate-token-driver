@@ -267,54 +267,61 @@ async def create_permissionless_retirement_tx(
     This endpoint is to be called by the client.
     """
 
-    token: schemas.TokenOnChain = request.token
-    payment: schemas.RetirementPaymentWithPayer = request.payment
+    try:
+        token: schemas.TokenOnChain = request.token
+        payment: schemas.RetirementPaymentWithPayer = request.payment
 
-    token_index = ClimateTokenIndex(
-        org_uid=token.org_uid,
-        warehouse_project_id=token.warehouse_project_id,
-        vintage_year=token.vintage_year,
-        sequence_num=token.sequence_num,
-    )
-    tail_metadata: schemas.TailMetadataBase = token.permissionless_retirement
-
-    mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {
-        GatewayMode.PERMISSIONLESS_RETIREMENT: (
-            tail_metadata.mod_hash,
-            G2Element.from_bytes(tail_metadata.signature),
+        token_index = ClimateTokenIndex(
+            org_uid=token.org_uid,
+            warehouse_project_id=token.warehouse_project_id,
+            vintage_year=token.vintage_year,
+            sequence_num=token.sequence_num,
         )
-    }
-    constants = await utils.get_constants(wallet_client=wallet_rpc_client)
+        tail_metadata: schemas.TailMetadataBase = token.permissionless_retirement
 
-    wallet = ClimateWallet(
-        token_index=token_index,
-        root_public_key=token.public_key,
-        mode_to_message_and_signature=mode_to_message_and_signature,
-        wallet_client=wallet_rpc_client,
-        constants=constants,
-    )
+        mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {
+            GatewayMode.PERMISSIONLESS_RETIREMENT: (
+                tail_metadata.mod_hash,
+                G2Element.from_bytes(tail_metadata.signature),
+            )
+        }
+        constants = await utils.get_constants(wallet_client=wallet_rpc_client)
 
-    if wallet.tail_program_hash != hexstr_to_bytes(asset_id):
-        raise ValueError(f"Asset id {asset_id} inconsistent with request body!")
+        wallet = ClimateWallet(
+            token_index=token_index,
+            root_public_key=token.public_key,
+            mode_to_message_and_signature=mode_to_message_and_signature,
+            wallet_client=wallet_rpc_client,
+            constants=constants,
+        )
 
-    cat_wallet_info = await utils.get_cat_wallet_info_by_asset_id(
-        asset_id=hexstr_to_bytes(asset_id),
-        wallet_client=wallet_rpc_client,
-    )
+        if wallet.tail_program_hash != hexstr_to_bytes(asset_id):
+            raise ValueError(f"Asset id inconsistent with request body!\n{wallet=}\n\n{wallet.tail_program_hash=}\n\n{asset_id=}\n\n{hexstr_to_bytes(asset_id)=}\n\n{request=}")
 
-    result: Dict = await wallet.send_permissionless_retirement_transaction(
-        amount=payment.amount,
-        fee=payment.fee,
-        beneficiary_name=payment.beneficiary_name.encode(),
-        beneficiary_address=payment.beneficiary_address.encode(),
-        beneficiary_puzzle_hash=payment.beneficiary_puzzle_hash,
-        wallet_id=cat_wallet_info.id,
-    )
-    (transaction_record, *_) = result["transaction_records"]
+        cat_wallet_info = await utils.get_cat_wallet_info_by_asset_id(
+            asset_id=hexstr_to_bytes(asset_id),
+            wallet_client=wallet_rpc_client,
+        )
 
-    return schemas.PermissionlessRetirementTxResponse(
-        token=token,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
-    )
+        result: Dict = await wallet.send_permissionless_retirement_transaction(
+            amount=payment.amount,
+            fee=payment.fee,
+            beneficiary_name=payment.beneficiary_name.encode(),
+            beneficiary_address=payment.beneficiary_address.encode(),
+            beneficiary_puzzle_hash=payment.beneficiary_puzzle_hash,
+            wallet_id=cat_wallet_info.id,
+        )
+        (transaction_record, *_) = result["transaction_records"]
+
+        return schemas.PermissionlessRetirementTxResponse(
+            token=token,
+            tx=schemas.Transaction(
+                id=transaction_record.name, record=transaction_record.to_json_dict()
+            ),
+        )
+    except Exception:
+        import traceback
+        from pathlib import Path
+        traceback.print_exc(file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
+    finally:
+        print(f"leaving the endpoint", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))

@@ -1,3 +1,6 @@
+from pathlib import Path
+print(f"{__file__=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
+
 import functools
 import inspect
 import os

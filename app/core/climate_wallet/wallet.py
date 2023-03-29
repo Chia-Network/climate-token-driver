@@ -1,3 +1,4 @@
+from pathlib import Path
 import dataclasses
 import time
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -619,6 +620,8 @@ class ClimateWallet(ClimateWalletBase):
                 beneficiary_puzzle_hash = await get_first_puzzle_hash(
                     self.wallet_client
                 )
+                import asyncio
+                await asyncio.sleep(5)
 
             # `beneficiary_address` is not decode-able with bech32m
             else:
@@ -637,6 +640,7 @@ class ClimateWallet(ClimateWalletBase):
         )
         transaction_records: List[TransactionRecord] = result["transaction_records"]
 
+        print(f"{transaction_records=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
         await self.wallet_client.push_transactions(txs=transaction_records)
 
         return result
