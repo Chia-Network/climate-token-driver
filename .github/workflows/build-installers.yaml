@@ -146,7 +146,7 @@ jobs:
       - name: Upload exe
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}_windows_${{ matrix.platform }}
+          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
           path: ${{ github.workspace }}/dist/*.exe
           if-no-files-found: error
         if: matrix.runs-on == 'windows-2019'
