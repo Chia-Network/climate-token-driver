@@ -51,12 +51,18 @@ jobs:
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
           echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
 
+      - name: Create virtual environment
+        uses: Chia-Network/actions/create-venv@main
+        id: create-venv
+
+      - name: Activate virtual environment
+        uses: Chia-Network/actions/activate-venv@main
+        with:
+          directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
+
       - name: Install with poetry and package application (Linux)
         shell: bash
         run: |
-          pip install virtualenv
-          python -m virtualenv venv
-          source venv/bin/activate
           pip install pyinstaller
           pip install poetry
           poetry install
