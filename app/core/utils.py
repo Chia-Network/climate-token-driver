@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from blspy import G1Element, PrivateKey
@@ -52,6 +53,7 @@ async def get_cat_wallet_info_by_asset_id(
     asset_id: Optional[bytes32],
     wallet_client: WalletRpcClient,
 ) -> Optional[WalletInfo]:
+    print(f" ==== get_cat_wallet_info_by_asset_id()", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
 
     wallet_objs: List[Dict[str, Any]] = await wallet_client.get_wallets()
     wallet_infos: List[WalletInfo] = [
@@ -76,6 +78,7 @@ async def get_wallet_info_by_id(
     wallet_id: int,
     wallet_client: WalletRpcClient,
 ) -> Optional[WalletInfo]:
+    print(f" ==== get_wallet_info_by_id()", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
 
     wallet_objs: List[Dict[str, Any]] = await wallet_client.get_wallets()
     wallet_infos: List[WalletInfo] = [

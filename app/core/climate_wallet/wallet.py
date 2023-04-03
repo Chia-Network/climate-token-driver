@@ -307,6 +307,7 @@ class ClimateWallet(ClimateWalletBase):
         transaction_request: TransactionRequest
         transaction_records: List[TransactionRecord]
 
+        # NOTE:
         # this is a hack to get inner puzzle hash for `origin_coin`
 
         transaction_request = TransactionRequest(
@@ -336,6 +337,9 @@ class ClimateWallet(ClimateWalletBase):
         inner_puzzle: Program = get_innerpuzzle_from_puzzle(puzzle)
         from_puzzle_hash: bytes32 = inner_puzzle.get_tree_hash()
 
+        # risk of coin selection algorithm resulting in different answers
+        # between the pre-check and the spend
+        # NOTE:
         # we construct the actual transaction here
 
         key_value_pairs: Optional[List[Tuple[str, Union[str, int]]]] = None
@@ -620,8 +624,6 @@ class ClimateWallet(ClimateWalletBase):
                 beneficiary_puzzle_hash = await get_first_puzzle_hash(
                     self.wallet_client
                 )
-                import asyncio
-                await asyncio.sleep(5)
 
             # `beneficiary_address` is not decode-able with bech32m
             else:
@@ -638,9 +640,12 @@ class ClimateWallet(ClimateWalletBase):
                 "bp": beneficiary_puzzle_hash,
             },
         )
+        # import asyncio
+        # await asyncio.sleep(45)
         transaction_records: List[TransactionRecord] = result["transaction_records"]
 
         print(f"{transaction_records=}", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
+        # submitting here
         await self.wallet_client.push_transactions(txs=transaction_records)
 
         return result

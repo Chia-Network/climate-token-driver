@@ -23,7 +23,7 @@ app = FastAPI(
 )
 
 print(f"{__file__=} ==== B", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
-if settings.MODE == ExecutionMode.DEV:
+if True:#settings.MODE == ExecutionMode.DEV:
 
     @app.exception_handler(Exception)
     async def exception_handler(request: Request, e: Exception):

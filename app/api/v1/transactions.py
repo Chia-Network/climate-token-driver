@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from chia.rpc.wallet_rpc_client import WalletRpcClient
@@ -81,6 +82,8 @@ async def get_transactions(
         reverse=reverse,
         to_address=to_address,
     )
+
+    print(f" ==== get_transactions()", file=Path("/home/altendky/repos/climate-wallet/machete/log").open(mode="a"))
 
     wallet_objs: List[ChiaJsonObject] = await wallet_rpc_client.get_wallets(
         wallet_type=WalletType.CAT,
