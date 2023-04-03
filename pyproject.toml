@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ivern-chialisp"
+name = "app"
 version = "0.1.0"
 description = ""
 authors = ["Harry Hsu <stmharry@hashgreen.net>"]
