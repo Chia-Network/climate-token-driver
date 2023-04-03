@@ -2,8 +2,6 @@ name: Build & Release
 
 on:
   push:
-    branches:
-      - main
     tags:
       - '**'
   pull_request:
@@ -20,8 +18,8 @@ jobs:
     name: Build binaries
     runs-on: ${{ matrix.runs-on }}
     strategy:
+      fail-fast: false
       matrix:
-#        runs-on: [ ubuntu-latest, macos-latest, windows-2019]
         runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
@@ -31,6 +29,9 @@ jobs:
           - app-name: climate-explorer-chia
             app-mode: explorer
             app-description: "Interface for viewing Chia on-chain carbon tokens"
+          - app-name: dev-token-driver-chia
+            app-mode: dev
+            app-description: "Token driver in dev mode"
 
     steps:
       - name: Checkout Code
@@ -39,9 +40,10 @@ jobs:
           submodules: 'recursive'
 
       - name: Setup Python
-        uses: Chia-Network/actions/setup-python@main
+        #uses: Chia-Network/actions/setup-python@main
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.10.8'
 
       - name: Create .env file
         run: |
@@ -62,20 +64,34 @@ jobs:
 
       - name: Install with poetry and package application (Windows)
         run: |
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-          pip install virtualenv
+          echo "~~~~~ Clear pip cache ~~~~~"
+          pip cache purge
+          echo "~~~~~ Pip installing virtualenv ~~~~~"
+          pip install virtualenv --no-cache-dir
+          echo "~~~~~ Creating the virtualenv ~~~~~"
           python -m virtualenv venv
+          "echo ~~~~~ Activating the virtualenv ~~~~~"
           .\venv\Scripts\activate
-          pip install pyinstaller
+          echo "~~~~~ Update PIP and related packages ~~~~~"
+          pip install --upgrade pip setuptools wheel --no-cache-dir
+          echo "~~~~~ Installing pyinstaller with pip ~~~~~"
+          pip install pyinstaller --no-cache-dir
+          echo "~~~~~ Installing Poetry ~~~~~"
+          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+          echo "~~~~~ Running poetry install"
           C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
+          echo "~~~~~ Running PyInstaller ~~~~~"
           python -m PyInstaller --clean pyinstaller.spec
         if: matrix.runs-on == 'windows-2019'
 
       - name: Get tag name
         id: tag-name
+        shell: bash
         run: |
-          echo "TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+          TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)
+          echo "TAGNAME=${TAGNAME}" >> $GITHUB_OUTPUT
           echo "Tag is ${TAGNAME}"
+          echo "github.sha is ${{ github.sha }}"
 
       - name: Install j2
         run: |
@@ -130,7 +146,7 @@ jobs:
       - name: Upload exe
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}_windows_${{ matrix.platform }}
+          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
           path: ${{ github.workspace }}/dist/*.exe
           if-no-files-found: error
         if: matrix.runs-on == 'windows-2019'
