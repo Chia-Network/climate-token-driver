@@ -63,20 +63,23 @@ jobs:
       - name: Install pyinstaller
         run: pip install pyinstaller
 
-      - name: Install with poetry and package application (Linux)
-        shell: bash
-        run: |
-          pip install poetry
-          poetry install
-        if: matrix.runs-on != 'windows-2019'
+      - name: Run poetry install
+        uses: Chia-Network/actions/poetry@create-poetry-action
 
-      - name: Install with poetry and package application (Windows)
-        run: |
-          echo "~~~~~ Installing Poetry ~~~~~"
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-          echo "~~~~~ Running poetry install"
-          C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
-        if: matrix.runs-on == 'windows-2019'
+      # - name: Install with poetry and package application (Linux)
+      #   shell: bash
+      #   run: |
+      #     pip install poetry
+      #     poetry install
+      #   if: matrix.runs-on != 'windows-2019'
+
+      # - name: Install with poetry and package application (Windows)
+      #   run: |
+      #     echo "~~~~~ Installing Poetry ~~~~~"
+      #     (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+      #     echo "~~~~~ Running poetry install"
+      #     C:\Users\runneradmin\AppData\Roaming\Python\Scripts\poetry install
+      #   if: matrix.runs-on == 'windows-2019'
 
       - name: Run pyinstaller
         run: python -m PyInstaller --clean pyinstaller.spec
