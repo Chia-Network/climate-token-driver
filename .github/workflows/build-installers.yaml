@@ -64,7 +64,7 @@ jobs:
         run: pip install pyinstaller
 
       - name: Create virtual environment for Poetry
-        uses: Chia-Network/actions/create-venv@create_venv_outputs_as_posix
+        uses: Chia-Network/actions/create-venv@main
         id: create-poetry-venv
 
       - name: Run poetry install
