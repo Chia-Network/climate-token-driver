@@ -64,7 +64,7 @@ jobs:
         run: pip install pyinstaller
 
       - name: Run poetry install
-        uses: Chia-Network/actions/poetry@main
+        uses: Chia-Network/actions/poetry@use_temp_venv_for_poetry_itself
 
       - name: Run pyinstaller
         run: python -m PyInstaller --clean pyinstaller.spec
