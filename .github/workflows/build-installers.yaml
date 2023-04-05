@@ -70,7 +70,7 @@ jobs:
       - name: Run poetry install
         uses: Chia-Network/actions/poetry@use_temp_venv_for_poetry_itself
         with:
-          python-executable: ${{ steps.create-poetry-env.outputs.python_executable }}
+          python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
 
       - name: Run pyinstaller
         run: python -m PyInstaller --clean pyinstaller.spec
