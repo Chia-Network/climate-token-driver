@@ -128,6 +128,14 @@ jobs:
           if-no-files-found: error
         if: matrix.runs-on == 'ubuntu-latest'
 
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.app-name }}-linux-${{ matrix.platform }}
+          path: ${{ github.workspace }}/dist/main
+          if-no-files-found: error
+        if: matrix.runs-on == 'ubuntu-latest'
+
       - name: Upload exe
         uses: actions/upload-artifact@v3
         with:
