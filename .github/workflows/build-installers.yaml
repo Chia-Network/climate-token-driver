@@ -116,13 +116,13 @@ jobs:
         if: matrix.os.matrix == 'windows'
 
 
-      - name: Sign windows artifacts
-        uses: chia-network/actions/sign/windows@main
-        with:
-          certificate_path: .\win_code_sign_cert.pfx
-          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
-          file: ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-        if: matrix.os.matrix == 'windows'
+#      - name: Sign windows artifacts
+#        uses: chia-network/actions/sign/windows@main
+#        with:
+#          certificate_path: .\win_code_sign_cert.pfx
+#          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
+#          file: ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+#        if: matrix.os.matrix == 'windows'
 
       - name: Create .deb Package
         env:
