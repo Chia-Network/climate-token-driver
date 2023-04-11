@@ -17,10 +17,23 @@ concurrency:
 jobs:
   build:
     name: Build binaries
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os.runs-on }}
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - name: Linux
+            runs-on: ubuntu-latest
+            matrix: linux
+            artifact-os-name: linux
+          - name: macOS
+            runs-on: macos-latest
+            matrix: macos
+            artifact-os-name: macos
+          - name: Windows
+            runs-on: windows-2019
+            matrix: windows
+            artifact-os-name: windows
         runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
@@ -86,7 +99,7 @@ jobs:
       - name: Rename Windows exe file
         run: |
           mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-        if: matrix.runs-on == 'windows-2019'
+        if: matrix.os.matrix == 'windows'
 
       # Windows Code Signing
       - name: Decode code signing cert into an encrypted file
@@ -94,7 +107,7 @@ jobs:
         with:
           encoded-value: ${{ secrets.WIN_CODE_SIGN_CERT }}
           destination-file: .\win_code_sign_cert.pfx
-        if: matrix.runs-on == 'windows-2019'
+        if: matrix.os.matrix == 'windows'
 
 
       - name: Sign windows artifacts
@@ -103,7 +116,7 @@ jobs:
           certificate_path: .\win_code_sign_cert.pfx
           certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
           file: ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-        if: matrix.runs-on == 'windows-2019'
+        if: matrix.os.matrix == 'windows'
 
       - name: Create .deb Package
         env:
@@ -119,7 +132,7 @@ jobs:
           mkdir -p deb/$DEB_BASE/DEBIAN
           j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
           dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
-        if: matrix.runs-on == 'ubuntu-latest'
+        if: matrix.os.matrix == 'linux'
 
       - name: Upload deb
         uses: actions/upload-artifact@v3
@@ -127,15 +140,15 @@ jobs:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
           if-no-files-found: error
-        if: matrix.runs-on == 'ubuntu-latest'
+        if: matrix.os.matrix == 'linux'
 
-      - name: Upload Linux binary
+      - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}-linux-${{ matrix.platform }}
-          path: ${{ github.workspace }}/dist/main
+          name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.platform }}
+          path: ${{ github.workspace }}/dist/main*
           if-no-files-found: error
-        if: matrix.runs-on == 'ubuntu-latest'
+        if: matrix.os.matrix == 'linux'
 
       - name: Upload exe
         uses: actions/upload-artifact@v3
@@ -143,4 +156,4 @@ jobs:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
           path: ${{ github.workspace }}/dist/*.exe
           if-no-files-found: error
-        if: matrix.runs-on == 'windows-2019'
+        if: matrix.os.matrix == 'windows'
