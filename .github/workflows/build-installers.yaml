@@ -102,10 +102,10 @@ jobs:
         run: |
           pip install j2cli
 
-      - name: Rename Windows exe file
-        run: |
-          mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-        if: matrix.os.matrix == 'windows'
+#      - name: Rename Windows exe file
+#        run: |
+#          mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+#        if: matrix.os.matrix == 'windows'
 
       # Windows Code Signing
       - name: Decode code signing cert into an encrypted file
@@ -154,12 +154,12 @@ jobs:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.platform }}
           path: ${{ github.workspace }}/dist/main*
           if-no-files-found: error
-        if: matrix.os.matrix == 'linux'
+#        if: matrix.os.matrix == 'linux'
 
-      - name: Upload exe
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-          path: ${{ github.workspace }}/dist/*.exe
-          if-no-files-found: error
-        if: matrix.os.matrix == 'windows'
+#      - name: Upload exe
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+#          path: ${{ github.workspace }}/dist/*.exe
+#          if-no-files-found: error
+#        if: matrix.os.matrix == 'windows'
