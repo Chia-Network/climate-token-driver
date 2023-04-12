@@ -30,6 +30,9 @@ jobs:
           - app-name: climate-explorer-chia
             app-mode: explorer
             app-description: "Interface for viewing Chia on-chain carbon tokens"
+          - app-name: climate-token-client-chia
+            app-mode: client
+            app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
           - app-name: dev-token-driver-chia
             app-mode: dev
             app-description: "Token driver in dev mode"
