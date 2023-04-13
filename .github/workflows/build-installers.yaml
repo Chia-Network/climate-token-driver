@@ -37,7 +37,6 @@ jobs:
             matrix: windows
             artifact-os-name: windows
             executable-extension: '.exe'
-        runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
           - app-name: climate-tokenization-chia
