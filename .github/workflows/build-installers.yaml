@@ -112,7 +112,7 @@ jobs:
         run: |
           # no -p, we want to be sure this is clean so wildcards below don't get extra files
           mkdir artifacts/
-          mv ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}${{ matrix.os.executable-extension }}
+          cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}${{ matrix.os.executable-extension }}
 
       # Windows Code Signing
       - name: Decode code signing cert into an encrypted file
