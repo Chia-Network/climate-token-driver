@@ -26,14 +26,17 @@ jobs:
             runs-on: ubuntu-latest
             matrix: linux
             artifact-os-name: linux
+            executable-extension: ''
           - name: macOS
             runs-on: macos-latest
             matrix: macos
             artifact-os-name: macos
+            executable-extension: ''
           - name: Windows
             runs-on: windows-2019
             matrix: windows
             artifact-os-name: windows
+            executable-extension: '.exe'
         runs-on: [ ubuntu-latest, windows-2019 ]
         platform: [ amd64 ]
         config:
@@ -105,10 +108,12 @@ jobs:
         run: |
           pip install j2cli
 
-#      - name: Rename Windows exe file
-#        run: |
-#          mv ./dist/main.exe ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-#        if: matrix.os.matrix == 'windows'
+      - name: Rename binary
+        run: |
+          # no -p, we want to be sure this is clean so wildcards below don't get extra files
+          mkdir artifacts/
+          mv ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}${{ matrix.os.executable-extension }}
+        if: matrix.os.matrix == 'windows'
 
       # Windows Code Signing
       - name: Decode code signing cert into an encrypted file
@@ -119,13 +124,13 @@ jobs:
         if: matrix.os.matrix == 'windows'
 
 
-#      - name: Sign windows artifacts
-#        uses: chia-network/actions/sign/windows@main
-#        with:
-#          certificate_path: .\win_code_sign_cert.pfx
-#          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
-#          file: ./dist/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-#        if: matrix.os.matrix == 'windows'
+      - name: Sign windows artifacts
+        uses: chia-network/actions/sign/windows@main
+        with:
+          certificate_path: .\win_code_sign_cert.pfx
+          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
+          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+        if: matrix.os.matrix == 'windows'
 
       - name: Create .deb Package
         env:
@@ -155,14 +160,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.platform }}
-          path: ${{ github.workspace }}/dist/main*
+          path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
-#        if: matrix.os.matrix == 'linux'
-
-#      - name: Upload exe
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
-#          path: ${{ github.workspace }}/dist/*.exe
-#          if-no-files-found: error
-#        if: matrix.os.matrix == 'windows'
