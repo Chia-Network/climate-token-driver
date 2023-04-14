@@ -16,28 +16,35 @@ concurrency:
 
 jobs:
   build:
-    name: Build binaries
-    runs-on: ${{ matrix.os.runs-on }}
+    name: Build - ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
+    runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     strategy:
       fail-fast: false
       matrix:
         os:
           - name: Linux
-            runs-on: ubuntu-latest
             matrix: linux
+            emoji: 🐧
+            runs-on:
+              arm: [Linux, ARM64]
+              intel: [ubuntu-latest]
             artifact-os-name: linux
             executable-extension: ''
           - name: macOS
-            runs-on: macos-latest
             matrix: macos
+            emoji: 🍎
+            runs-on:
+              arm: [macOS, ARM64]
+              intel: [macos-latest]
             artifact-os-name: macos
             executable-extension: ''
           - name: Windows
-            runs-on: windows-2019
             matrix: windows
+            emoji: 🪟
+            runs-on:
+              intel: [windows-latest]
             artifact-os-name: windows
             executable-extension: '.exe'
-        platform: [ amd64 ]
         config:
           - app-name: climate-tokenization-chia
             app-mode: registry
@@ -51,6 +58,22 @@ jobs:
           - app-name: dev-token-driver-chia
             app-mode: dev
             app-description: "Token driver in dev mode"
+        arch:
+          - name: ARM
+            matrix: arm
+            artifact-name: arm64
+            deb-platform: arm64
+            electron-builder-options: --arm64
+          - name: Intel
+            matrix: intel
+            artifact-name: amd64
+            deb-platform: amd64
+            electron-builder-options: --x64
+        exclude:
+          - os:
+              matrix: windows
+            arch:
+              matrix: arm
 
     steps:
       - name: Checkout Code
@@ -111,7 +134,7 @@ jobs:
         run: |
           # no -p, we want to be sure this is clean so wildcards below don't get extra files
           mkdir artifacts/
-          cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}${{ matrix.os.executable-extension }}
+          cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}${{ matrix.os.executable-extension }}
 
       # Windows Code Signing
       - name: Decode code signing cert into an encrypted file
@@ -127,17 +150,17 @@ jobs:
         with:
           certificate_path: .\win_code_sign_cert.pfx
           certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
-          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.platform }}.exe
+          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
         if: matrix.os.matrix == 'windows'
 
       - name: Create .deb Package
         env:
           APP_NAME: ${{ matrix.config.app-name }}
           APP_VERSION: ${{ steps.tag-name.outputs.TAGNAME }}
-          PLATFORM: ${{ matrix.platform }}
+          PLATFORM: ${{ matrix.arch.deb-platform }}
           APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
-          DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}"
+          DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}"
           mkdir -p deb/$DEB_BASE/usr/local/bin
           cp dist/main deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
           chmod +x deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
@@ -149,7 +172,7 @@ jobs:
       - name: Upload deb
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.platform }}.deb
+          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
           path: ${{ github.workspace }}/deb/*.deb
           if-no-files-found: error
         if: matrix.os.matrix == 'linux'
@@ -157,6 +180,6 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.platform }}
+          name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
