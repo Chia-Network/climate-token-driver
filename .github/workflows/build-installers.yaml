@@ -88,7 +88,7 @@ jobs:
       - name: Setup Python
         uses: Chia-Network/actions/setup-python@main
         with:
-          python-version: '3.10.8'
+          python-version: '3.10'
 
       - name: Create .env file
         run: |
