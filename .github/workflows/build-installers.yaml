@@ -16,11 +16,28 @@ concurrency:
 
 jobs:
   build:
-    name: Build - ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
+    name: Build - ${{ matrix.config.name }} ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     strategy:
       fail-fast: false
       matrix:
+        config:
+          - name: tokenization
+            app-name: climate-tokenization-chia
+            app-mode: registry
+            app-description: "Carbon tokenization engine on the Chia blockchain"
+          - name: explorer
+            app-name: climate-explorer-chia
+            app-mode: explorer
+            app-description: "Interface for viewing Chia on-chain carbon tokens"
+          - name: client
+            app-name: climate-token-client-chia
+            app-mode: client
+            app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
+          - name: dev
+            app-name: dev-token-driver-chia
+            app-mode: dev
+            app-description: "Token driver in dev mode"
         os:
           - name: Linux
             matrix: linux
@@ -45,19 +62,6 @@ jobs:
               intel: [windows-latest]
             artifact-os-name: windows
             executable-extension: '.exe'
-        config:
-          - app-name: climate-tokenization-chia
-            app-mode: registry
-            app-description: "Carbon tokenization engine on the Chia blockchain"
-          - app-name: climate-explorer-chia
-            app-mode: explorer
-            app-description: "Interface for viewing Chia on-chain carbon tokens"
-          - app-name: climate-token-client-chia
-            app-mode: client
-            app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
-          - app-name: dev-token-driver-chia
-            app-mode: dev
-            app-description: "Token driver in dev mode"
         arch:
           - name: ARM
             matrix: arm
