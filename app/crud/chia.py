@@ -23,13 +23,22 @@ error_code = ErrorCode()
 @dataclasses.dataclass
 class ClimateWareHouseCrud(object):
     url: str
+    api_key: Optional[str]
+
+    def _headers(self) -> Dict[str, str]:
+        headers = {}
+
+        if self.api_key is not None:
+            headers["x-api-key"] = self.api_key
+
+        return headers
 
     def get_climate_units(self, search: Dict[str, Any]) -> List[Dict]:
         try:
             params = urlencode(search)
             url = urlparse(self.url + "/v1/units")
 
-            r = requests.get(url.geturl(), params=params)
+            r = requests.get(url.geturl(), params=params, headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
                 raise error_code.internal_server_error(
@@ -46,7 +55,7 @@ class ClimateWareHouseCrud(object):
         try:
             url = urlparse(self.url + "/v1/projects")
 
-            r = requests.get(url.geturl())
+            r = requests.get(url.geturl(), headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
                 raise error_code.internal_server_error(
@@ -63,7 +72,7 @@ class ClimateWareHouseCrud(object):
         try:
             url = urlparse(self.url + "/v1/organizations")
 
-            r = requests.get(url.geturl())
+            r = requests.get(url.geturl(), headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
                 raise error_code.internal_server_error(
@@ -83,7 +92,7 @@ class ClimateWareHouseCrud(object):
             params = urlencode(condition)
             url = urlparse(self.url + "/v1/organizations/metadata")
 
-            r = requests.get(url.geturl(), params=params)
+            r = requests.get(url.geturl(), params=params, headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
                 raise error_code.internal_server_error(
