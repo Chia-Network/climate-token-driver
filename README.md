@@ -77,6 +77,7 @@ The whole list of configurable variables are detailed in [config.py](app/config.
 
 - `LOG_PATH`: the path this application write logs to, relative to `${CHIA_ROOT}`.
 - `CLIMATE_API_URL`: the climate warehouse API URL.
+- `CLIMATE_API_KEY`: the climate warehouse API key.
 
 Only when in `registry` and `client` modes, the following configurations are relevant:
 
