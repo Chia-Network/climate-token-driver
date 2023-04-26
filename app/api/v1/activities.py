@@ -53,8 +53,8 @@ async def get_activity(
             raise ErrorCode().bad_request_error(message="search_by is invalid")
 
     climate_data = crud.ClimateWareHouseCrud(
-        url=settings.CLIMATE_API_URL,
-        api_key=settings.CLIMATE_API_KEY,
+        url=settings.CADT_API_SERVER_HOST,
+        api_key=settings.CADT_API_KEY,
     ).combine_climate_units_and_metadata(search=cw_filters)
     if len(climate_data) == 0:
         logger.warning(f"No data to get from climate warehouse. search:{cw_filters}")

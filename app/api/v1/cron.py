@@ -118,7 +118,7 @@ async def scan_token_activity() -> None:
     ):
 
         db_crud = crud.DBCrud(db=db)
-        climate_warehouse = crud.ClimateWareHouseCrud(url=settings.CLIMATE_API_URL, api_key=settings.CLIMATE_API_KEY)
+        climate_warehouse = crud.ClimateWareHouseCrud(url=settings.CADT_API_SERVER_HOST, api_key=settings.CADT_API_KEY)
         blockchain = crud.BlockChainCrud(full_node_client=full_node_client)
 
         try:
