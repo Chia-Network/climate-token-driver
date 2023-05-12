@@ -38,10 +38,15 @@ if __name__ == "__main__":
     logger.info(f"Using settings {settings.dict()}")
     wait_until_dir_exists(settings.CHIA_ROOT)
 
-    uvicorn.run(
-        app,
-        host=settings.SERVER_HOST,
-        port=settings.SERVER_PORT,
-        log_level="info",
-        log_config=log_config,
-    )
+    if settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV] or \
+            settings.SERVER_HOST in ["127.0.0.1", "localhost"]:
+        uvicorn.run(
+            app,
+            host=settings.SERVER_HOST,
+            port=settings.SERVER_PORT,
+            log_level="info",
+            log_config=log_config,
+        )
+    else:
+        print(f'Climate Token Driver can only run on localhost in {settings.MODE.name} mode. Please update '
+              f'SERVER_HOST in {settings.CHIA_ROOT / settings.CONFIG_PATH}')
