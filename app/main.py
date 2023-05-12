@@ -50,5 +50,8 @@ if __name__ == "__main__":
             log_config=log_config,
         )
     else:
-        print(f'Climate Token Driver can only run on localhost in {settings.MODE.name} mode. Please update '
-              f'SERVER_HOST in {settings.CHIA_ROOT / settings.CONFIG_PATH}')
+        print(
+            f'Climate Token Driver can only run on localhost in {settings.MODE.name} mode. Please update'
+            f' SERVER_HOST in {settings.CHIA_ROOT / settings.CONFIG_PATH}'
+        )
+        sys.exit(1)
