@@ -57,12 +57,17 @@ async def _scan_token_activity(
         logger.warning("Full node state has not been retrieved.")
         return False
 
-    if state.current_height == state.peak_height:
-        logger.info("Activity synced.")
-        return False
-
     start_height = state.current_height
     end_height = min(start_height + settings.BLOCK_RANGE, state.peak_height + 1)
+
+    # make sure
+    # - shallow records (<`MIN_DEPTH`) are revisited
+    # - lookback 36 hours to compensate for CW metadata delay
+    target_start_height = end_height - settings.MIN_DEPTH - settings.LOOKBACK_DEPTH
+
+    if state.current_height == target_start_height:
+        logger.info("Activity synced.")
+        return False
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
@@ -95,11 +100,8 @@ async def _scan_token_activity(
 
         db_crud.batch_insert_ignore_activity(activities)
 
-    # make sure
-    # - shallow records (<`MIN_DEPTH`) are revisited
-    # - lookback 36 hours to compensate for CW metadata delay
     db_crud.update_block_state(
-        current_height=end_height - settings.MIN_DEPTH - settings.LOOKBACK_DEPTH
+        current_height=target_start_height
     )
     return True
 
