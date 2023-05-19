@@ -1,4 +1,4 @@
-# This workflow runs on any PRs that are targeting main, and ensures that the version in package.json is incremented
+# This workflow runs on any PRs that are targeting main, and ensures that the version in pyproject.toml is incremented
 name: Check Version Increment
 
 on:
@@ -30,10 +30,13 @@ jobs:
           ref: main
           path: main-repo
 
+      - name: Install yq
+        run: pip install yq
+
       - name: Check Versions
         run: |
-          main_version=$(cat $GITHUB_WORKSPACE/main-repo/package.json | jq -r '.version')
-          branch_version=$(cat $GITHUB_WORKSPACE/branch-repo/package.json | jq -r '.version')
+          main_version=$(cat $GITHUB_WORKSPACE/main-repo/package.json | tomlq -r '.tool.poetry.version')
+          branch_version=$(cat $GITHUB_WORKSPACE/branch-repo/package.json | tomlq -r '.tool.poetry.version')
           echo "Main version: $main_version"
           echo "Branch version: $branch_version"
 
