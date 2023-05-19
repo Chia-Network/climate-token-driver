@@ -34,6 +34,10 @@ jobs:
             app-name: climate-token-driver
             app-mode: client
             app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
+          - name: dev
+            app-name: dev-token-driver-chia
+            app-mode: dev
+            app-description: "Token driver in dev mode"
 
         os:
           - name: Linux
