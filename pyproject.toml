@@ -4,6 +4,7 @@ version = "1.0.3"
 description = "https://github.com/Chia-Network/climate-token-driver"
 authors = ["Harry Hsu <stmharry@hashgreen.net>",
            "Chia Network Inc <hello@chia.net>"]
+maintainers = ["Chia Network Inc <hello@chia.net>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
