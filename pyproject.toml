@@ -5,6 +5,9 @@ description = "https://github.com/Chia-Network/climate-token-driver"
 authors = ["Harry Hsu <stmharry@hashgreen.net>",
            "Chia Network Inc <hello@chia.net>"]
 maintainers = ["Chia Network Inc <hello@chia.net>"]
+repository = "https://github.com/Chia-Network/climate-token-driver"
+homepage = "https://www.chia.net/"
+license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
