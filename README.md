@@ -1,10 +1,25 @@
 # Climate Token Driver Suite
 
-This repository is intended to be used in multiple components in the Climate Portal system, including
+This application can run in 4 modes, each providing a separate application:
 
-- Climate Portal (as token driver)
-- Climate Wallet (as token driver)
-- Climate Explorer (as token driver and backend)
+* **Chia Climate Tokenization**: 
+  * Mode: Registry
+  * Port: 31312
+  * Application Name: climate-tokenization-chia
+* **Climate Explorer**:
+  * Mode: Explorer
+  * Port: 31313
+  * Application Name: climate-explorer
+* **Climate Token Driver**:
+  * Mode: Client
+  * Port: 31314
+  * Application Name: climate-tokenization-chia
+* **Dev Mode (for developers only!)**:
+  * Mode: Dev
+  * Port: 31999
+  * Application Name: Only available from source builds
+
+When compiling from source, the "mode" is controlled by the `.env` file.  Each application, or mode, is offered as precompiled binaries, appropriate for most users.  
 
 ## Hierarchy
 
