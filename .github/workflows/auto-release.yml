@@ -1,4 +1,4 @@
-# Compares the version in package.json to tags on the repo. If the tag doesn't exist, a new tag is created, which
+# Compares the version in pyproject.toml to tags on the repo. If the tag doesn't exist, a new tag is created, which
 # then triggers the normal "on tag" release automation in the build job
 name: Auto Tag
 
@@ -24,9 +24,12 @@ jobs:
           token: ${{ secrets.PACKAGE_ADMIN_PAT }}
           fetch-depth: 0
 
+      - name: Install yq
+        run: pip install yq
+
       - name: Check for current version tag. Create if it doesn't exist. Create CHANGELOG
         run: |
-          version=$(cat $GITHUB_WORKSPACE/package.json | jq -r '.version')
+          version=$(cat $GITHUB_WORKSPACE/pyproject.toml | tomlq -r '.tool.poetry.version')
           echo "Version is: $version"
 
           if [ $(git tag -l "$version") ]; then

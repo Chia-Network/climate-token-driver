@@ -35,12 +35,12 @@ jobs:
 
       - name: Check Versions
         run: |
-          main_version=$(cat $GITHUB_WORKSPACE/main-repo/package.json | tomlq -r '.tool.poetry.version')
-          branch_version=$(cat $GITHUB_WORKSPACE/branch-repo/package.json | tomlq -r '.tool.poetry.version')
+          main_version=$(cat $GITHUB_WORKSPACE/main-repo/pyproject.toml | tomlq -r '.tool.poetry.version')
+          branch_version=$(cat $GITHUB_WORKSPACE/branch-repo/pyproject.toml | tomlq -r '.tool.poetry.version')
           echo "Main version: $main_version"
           echo "Branch version: $branch_version"
 
           if [[ "$branch_version" == "$main_version" ]]; then
-            echo "Version in package.json on this branch is not changing. Version must incremenet for a merge to main"
+            echo "Version in pyproject.toml on this branch is not changing. Version must incremenet for a merge to main"
             exit 1
           fi
