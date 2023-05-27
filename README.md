@@ -156,3 +156,7 @@ The first part of this is the commit "type". The most common types are "feat" fo
   After the type and scope there should be a colon.
   ​
   The "subject" of the commit follows. It should be a short indication of the change. The commit convention prefers that this is written in the present-imperative tense.
+
+  ### Branch Layout
+
+  All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.  
