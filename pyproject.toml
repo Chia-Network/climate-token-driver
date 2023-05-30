@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "app"
-version = "0.1.0"
+name = "climate-token-driver"
+version = "1.0.2"
 description = ""
 authors = ["Harry Hsu <stmharry@hashgreen.net>"]
 
@@ -16,12 +16,14 @@ fastapi-utils = "^0.2.1"
 SQLAlchemy-Utils = "^0.38.3"
 pydantic = { extras = ["dotenv"], version = "^1.10.2" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 # has to be disabled unfortunately due to developing chia-blockchain
 # chia-dev-tools = "^1.1.1"
 pytest = "^7.1.2"
 pytest-asyncio = "^0.19.0"
 commitizen = "^2.27.1"
+#pre-commit = "^3.3.2"
+#conventional-pre-commit = "^2.2.0"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
