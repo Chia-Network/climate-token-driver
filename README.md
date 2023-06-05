@@ -145,3 +145,33 @@ Only when in `explorer` mode, the following configurations are relevant:
   # first ensure the `MODE` is set to the `dev` for all tests to be discoverable, then
   python -m pytest ./tests
   ```
+## Commiting
+
+​This repo uses a [commit convention](https://www.conventionalcommits.org/en/v1.0.0/). A typical commit message might read:
+​
+```
+    fix: correct home screen layout
+```
+​
+The first part of this is the commit "type". The most common types are "feat" for new features, and "fix" for bugfixes. Using these commit types helps us correctly manage our version numbers and changelogs. Since our release process calculates new version numbers from our commits it is very important to get this right.
+​
+
+- `feat` is for introducing a new feature
+- `fix` is for bug fixes
+- `docs` for documentation only changes
+- `style` is for code formatting only
+- `refactor` is for changes to code which should not be detectable by users or testers
+- `perf` is for a code change that improves performance
+- `test` is for changes which only touch test files or related tooling
+- `build` is for changes which only touch our develop/release tools
+- `ci` is for changes to the continuous integration files and scripts
+- `chore` is for changes that don't modify code, like a version bump
+- `revert` is for reverting a previous commit
+  ​
+  After the type and scope there should be a colon.
+  ​
+  The "subject" of the commit follows. It should be a short indication of the change. The commit convention prefers that this is written in the present-imperative tense.
+
+  ### Branch Layout
+
+  All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.  
