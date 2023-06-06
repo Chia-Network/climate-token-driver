@@ -27,6 +27,16 @@ jobs:
       - name: Install yq
         run: pip install yq
 
+      # Install Python for commitizen, the automatic changelog tool
+      - name: Setup Python
+        uses: Chia-Network/actions/setup-python@main
+        with:
+          python-version: '3'
+
+      - name: Install commitizen
+        run: |
+          pip install -U commitizen
+
       - name: Check for current version tag. Create if it doesn't exist. Create CHANGELOG
         run: |
           version=$(cat $GITHUB_WORKSPACE/pyproject.toml | tomlq -r '.tool.poetry.version')
