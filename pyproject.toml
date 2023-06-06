@@ -32,7 +32,7 @@ commitizen = "^2.27.1"
 name = "cz_conventional_commits"
 version = "1.0.1"
 tag_format = "$version"
-changelog_start_rev = "1.0.4"
+changelog_start_rev = "1.0.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
