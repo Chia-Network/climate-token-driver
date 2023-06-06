@@ -25,19 +25,20 @@ jobs:
           - name: tokenization
             app-name: climate-tokenization-chia
             app-mode: registry
-            app-description: "Carbon tokenization engine on the Chia blockchain"
+            app-description: "Carbon tokenization application on the Chia blockchain"
           - name: explorer
             app-name: climate-explorer-chia
             app-mode: explorer
-            app-description: "Interface for viewing Chia on-chain carbon tokens"
+            app-description: "Interface for tracking Chia on-chain carbon tokens"
           - name: client
-            app-name: climate-token-client-chia
+            app-name: climate-token-driver
             app-mode: client
             app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
           - name: dev
             app-name: dev-token-driver-chia
             app-mode: dev
             app-description: "Token driver in dev mode"
+
         os:
           - name: Linux
             matrix: linux
@@ -140,21 +141,21 @@ jobs:
           cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}${{ matrix.os.executable-extension }}
 
       # Windows Code Signing
-      - name: Decode code signing cert into an encrypted file
-        uses: kitek/decode-base64-into-file-action@1.0
-        with:
-          encoded-value: ${{ secrets.WIN_CODE_SIGN_CERT }}
-          destination-file: .\win_code_sign_cert.pfx
-        if: matrix.os.matrix == 'windows'
+#      - name: Decode code signing cert into an encrypted file
+#        uses: kitek/decode-base64-into-file-action@1.0
+#        with:
+#          encoded-value: ${{ secrets.WIN_CODE_SIGN_CERT }}
+#          destination-file: .\win_code_sign_cert.pfx
+#        if: matrix.os.matrix == 'windows'
 
 
-      - name: Sign windows artifacts
-        uses: chia-network/actions/sign/windows@main
-        with:
-          certificate_path: .\win_code_sign_cert.pfx
-          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
-          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
-        if: matrix.os.matrix == 'windows'
+#      - name: Sign windows artifacts
+#        uses: chia-network/actions/sign/windows@main
+#        with:
+#          certificate_path: .\win_code_sign_cert.pfx
+#          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
+#          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
+#        if: matrix.os.matrix == 'windows'
 
       - name: Create .deb Package
         env:
@@ -186,3 +187,8 @@ jobs:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
+
+      - name: Pretend this is a release
+        run: |
+          echo "This is the release job that should only run when a tag is created!"
+        if: startsWith(github.ref, 'refs/tags/')

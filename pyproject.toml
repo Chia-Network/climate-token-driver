@@ -1,8 +1,13 @@
 [tool.poetry]
-name = "app"
-version = "0.1.0"
-description = ""
-authors = ["Harry Hsu <stmharry@hashgreen.net>"]
+name = "Chia Climate Token Driver"
+version = "1.0.3"
+description = "https://github.com/Chia-Network/climate-token-driver"
+authors = ["Harry Hsu <stmharry@hashgreen.net>",
+           "Chia Network Inc <hello@chia.net>"]
+maintainers = ["Chia Network Inc <hello@chia.net>"]
+repository = "https://github.com/Chia-Network/climate-token-driver"
+homepage = "https://www.chia.net/"
+license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -16,7 +21,7 @@ fastapi-utils = "^0.2.1"
 SQLAlchemy-Utils = "^0.38.3"
 pydantic = { extras = ["dotenv"], version = "^1.10.2" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 # has to be disabled unfortunately due to developing chia-blockchain
 # chia-dev-tools = "^1.1.1"
 pytest = "^7.1.2"
@@ -25,8 +30,9 @@ commitizen = "^2.27.1"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.0.0"
-tag_format = "v$version"
+version = "1.0.1"
+tag_format = "$version"
+changelog_start_rev = "1.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
