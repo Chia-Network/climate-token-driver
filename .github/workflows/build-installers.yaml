@@ -195,8 +195,6 @@ jobs:
         run: |
           echo "Here is the artifacts folder"
           ls -lah ${{ github.workspace }}/artifacts/
-          echo "Here is the deb folder"
-          ls -lah  ${{ github.workspace }}/deb/
 
       - name: Release Windows executable
         uses: softprops/action-gh-release@v0.1.15
