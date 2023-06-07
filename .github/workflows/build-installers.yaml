@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.sha || '' }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build - ${{ matrix.config.name }} ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
@@ -201,6 +204,13 @@ jobs:
           files: |
             ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'windows'
+
+      - name: Release Non-Windows executable
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          files: |
+            ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}
+        if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release debs
         uses: softprops/action-gh-release@v0.1.15
