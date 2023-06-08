@@ -219,7 +219,7 @@ jobs:
         uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
-            ${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ matrix.arch.artifact-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}.zip
+            ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ matrix.arch.artifact-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}.zip
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release debs
