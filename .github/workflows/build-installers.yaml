@@ -188,11 +188,6 @@ jobs:
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
 
-      - name: Alright what are these files named
-        run: |
-          echo "Here is the artifacts folder"
-          ls ${{ github.workspace }}/artifacts/
-
       - name: Create zip files for release
         uses: thedoctor0/zip-release@0.7.1
         with:
@@ -214,6 +209,11 @@ jobs:
       #     files: |
       #       ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}
       #   if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Alright what are these files named
+        run: |
+          echo "Here is the artifacts folder"
+          ls ${{ github.workspace }}/artifacts/
 
       - name: Release executable (Linux and MacOS)
         uses: softprops/action-gh-release@v0.1.15
