@@ -201,6 +201,7 @@ jobs:
         with:
           files: ./artifacts/${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
         if: startsWith(github.ref, 'refs/tags/')
+
       - name: Release debs
         uses: softprops/action-gh-release@v0.1.15
         with:
