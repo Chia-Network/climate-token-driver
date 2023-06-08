@@ -193,18 +193,31 @@ jobs:
           echo "Here is the artifacts folder"
           ls ${{ github.workspace }}/artifacts/
 
-      - name: Release Windows executable
-        uses: softprops/action-gh-release@v0.1.15
-        with:
-          files: |
-            ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'windows'
+      - name: Create zip files for release
+        run: |
+          cd artifacts
+          zip -r ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}-${{ steps.tag-name.outputs.TAGNAME || github.sha }}.zip *
+        if: startsWith(github.ref, 'refs/tags/')
 
-      - name: Release Non-Windows executable
+      # - name: Release Windows executable
+      #   uses: softprops/action-gh-release@v0.1.15
+      #   with:
+      #     files: |
+      #       ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
+      #   if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'windows'
+
+      # - name: Release Non-Windows executable
+      #   uses: softprops/action-gh-release@v0.1.15
+      #   with:
+      #     files: |
+      #       ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}
+      #   if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Release executable
         uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
-            ${{ github.workspace }}/artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}
+            ${{ github.workspace }}/artifacts/*.zip
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release debs
