@@ -33,9 +33,19 @@ When compiling from source, the "mode" is controlled by the `.env` file.  Each a
     - `schemas`: schemas shared by all the layers
 - `tests`: pytest suites
 
-## Usage
+## Installation and configuration
 
-### Installation and configuration
+Precompiled executables are available for Mac, Windows, and Linux (both ARM and x86) on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page.
+
+### Debian-based Linux Distros
+
+For users of Debian, Ubuntu, Mint, PopOS, and other Debian-based distributions, a .deb file is provided on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page.  This can be installed with
+
+```sh
+dpkg -i package-filename.deb
+```
+
+### From Source
 
 - Clone this repo.
 
@@ -64,7 +74,7 @@ When compiling from source, the "mode" is controlled by the `.env` file.  Each a
   # then change variable in .env
   ```
 
-### Configurations
+## Configurations
 
 Note there are two steps the application loads the configurations:
 1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, `CONFIG_PATH`, and `SERVER_PORT`.
@@ -110,6 +120,8 @@ Only when in `explorer` mode, the following configurations are relevant:
 - `MIN_DEPTH`: the minimum number of blocks an activity needs to be on chain to be recorded.
 - `LOOKBACK_DEPTH`: this number of latest blocks are always rescanned to ensure all latest token activities are picked up for newly created tokens.
 
+## For Developers
+
 ### Run from source for development
 
 - [Install Poetry](https://python-poetry.org/docs/)
@@ -130,6 +142,7 @@ Only when in `explorer` mode, the following configurations are relevant:
 ### Package app
 
 - Package the app.
+
   ```sh
   # first ensure the `MODE` is set to the intended mode, then
   python -m PyInstaller --clean pyinstaller.spec
@@ -141,12 +154,13 @@ Only when in `explorer` mode, the following configurations are relevant:
   ```
 
 ### Run test cases
+
 - Invoke `pytest` with:
   ```sh
   # first ensure the `MODE` is set to the `dev` for all tests to be discoverable, then
   python -m pytest ./tests
   ```
-## Commiting
+### Commiting
 
 ​This repo uses a [commit convention](https://www.conventionalcommits.org/en/v1.0.0/). A typical commit message might read:
 ​
@@ -168,11 +182,13 @@ The first part of this is the commit "type". The most common types are "feat" fo
 - `ci` is for changes to the continuous integration files and scripts
 - `chore` is for changes that don't modify code, like a version bump
 - `revert` is for reverting a previous commit
-  ​
-  After the type and scope there should be a colon.
-  ​
-  The "subject" of the commit follows. It should be a short indication of the change. The commit convention prefers that this is written in the present-imperative tense.
 
-  ### Branch Layout
+After the type and scope there should be a colon.
 
-  All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.
+ ​
+The "subject" of the commit follows. It should be a short indication of the change. The commit convention prefers that this is written in the present-imperative tense.
+
+
+#### Branch Layout
+
+All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.
