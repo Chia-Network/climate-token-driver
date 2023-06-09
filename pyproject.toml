@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Chia Climate Token Driver"
-version = "1.0.4"
+version = "1.0.5"
 description = "https://github.com/Chia-Network/climate-token-driver"
 authors = ["Harry Hsu <stmharry@hashgreen.net>",
            "Chia Network Inc <hello@chia.net>"]
