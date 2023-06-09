@@ -1,4 +1,4 @@
-name: Build & Release
+name: Create release notes
 
 on:
   push:
@@ -26,5 +26,5 @@ jobs:
       - name: Create release with the Changelog as release notes
         uses: softprops/action-gh-release@v0.1.15
         with:
-          body_path: ${{ github.workspace }}/CHANGELOG.md
+          body_path: CHANGELOG.md
           token: ${{ secrets.PACKAGE_ADMIN_PAT }}
