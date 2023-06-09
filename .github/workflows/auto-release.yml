@@ -42,7 +42,6 @@ jobs:
         run: |
           version=$(cat $GITHUB_WORKSPACE/pyproject.toml | tomlq -r '.tool.poetry.version')
           echo "Version is: $version"
-
           if [ $(git tag -l "$version") ]; then
             echo "Tag exists, nothing to do"
           else

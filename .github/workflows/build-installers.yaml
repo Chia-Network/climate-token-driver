@@ -190,3 +190,24 @@ jobs:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
+
+      - name: Create zip files for release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: ${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+          directory: 'artifacts'
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Release executable
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          files: ./artifacts/${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Release debs
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          files: |
+            ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
