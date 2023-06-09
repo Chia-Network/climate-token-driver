@@ -25,14 +25,14 @@ jobs:
           token: ${{ secrets.PACKAGE_ADMIN_PAT }}
           fetch-depth: 0
 
-      - name: Install yq
-        run: pip install yq
-
       # Install Python for commitizen, the automatic changelog tool
       - name: Setup Python
         uses: Chia-Network/actions/setup-python@main
         with:
           python-version: '3'
+
+      - name: Install yq
+        run: pip install yq
 
       - name: Install commitizen
         run: |
