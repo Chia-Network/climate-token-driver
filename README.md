@@ -2,10 +2,11 @@
 
 This application can run in 4 modes, each providing a separate application:
 
-* **Chia Climate Tokenization**: 
+* **Chia Climate Tokenization**:
   * Mode: Registry
   * Port: 31312
   * Application Name: climate-tokenization-chia
+  * *Only listens on localhost for connections from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)*
 * **Climate Explorer**:
   * Mode: Explorer
   * Port: 31313
@@ -19,7 +20,7 @@ This application can run in 4 modes, each providing a separate application:
   * Port: 31999
   * Application Name: Only available from source builds
 
-When compiling from source, the "mode" is controlled by the `.env` file.  Each application, or mode, is offered as precompiled binaries, appropriate for most users.  
+When compiling from source, the "mode" is controlled by the `.env` file.  Each application, or mode, is offered as precompiled binaries, appropriate for most users.
 
 ## Hierarchy
 
@@ -67,8 +68,8 @@ When compiling from source, the "mode" is controlled by the `.env` file.  Each a
 
 Note there are two steps the application loads the configurations:
 1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, `CONFIG_PATH`, and `SERVER_PORT`.
-   Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}` 
-   and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the 
+   Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}`
+   and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the
    default *flavor* for the binary (though it is overridden by system environment variables).
 
 1. Then, a `config.yaml` file located at `${CHIA_ROOT}/${CONFIG_PATH}` is loaded, which adds to the configurations after `.env`.
@@ -83,7 +84,7 @@ The whole list of configurable variables are detailed in [config.py](app/config.
 
 - `CHIA_ROOT`: the root of Chia wallets on the local machine, typically `~/.chia/mainnet`.
 - `CONFIG_PATH`: the path of the `config.yaml` file, relative to `${CHIA_ROOT}`.
-- `SERVER_HOST`: the host this application runs on.
+- `SERVER_HOST`: the network IP address this application binds to.  Setting to `0.0.0.0` listens on all interfaces, which is appropriate when running the Climate Explorer.  When running Chia Climate Tokenization, the `SERVER_HOST` must be `localhost` or `127.0.0.1` as this prevents the registry from accidentally being available on the public web, which would be a severe security issue.  When in Chia Climate Tokenization mode, the application should only be receiving requests from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine) which is expected to be run on the same host as Chia Climate Tokenization.
 - `SERVER_PORT`: you can leave this blank and the port will be automatically assigned based on `MODE`:
   - `dev`: 31999
   - `registry`: 31312
@@ -174,4 +175,4 @@ The first part of this is the commit "type". The most common types are "feat" fo
 
   ### Branch Layout
 
-  All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.  
+  All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.

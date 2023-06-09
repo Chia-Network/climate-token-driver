@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.sha || '' }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build - ${{ matrix.config.name }} ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
