@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref == 'refs/heads/main' && github.sha || '' }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build - ${{ matrix.config.name }} ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
@@ -25,19 +28,20 @@ jobs:
           - name: tokenization
             app-name: climate-tokenization-chia
             app-mode: registry
-            app-description: "Carbon tokenization engine on the Chia blockchain"
+            app-description: "Carbon tokenization application on the Chia blockchain"
           - name: explorer
             app-name: climate-explorer-chia
             app-mode: explorer
-            app-description: "Interface for viewing Chia on-chain carbon tokens"
+            app-description: "Interface for tracking Chia on-chain carbon tokens"
           - name: client
-            app-name: climate-token-client-chia
+            app-name: climate-token-driver
             app-mode: client
             app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
           - name: dev
             app-name: dev-token-driver-chia
             app-mode: dev
             app-description: "Token driver in dev mode"
+
         os:
           - name: Linux
             matrix: linux
@@ -186,3 +190,24 @@ jobs:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
+
+      - name: Create zip files for release
+        uses: thedoctor0/zip-release@0.7.1
+        with:
+          type: 'zip'
+          filename: ${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+          directory: 'artifacts'
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Release executable
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          files: ./artifacts/${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Release debs
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          files: |
+            ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
