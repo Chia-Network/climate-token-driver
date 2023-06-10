@@ -22,6 +22,16 @@ This application can run in 4 modes, each providing a separate application:
 
 When compiling from source, the "mode" is controlled by the `.env` file.  Each application, or mode, is offered as precompiled binaries, appropriate for most users.
 
+## Related Projects
+
+* [Chia Blockchain](https://github.com/Chia-Network/chia-blockchain)
+* [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)
+* [Climate Tokenization Engine User Interface](https://github.com/Chia-Network/Climate-Tokenization-Engine-UI)
+* [Climate Explorer UI](https://github.com/Chia-Network/climate-explorer-ui)
+* [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet)
+* [Climate Action Data Trust](https://github.com/Chia-Network/cadt)
+* [Climate Action Data Trust UI](https://github.com/Chia-Network/cadt-ui)
+
 ## Hierarchy
 
 - `app`:
