@@ -176,6 +176,8 @@ Only when in `explorer` mode, the following configurations are relevant:
   ```
 ### Commiting
 
+[Signed commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) are required.
+
 ​This repo uses a [commit convention](https://www.conventionalcommits.org/en/v1.0.0/). A typical commit message might read:
 ​
 ```
