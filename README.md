@@ -1,22 +1,26 @@
 # Climate Token Driver Suite
 
-This application can run in 4 modes, each providing a separate application:
+This application can run in 4 modes, each providing a separate application with a distinct use case:
 
 * **Chia Climate Tokenization**:
   * Mode: Registry
+  * Use case: A registry would use this to tokenize carbon credits onto the Chia blockchain
   * Port: 31312
   * Application Name: climate-tokenization-chia
   * *Only listens on localhost for connections from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)*
 * **Climate Explorer**:
   * Mode: Explorer
+  * Use case: A registry (or interested observer) would use this to track all on-chain activity related to tokenized carbon credits
   * Port: 31313
   * Application Name: climate-explorer
 * **Climate Token Driver**:
   * Mode: Client
+  * Use case: A carbon token holder could use this in conjunction with the [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet) to manage their tokenized carbon credits
   * Port: 31314
   * Application Name: climate-tokenization-chia
 * **Dev Mode (for developers only!)**:
   * Mode: Dev
+  * Use case: Developers are able to test the software without having to communicate with the blockchain
   * Port: 31999
   * Application Name: Only available from source builds
 
@@ -171,6 +175,8 @@ Only when in `explorer` mode, the following configurations are relevant:
   python -m pytest ./tests
   ```
 ### Commiting
+
+[Signed commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) are required.
 
 ​This repo uses a [commit convention](https://www.conventionalcommits.org/en/v1.0.0/). A typical commit message might read:
 ​
