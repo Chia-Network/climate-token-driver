@@ -175,6 +175,7 @@ jobs:
           mkdir -p "deb/$CLI_DEB_BASE/etc/systemd/system"
           mkdir -p deb/$DEB_BASE/usr/local/bin
           j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
+          j2 -o "deb/$DEB_BASE//etc/systemd/system/${{ matrix.config.app-name }}@.service" build-scripts/deb/systemd-template@.service.j2
           ln -s ../../../opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }} /usr/local/bin/${{ matrix.config.app-name }}
           dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
         if: matrix.os.matrix == 'linux'
