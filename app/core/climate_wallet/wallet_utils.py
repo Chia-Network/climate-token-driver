@@ -18,7 +18,7 @@ from chia.wallet.cat_wallet.cat_utils import (
 )
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
-from chia.wallet.puzzles.cat_loader import CAT_MOD
+from chia.wallet.cat_wallet.cat_utils import CAT_MOD
 
 from app.core.chialisp.gateway import (
     create_gateway_announcement,

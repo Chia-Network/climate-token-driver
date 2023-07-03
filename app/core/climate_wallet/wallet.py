@@ -20,7 +20,7 @@ from chia.wallet.cat_wallet.cat_utils import (
     match_cat_puzzle,
 )
 from chia.wallet.payment import Payment
-from chia.wallet.puzzles.cat_loader import CAT_MOD
+from chia.wallet.cat_wallet.cat_utils import CAT_MOD
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.uncurried_puzzle import uncurry_puzzle
 from chia.wallet.util.compute_memos import compute_memos

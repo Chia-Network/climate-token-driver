@@ -9,7 +9,7 @@ from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
 from chia.wallet.cat_wallet.cat_info import CATInfo
 from chia.wallet.cat_wallet.cat_utils import construct_cat_puzzle
-from chia.wallet.puzzles.cat_loader import CAT_MOD
+from chia.wallet.cat_wallet.cat_utils import CAT_MOD
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.transaction_sorting import SortKey
 from chia.wallet.util.wallet_types import WalletType
