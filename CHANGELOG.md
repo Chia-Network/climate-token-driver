@@ -1,3 +1,9 @@
+## 1.0.8 (2023-07-12)
+
+### Feat
+
+- add height range filter to activity controller
+
 ## 1.0.7 (2023-06-29)
 
 ## 1.0.6 (2023-06-10)
