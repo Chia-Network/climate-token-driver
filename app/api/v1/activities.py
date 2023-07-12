@@ -20,6 +20,7 @@ router = APIRouter()
 async def get_activity(
     search: Optional[str] = None,
     search_by: Optional[schemas.ActivitySearchBy] = None,
+    heightRange: Optional[str] = None,
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 10,
@@ -51,6 +52,15 @@ async def get_activity(
             pass
         case _:
             raise ErrorCode().bad_request_error(message="search_by is invalid")
+        
+    if heightRange is not None:
+        try:
+            height1, height2 = map(int, heightRange.split('-'))
+            activity_filters["and"].append(
+                models.Activity.height.between(height1, height2)
+            )
+        except ValueError:
+            raise ErrorCode().bad_request_error(message="heightRange format is invalid. Correct format: 'height1-height2'")
 
     climate_data = crud.ClimateWareHouseCrud(
         url=settings.CADT_API_SERVER_HOST,
