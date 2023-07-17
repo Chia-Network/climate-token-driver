@@ -76,12 +76,18 @@ async def get_activity(
     activities: List[models.Activity]
     total: int
 
-    sort_order = desc if sort.lower() == 'desc' else asc
+    order_by_clause = []
+    if sort.lower() == 'desc':
+        order_by_clause.append(models.Activity.height.desc())
+        order_by_clause.append(models.Activity.coin_id.desc())
+    else:
+        order_by_clause.append(models.Activity.height.asc())
+        order_by_clause.append(models.Activity.coin_id.asc())
 
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
-        order_by=[sort_order(models.Activity.height), sort_order(models.Activity.coin_id)],
+        order_by=order_by_clause,
         page=page,
         limit=limit,
     )
