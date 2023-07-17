@@ -1,3 +1,4 @@
+from sqlalchemy import desc, asc
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends
@@ -24,6 +25,7 @@ async def get_activity(
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 10,
+    sort: str = 'desc',
     db: Session = Depends(deps.get_db_session),
 ):
     """Get activity.
@@ -74,10 +76,12 @@ async def get_activity(
     activities: List[models.Activity]
     total: int
 
+    sort_order = desc if sort.lower() == 'desc' else asc
+
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
-        order_by=models.Activity.height,
+        order_by=[sort_order(models.Activity.height), sort_order(models.Activity.coin_id)],
         page=page,
         limit=limit,
     )
