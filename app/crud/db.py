@@ -64,16 +64,14 @@ class DBCrudBase(object):
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
 
-    def select_activity_with_pagination(
-        self, model: Any, filters: Any, order_by: Any, limit: int, page: int
-    ):
+    def select_activity_with_pagination(self, model: Any, filters: Any, order_by: Any, limit: int, page: int):
         try:
             query = self.db.query(model).filter(
                 or_(*filters["or"]), and_(*filters["and"])
             )
             return (
                 (
-                    query.order_by(order_by.desc())
+                    query.order_by(*order_by)  # no .desc() here
                     .limit(limit)
                     .offset((page - 1) * limit)
                     .all()
@@ -83,7 +81,6 @@ class DBCrudBase(object):
         except Exception as e:
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
-
 
 @dataclasses.dataclass
 class DBCrud(DBCrudBase):
