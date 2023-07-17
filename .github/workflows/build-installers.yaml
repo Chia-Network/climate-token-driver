@@ -29,18 +29,22 @@ jobs:
             app-name: climate-tokenization-chia
             app-mode: registry
             app-description: "Carbon tokenization application on the Chia blockchain"
+            add-to-apt: true
           - name: explorer
             app-name: climate-explorer-chia
             app-mode: explorer
             app-description: "Interface for tracking Chia on-chain carbon tokens"
+            add-to-apt: true
           - name: client
             app-name: climate-token-driver
             app-mode: client
             app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
+            add-to-apt: false
           - name: dev
             app-name: dev-token-driver-chia
             app-mode: dev
             app-description: "Token driver in dev mode"
+            add-to-apt: false
 
         os:
           - name: Linux
@@ -72,11 +76,13 @@ jobs:
             artifact-name: arm64
             deb-platform: arm64
             electron-builder-options: --arm64
+            apt-arm-option: only
           - name: Intel
             matrix: intel
             artifact-name: amd64
             deb-platform: amd64
             electron-builder-options: --x64
+            apt-arm-option: false
         exclude:
           - os:
               matrix: windows
@@ -215,3 +221,15 @@ jobs:
           files: |
             ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
+
+      - name: Get repo name to use for APT trigger
+        id: repo-name
+        run: |
+          echo "REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d "/" -f 2)" >>$GITHUB_OUTPUT
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true'
+
+      - name: Trigger apt repo update
+        run: |
+          curl -s -XPOST -H "Authorization: Bearer ${{ secrets.GLUE_ACCESS_TOKEN }}" --data '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ matrix.config.app-name }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"${{ matrix.arch.apt-arm-option }}"}' ${{ secrets.GLUE_API_URL }}/api/v1/climate-tokenization/${{ github.sha }}/start
+          curl -s -XPOST -H "Authorization: Bearer ${{ secrets.GLUE_ACCESS_TOKEN }}" --data '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ matrix.config.app-name }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"${{ matrix.arch.apt-arm-option }}"}' ${{ secrets.GLUE_API_URL }}/api/v1/climate-tokenization/${{ github.sha }}/success/deploy
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true'
