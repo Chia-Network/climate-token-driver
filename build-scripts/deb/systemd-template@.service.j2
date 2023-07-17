@@ -1,0 +1,31 @@
+#
+# {{ APP_NAME }} init file for systemd. To start the {{ APP_NAME }} service
+# using systemd, execute `systemctl start {{ APP_NAME }}@<USERNAME>`
+# where <USERNAME> is the Linux user you wish to run
+# {{ APP_NAME }} as. Normally you'll run {{ APP_NAME }} on the same system
+# as the Chia Wallet and Data Layer and you need to run
+# {{ APP_NAME }} as the same user as Chia.
+#
+# For example, if running Chia as the ubuntu user
+# with your $CHIA_ROOT directory at /home/ubuntu/.chia,
+# then start {{ APP_NAME }} with the command
+#
+# `systemctl start {{ APP_NAME }}@ubuntu`
+#
+
+[Unit]
+Description={{ APP_NAME }}
+
+[Service]
+# Set Chia directory as an environment variable
+Environment=CHIA_ROOT=/home/%i/.chia/mainnet
+
+# {{ APP_NAME }} executable
+ExecStart=/opt/{{ APP_NAME }}/{{ APP_NAME }}
+
+# Start the software with `systemctl start {{ APP_NAME }}@username`
+User=%i
+Group=%i
+
+[Install]
+WantedBy=multi-user.target
