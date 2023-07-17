@@ -29,22 +29,22 @@ jobs:
             app-name: climate-tokenization-chia
             app-mode: registry
             app-description: "Carbon tokenization application on the Chia blockchain"
-            add-to-apt: true
+            add-to-apt: 'true'
           - name: explorer
             app-name: climate-explorer-chia
             app-mode: explorer
             app-description: "Interface for tracking Chia on-chain carbon tokens"
-            add-to-apt: true
+            add-to-apt: 'true'
           - name: client
             app-name: climate-token-driver
             app-mode: client
             app-description: "Embedded climate token driver for carbon tokens on the Chia blockchain"
-            add-to-apt: false
+            add-to-apt: 'false'
           - name: dev
             app-name: dev-token-driver-chia
             app-mode: dev
             app-description: "Token driver in dev mode"
-            add-to-apt: false
+            add-to-apt: 'false'
 
         os:
           - name: Linux
@@ -76,13 +76,13 @@ jobs:
             artifact-name: arm64
             deb-platform: arm64
             electron-builder-options: --arm64
-            apt-arm-option: only
+            apt-arm-option: 'only'
           - name: Intel
             matrix: intel
             artifact-name: amd64
             deb-platform: amd64
             electron-builder-options: --x64
-            apt-arm-option: false
+            apt-arm-option: 'false'
         exclude:
           - os:
               matrix: windows
