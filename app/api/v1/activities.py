@@ -1,3 +1,4 @@
+from sqlalchemy import desc, asc
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends
@@ -20,9 +21,11 @@ router = APIRouter()
 async def get_activity(
     search: Optional[str] = None,
     search_by: Optional[schemas.ActivitySearchBy] = None,
+    minHeight: Optional[int] = None,
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 10,
+    sort: str = 'desc',
     db: Session = Depends(deps.get_db_session),
 ):
     """Get activity.
@@ -51,6 +54,9 @@ async def get_activity(
             pass
         case _:
             raise ErrorCode().bad_request_error(message="search_by is invalid")
+        
+    if minHeight is not None:
+        activity_filters["and"].append(models.Activity.height >= minHeight)
 
     climate_data = crud.ClimateWareHouseCrud(
         url=settings.CADT_API_SERVER_HOST,
@@ -70,10 +76,18 @@ async def get_activity(
     activities: List[models.Activity]
     total: int
 
+    order_by_clause = []
+    if sort.lower() == 'desc':
+        order_by_clause.append(models.Activity.height.desc())
+        order_by_clause.append(models.Activity.coin_id.desc())
+    else:
+        order_by_clause.append(models.Activity.height.asc())
+        order_by_clause.append(models.Activity.coin_id.asc())
+
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
-        order_by=models.Activity.height,
+        order_by=order_by_clause,
         page=page,
         limit=limit,
     )
