@@ -71,7 +71,7 @@ class DBCrudBase(object):
             )
             return (
                 (
-                    query.order_by(*order_by)  # no .desc() here
+                    query.order_by(*order_by)
                     .limit(limit)
                     .offset((page - 1) * limit)
                     .all()
