@@ -270,7 +270,7 @@ jobs:
             FILES="$d/*.dat"; \
             for f in $FILES; do \
               APP=`cat $f`; \
-              APPS_ARRAY="${APPS_ARRAY}\"${APP}\", "; \
+              APPS_ARRAY="${APPS_ARRAY}\\\"${APP}\\\", "; \
             done; \
           done;
           APPS_ARRAY=${APPS_ARRAY%??}
