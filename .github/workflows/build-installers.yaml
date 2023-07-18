@@ -270,10 +270,10 @@ jobs:
             FILES="$d/*.dat"; \
             for f in $FILES; do \
               APP=`cat $f`; \
-              APPS_ARRAY="${APPS_ARRAY}${APP},"; \
+              APPS_ARRAY="${APPS_ARRAY}\"${APP}\", "; \
             done; \
           done;
-          APPS_ARRAY=${APPS_ARRAY%?}
+          APPS_ARRAY=${APPS_ARRAY%??}
           APPS_ARRAY="${APPS_ARRAY}]"
           echo "Array being passed is ${APPS_ARRAY}"
           echo "APPLICATIONS=${APPS_ARRAY}" >> $GITHUB_OUTPUT
