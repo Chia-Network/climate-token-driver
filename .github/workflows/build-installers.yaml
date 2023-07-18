@@ -76,13 +76,11 @@ jobs:
             artifact-name: arm64
             deb-platform: arm64
             electron-builder-options: --arm64
-            apt-arm-option: 'only'
           - name: Intel
             matrix: intel
             artifact-name: amd64
             deb-platform: amd64
             electron-builder-options: --x64
-            apt-arm-option: 'false'
         exclude:
           - os:
               matrix: windows
@@ -222,14 +220,66 @@ jobs:
             ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
 
+        # Only do for Intel builds as we know we build ARM and can pass that info along to the apt update automation
+      - name: Create artifact with metadata for apt upload
+        run: |
+          echo "${{ matrix.config.app-name }}" > APTDATA_${{ matrix.config.app-name }}.dat
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel'
+
+      - name: Upload artifact to pass apt data to release job
+        uses: actions/upload-artifact@v3
+        with:
+          name: APTDATA_${{ matrix.config.app-name }}_${{ matrix.arch.artifact-name }}
+          path: APTDATA_${{ matrix.config.app-name }}_${{ matrix.arch.artifact-name }}.dat
+          if-no-files-found: error
+          retention-days: 1
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel'
+
+
+  apt-upload:
+    name: Trigger update in apt repo
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build
+    steps:
       - name: Get repo name to use for APT trigger
         id: repo-name
         run: |
           echo "REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d "/" -f 2)" >>$GITHUB_OUTPUT
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true'
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Get tag name
+        id: tag-name
+        shell: bash
+        run: |
+          TAGNAME=$(echo $GITHUB_REF | cut -d / -f 3)
+          echo "TAGNAME=${TAGNAME}" >> $GITHUB_OUTPUT
+          echo "Tag is ${TAGNAME}"
+          echo "github.sha is ${{ github.sha }}"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Parse meta files for apt variables
+        id: apt-metadata
+        run: |
+          APPS_ARRAY="["
+          DIRECTORIES="./APP*"
+          for d in $DIRECTORIES; do \
+            FILES="$d/*.dat"; \
+            for f in $FILES; do \
+              APP=`cat $f`; \
+              APPS_ARRAY="${APPS_ARRAY}${APP},"; \
+            done; \
+          done;
+          APPS_ARRAY=${APPS_ARRAY%?}
+          APPS_ARRAY="${APPS_ARRAY}]"
+          echo "Array being passed is ${APPS_ARRAY}"
+          echo "APPLICATIONS=${APPS_ARRAY}" >> $GITHUB_OUTPUT
 
       - name: Trigger apt repo update
         run: |
-          curl -s -XPOST -H "Authorization: Bearer ${{ secrets.GLUE_ACCESS_TOKEN }}" --data '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ matrix.config.app-name }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"${{ matrix.arch.apt-arm-option }}"}' ${{ secrets.GLUE_API_URL }}/api/v1/climate-tokenization/${{ github.sha }}/start
-          curl -s -XPOST -H "Authorization: Bearer ${{ secrets.GLUE_ACCESS_TOKEN }}" --data '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ matrix.config.app-name }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"${{ matrix.arch.apt-arm-option }}"}' ${{ secrets.GLUE_API_URL }}/api/v1/climate-tokenization/${{ github.sha }}/success/deploy
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true'
+          curl -s -XPOST -H "Authorization: Bearer ${{ secrets.GLUE_ACCESS_TOKEN }}" --data '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ steps.apt-metadata.outputs.APPLICATIONS }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"available"}' ${{ secrets.GLUE_API_URL }}/api/v1/climate-tokenization/${{ github.sha }}/start
+          curl -s -XPOST -H "Authorization: Bearer ${{ secrets.GLUE_ACCESS_TOKEN }}" --data '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ steps.apt-metadata.outputs.APPLICATIONS }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"available"}' ${{ secrets.GLUE_API_URL }}/api/v1/climate-tokenization/${{ github.sha }}/success/deploy
+        if: startsWith(github.ref, 'refs/tags/')
