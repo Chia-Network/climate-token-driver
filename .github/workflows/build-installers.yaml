@@ -265,7 +265,7 @@ jobs:
         id: apt-metadata
         run: |
           APPS_ARRAY="["
-          DIRECTORIES="./APP*"
+          DIRECTORIES="./APTDATA*"
           for d in $DIRECTORIES; do \
             FILES="$d/*.dat"; \
             for f in $FILES; do \
