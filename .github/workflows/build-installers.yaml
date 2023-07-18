@@ -229,8 +229,8 @@ jobs:
       - name: Upload artifact to pass apt data to release job
         uses: actions/upload-artifact@v3
         with:
-          name: APTDATA_${{ matrix.config.app-name }}_${{ matrix.arch.artifact-name }}
-          path: APTDATA_${{ matrix.config.app-name }}_${{ matrix.arch.artifact-name }}.dat
+          name: APTDATA_${{ matrix.config.app-name }}
+          path: APTDATA_${{ matrix.config.app-name }}.dat
           if-no-files-found: error
           retention-days: 1
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel'
