@@ -59,6 +59,51 @@ For users of Debian, Ubuntu, Mint, PopOS, and other Debian-based distributions, 
 dpkg -i package-filename.deb
 ```
 
+The Chia Climate Tokenization and Climate Explorer applications are also available via apt:
+
+1. Start by updating apt and allowing repository download over HTTPS:
+
+```
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+```
+
+2.  Add Chia's official GPG Key (if you have installed Chia with `apt`, you'll have this key already and will get a message about overwriting the existing key, which is safe to do):
+
+```
+curl -sL https://repo.chia.net/FD39E6D3.pubkey.asc | sudo gpg --dearmor -o /usr/share/keyrings/chia.gpg
+```
+
+3. Use the following command to setup the repository.
+
+```
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/chia.gpg] https://repo.chia.net/climate-tokenization/debian/ stable main" | sudo tee /etc/apt/sources.list.d/climate-tokenization.list > /dev/null
+```
+
+4.  Install Chia Clmate Tokenization and Climate Explorer
+
+```
+sudo apt-get update
+sudo apt-get install climate-tokenization-chia
+sudo apt-get install climate-explorer-chia
+```
+
+5.  Start Chia Climate Tokenization and Climate Explorer with systemd
+
+```
+sudo systemctl start climate-tokenization-chia@<USERNAME>
+sudo systemctl start climate-explorer-chia@<USERNAME>
+```
+For `<USERNAME>`, enter the user that Chia runs as (the user with the `.chia` directory in their home directory).  For example, if the `ubuntu` is where Chia runs, start Chia Climate Tokenization with `systemctl start climate-tokenization-chia@ubuntu`.
+
+6.  Set the Chia Climate Tokenization and Climate Explorer to run at boot
+
+```
+sudo systemctl enable climate-tokenization-chia@<USERNAME>
+sudo systemctl enable climate-explorer-chia@<USERNAME>
+```
+
+
 ### From Source
 
 - Clone this repo.
