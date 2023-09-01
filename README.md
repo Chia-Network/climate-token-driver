@@ -17,7 +17,7 @@ This application can run in 4 modes, each providing a separate application with 
   * Mode: Client
   * Use case: A carbon token holder could use this in conjunction with the [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet) to manage their tokenized carbon credits
   * Port: 31314
-  * Application Name: climate-tokenization-chia
+  * Application Name: climate-token-driver
 * **Dev Mode (for developers only!)**:
   * Mode: Dev
   * Use case: Developers are able to test the software without having to communicate with the blockchain
