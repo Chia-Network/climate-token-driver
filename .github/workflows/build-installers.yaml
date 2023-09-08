@@ -78,7 +78,7 @@ jobs:
             electron-builder-options: --arm64
           - name: Intel
             matrix: intel
-            artifact-name: amd64
+            artifact-name: x86
             deb-platform: amd64
             electron-builder-options: --x64
         exclude:
@@ -148,21 +148,15 @@ jobs:
           cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}${{ matrix.os.executable-extension }}
 
       # Windows Code Signing
-      - name: Decode code signing cert into an encrypted file
-        uses: kitek/decode-base64-into-file-action@1.0
-        with:
-          encoded-value: ${{ secrets.WIN_CODE_SIGN_CERT }}
-          destination-file: .\win_code_sign_cert.pfx
-        if: matrix.os.matrix == 'windows'
-
-
       - name: Sign windows artifacts
-        uses: chia-network/actions/sign/windows@main
-        with:
-          certificate_path: .\win_code_sign_cert.pfx
-          certificate_password: ${{ secrets.WIN_CODE_SIGN_PASSWORD }}
-          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
         if: matrix.os.matrix == 'windows'
+        uses: chia-network/actions/digicert/windows-sign@main
+        with:
+          sm_api_key: ${{ secrets.SM_API_KEY }}
+          sm_client_cert_file_b64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
+          sm_client_cert_password: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          sm_code_signing_cert_sha1_hash: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
+          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
 
       - name: Create .deb Package
         env:
