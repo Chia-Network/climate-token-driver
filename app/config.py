@@ -54,17 +54,19 @@ class Settings(BaseSettings):
 
     @root_validator
     def configure_port(cls, values):
+        settings = get_settings()
+        
         if values["MODE"] == ExecutionMode.REGISTRY:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_REGISTRY.value
+            values["SERVER_PORT"] = settings.CLIMATE_TOKEN_REGISTRY_PORT or ServerPort.CLIMATE_TOKEN_REGISTRY.value
         elif values["MODE"] == ExecutionMode.CLIENT:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_CLIENT.value
+            values["SERVER_PORT"] = settings.CLIMATE_TOKEN_CLIENT_PORT or ServerPort.CLIMATE_TOKEN_CLIENT.value
         elif values["MODE"] == ExecutionMode.EXPLORER:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_EXPLORER.value
+            values["SERVER_PORT"] = settings.CLIMATE_EXPLORER_PORT or ServerPort.CLIMATE_EXPLORER.value
         elif values["MODE"] == ExecutionMode.DEV:
-            values["SERVER_PORT"] = ServerPort.DEV.value
+            values["SERVER_PORT"] = settings.DEV_PORT or ServerPort.DEV.value
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
-
+        
         return values
 
     @validator("CHIA_ROOT", pre=True)
