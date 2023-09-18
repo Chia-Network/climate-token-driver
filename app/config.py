@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
+    CLIMATE_EXPLORER_PORT: Optional[int] = None
+    CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
+    CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
+    DEV_PORT: Optional[int] = None
 
     @root_validator
     def configure_port(cls, values):
