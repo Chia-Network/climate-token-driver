@@ -60,19 +60,23 @@ class Settings(BaseSettings):
     def configure_port(cls, values):
         global settings
         if settings is None:
+            print("Settings is None.")
             return values
         
+        print(f"MODE: {values['MODE']}, Settings: {settings.__dict__}")
+
         if values["MODE"] == ExecutionMode.REGISTRY:
-            values["SERVER_PORT"] = int(getattr(settings, 'CLIMATE_TOKEN_REGISTRY_PORT', None) or ServerPort.CLIMATE_TOKEN_REGISTRY.value)
+            values["SERVER_PORT"] = int(getattr(settings, 'CLIMATE_TOKEN_REGISTRY_PORT', ServerPort.CLIMATE_TOKEN_REGISTRY.value))
         elif values["MODE"] == ExecutionMode.CLIENT:
-            values["SERVER_PORT"] = int(getattr(settings, 'CLIMATE_TOKEN_CLIENT_PORT', None) or ServerPort.CLIMATE_TOKEN_CLIENT.value)
+            values["SERVER_PORT"] = int(getattr(settings, 'CLIMATE_TOKEN_CLIENT_PORT', ServerPort.CLIMATE_TOKEN_CLIENT.value))
         elif values["MODE"] == ExecutionMode.EXPLORER:
-            values["SERVER_PORT"] = int(getattr(settings, 'CLIMATE_EXPLORER_PORT', None) or ServerPort.CLIMATE_EXPLORER.value)
+            values["SERVER_PORT"] = int(getattr(settings, 'CLIMATE_EXPLORER_PORT', ServerPort.CLIMATE_EXPLORER.value))
         elif values["MODE"] == ExecutionMode.DEV:
-            values["SERVER_PORT"] = int(getattr(settings, 'DEV_PORT', None) or ServerPort.DEV.value)
+            values["SERVER_PORT"] = int(getattr(settings, 'DEV_PORT', ServerPort.DEV.value))
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
-
+        
+        print(f"Set SERVER_PORT to {values['SERVER_PORT']}")
         return values
 
     @validator("CHIA_ROOT", pre=True)
