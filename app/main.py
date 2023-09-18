@@ -1,3 +1,5 @@
+import sys
+import time
 import traceback
 
 import uvicorn
@@ -42,6 +44,9 @@ if __name__ == "__main__":
         settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV]
         or settings.SERVER_HOST in ["127.0.0.1", "localhost"]
     ):
+        while settings is None:
+            print("Waiting for settings to load...")
+            time.sleep(1)
         uvicorn.run(
             app,
             host=settings.SERVER_HOST,
