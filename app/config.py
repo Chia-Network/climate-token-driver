@@ -7,13 +7,11 @@ from typing import Dict, Optional
 import yaml
 from pydantic import BaseSettings, root_validator, validator
 
-
 class ExecutionMode(enum.Enum):
     DEV = "dev"
     REGISTRY = "registry"
     CLIENT = "client"
     EXPLORER = "explorer"
-
 
 class ServerPort(enum.Enum):
     DEV = 31999
@@ -51,20 +49,31 @@ class Settings(BaseSettings):
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
+    CLIMATE_EXPLORER_PORT: Optional[int] = None
+    CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
+    CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
+    DEV_PORT: Optional[int] = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = get_settings()
+        return cls._instance
 
     @root_validator
     def configure_port(cls, values):
         if values["MODE"] == ExecutionMode.REGISTRY:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_REGISTRY.value
+            values["SERVER_PORT"] = values.get('CLIMATE_TOKEN_REGISTRY_PORT', ServerPort.CLIMATE_TOKEN_REGISTRY.value)
         elif values["MODE"] == ExecutionMode.CLIENT:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_CLIENT.value
+            values["SERVER_PORT"] = values.get('CLIMATE_TOKEN_CLIENT_PORT', ServerPort.CLIMATE_TOKEN_CLIENT.value)
         elif values["MODE"] == ExecutionMode.EXPLORER:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_EXPLORER.value
+            values["SERVER_PORT"] = values.get('CLIMATE_EXPLORER_PORT', ServerPort.CLIMATE_EXPLORER.value)
         elif values["MODE"] == ExecutionMode.DEV:
-            values["SERVER_PORT"] = ServerPort.DEV.value
+            values["SERVER_PORT"] = values.get('DEV_PORT', ServerPort.DEV.value)
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
-
+        
+        print(f"Set SERVER_PORT to {values['SERVER_PORT']}")
         return values
 
     @validator("CHIA_ROOT", pre=True)
@@ -105,8 +114,9 @@ def get_settings() -> Settings:
 
     settings_dict = default_settings.dict() | (settings_dict or {})
     settings = Settings(**settings_dict)
+    Settings._instance = Settings(**settings_dict)
 
-    return settings
+    return Settings._instance
 
 
 settings = get_settings()
