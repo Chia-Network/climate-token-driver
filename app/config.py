@@ -7,13 +7,13 @@ from typing import Dict, Optional
 import yaml
 from pydantic import BaseSettings, root_validator, validator
 
+settings = None
 
 class ExecutionMode(enum.Enum):
     DEV = "dev"
     REGISTRY = "registry"
     CLIENT = "client"
     EXPLORER = "explorer"
-
 
 class ServerPort(enum.Enum):
     DEV = 31999
@@ -25,6 +25,7 @@ class ServerPort(enum.Enum):
 
 
 class Settings(BaseSettings):
+    _instance = None
     _HIDDEN_FIELDS = ["MODE", "CHIA_ROOT", "CONFIG_PATH", "SERVER_PORT"]
 
     # Hidden configs: not exposed in config.yaml
@@ -51,20 +52,31 @@ class Settings(BaseSettings):
     CHIA_HOSTNAME: str = "localhost"
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
+    CLIMATE_EXPLORER_PORT: Optional[int] = None
+    CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
+    CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
+    DEV_PORT: Optional[int] = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = get_settings()
+        return cls._instance
 
     @root_validator
     def configure_port(cls, values):
         if values["MODE"] == ExecutionMode.REGISTRY:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_REGISTRY.value
+            values["SERVER_PORT"] = values.get('CLIMATE_TOKEN_REGISTRY_PORT', ServerPort.CLIMATE_TOKEN_REGISTRY.value)
         elif values["MODE"] == ExecutionMode.CLIENT:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_TOKEN_CLIENT.value
+            values["SERVER_PORT"] = values.get('CLIMATE_TOKEN_CLIENT_PORT', ServerPort.CLIMATE_TOKEN_CLIENT.value)
         elif values["MODE"] == ExecutionMode.EXPLORER:
-            values["SERVER_PORT"] = ServerPort.CLIMATE_EXPLORER.value
+            values["SERVER_PORT"] = values.get('CLIMATE_EXPLORER_PORT', ServerPort.CLIMATE_EXPLORER.value)
         elif values["MODE"] == ExecutionMode.DEV:
-            values["SERVER_PORT"] = ServerPort.DEV.value
+            values["SERVER_PORT"] = values.get('DEV_PORT', ServerPort.DEV.value)
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
-
+        
+        print(f"Set SERVER_PORT to {values['SERVER_PORT']}")
         return values
 
     @validator("CHIA_ROOT", pre=True)
@@ -80,33 +92,35 @@ class Settings(BaseSettings):
 
 
 def get_settings() -> Settings:
-    in_pyinstaller: bool = getattr(sys, "frozen", False)
+    if Settings._instance is None: 
+        in_pyinstaller: bool = getattr(sys, "frozen", False)
 
-    default_env_file: Path
-    default_config_file: Path
-    if in_pyinstaller:
-        default_env_file = Path(sys._MEIPASS) / ".env"
-        default_config_file = Path(sys._MEIPASS) / "config.yaml"
-    else:
-        default_env_file = Path(".env")
-        default_config_file = Path("config.yaml")
+        default_env_file: Path
+        default_config_file: Path
+        if in_pyinstaller:
+            default_env_file = Path(sys._MEIPASS) / ".env"
+            default_config_file = Path(sys._MEIPASS) / "config.yaml"
+        else:
+            default_env_file = Path(".env")
+            default_config_file = Path("config.yaml")
 
-    default_settings = Settings(_env_file=default_env_file)
-    config_file: Path = default_settings.CONFIG_PATH
+        default_settings = Settings(_env_file=default_env_file)
+        config_file: Path = default_settings.CONFIG_PATH
 
-    settings: Settings
-    settings_dict: Dict
-    if not config_file.is_file():
-        config_file.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(default_config_file, config_file)
+        settings: Settings
+        settings_dict: Dict
+        if not config_file.is_file():
+            config_file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(default_config_file, config_file)
 
-    with open(config_file, "r") as f:
-        settings_dict = yaml.safe_load(f)
+        with open(config_file, "r") as f:
+            settings_dict = yaml.safe_load(f)
 
-    settings_dict = default_settings.dict() | (settings_dict or {})
-    settings = Settings(**settings_dict)
+        settings_dict = default_settings.dict() | (settings_dict or {})
+        settings = Settings(**settings_dict)
+        Settings._instance = Settings(**settings_dict)
 
-    return settings
+    return Settings._instance
 
 
 settings = get_settings()
