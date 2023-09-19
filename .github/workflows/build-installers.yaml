@@ -165,7 +165,7 @@ jobs:
           PLATFORM: ${{ matrix.arch.deb-platform }}
           APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
-          DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}"
+          DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}"
           mkdir -p deb/$DEB_BASE/opt/${{ matrix.config.app-name }}
           cp dist/main deb/$DEB_BASE/opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }}
           chmod +x deb/$DEB_BASE/opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }}
@@ -181,7 +181,7 @@ jobs:
       - name: Upload deb
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
+          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
           if-no-files-found: error
         if: matrix.os.matrix == 'linux'
@@ -211,7 +211,7 @@ jobs:
         uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
-            ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.artifact-name }}.deb
+            ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
 
         # Only do for Intel builds as we know we build ARM and can pass that info along to the apt update automation
