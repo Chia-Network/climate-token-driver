@@ -9,8 +9,7 @@ from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.condition_opcodes import ConditionOpcode
 from chia.wallet.payment import Payment
 
-CLIMATE_WALLET_INDEX = 2050
-
+CLIMATE_WALLET_INDEX = 1
 
 class GatewayMode(enum.Enum):
     TOKENIZATION = "tokenization"
