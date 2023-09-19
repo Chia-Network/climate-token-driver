@@ -7,8 +7,6 @@ from typing import Dict, Optional
 import yaml
 from pydantic import BaseSettings, root_validator, validator
 
-settings = None
-
 class ExecutionMode(enum.Enum):
     DEV = "dev"
     REGISTRY = "registry"
@@ -25,7 +23,6 @@ class ServerPort(enum.Enum):
 
 
 class Settings(BaseSettings):
-    _instance = None
     _HIDDEN_FIELDS = ["MODE", "CHIA_ROOT", "CONFIG_PATH", "SERVER_PORT"]
 
     # Hidden configs: not exposed in config.yaml
@@ -92,33 +89,32 @@ class Settings(BaseSettings):
 
 
 def get_settings() -> Settings:
-    if Settings._instance is None: 
-        in_pyinstaller: bool = getattr(sys, "frozen", False)
+    in_pyinstaller: bool = getattr(sys, "frozen", False)
 
-        default_env_file: Path
-        default_config_file: Path
-        if in_pyinstaller:
-            default_env_file = Path(sys._MEIPASS) / ".env"
-            default_config_file = Path(sys._MEIPASS) / "config.yaml"
-        else:
-            default_env_file = Path(".env")
-            default_config_file = Path("config.yaml")
+    default_env_file: Path
+    default_config_file: Path
+    if in_pyinstaller:
+        default_env_file = Path(sys._MEIPASS) / ".env"
+        default_config_file = Path(sys._MEIPASS) / "config.yaml"
+    else:
+        default_env_file = Path(".env")
+        default_config_file = Path("config.yaml")
 
-        default_settings = Settings(_env_file=default_env_file)
-        config_file: Path = default_settings.CONFIG_PATH
+    default_settings = Settings(_env_file=default_env_file)
+    config_file: Path = default_settings.CONFIG_PATH
 
-        settings: Settings
-        settings_dict: Dict
-        if not config_file.is_file():
-            config_file.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy(default_config_file, config_file)
+    settings: Settings
+    settings_dict: Dict
+    if not config_file.is_file():
+        config_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(default_config_file, config_file)
 
-        with open(config_file, "r") as f:
-            settings_dict = yaml.safe_load(f)
+    with open(config_file, "r") as f:
+        settings_dict = yaml.safe_load(f)
 
-        settings_dict = default_settings.dict() | (settings_dict or {})
-        settings = Settings(**settings_dict)
-        Settings._instance = Settings(**settings_dict)
+    settings_dict = default_settings.dict() | (settings_dict or {})
+    settings = Settings(**settings_dict)
+    Settings._instance = Settings(**settings_dict)
 
     return Settings._instance
 
