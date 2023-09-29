@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     LOG_PATH: Path = Path("climate_token/log/debug.log")
     DB_PATH: Path = Path("climate_explorer/db/climate_activity_CHALLENGE.sqlite")
 
-    SERVER_HOST: str = "0.0.0.0"
+    CLIMATE_EXPLORER_SERVER_HOST: str = "0.0.0.0"
     BLOCK_START: int = 1_500_000
     BLOCK_RANGE: int = 10_000
     MIN_DEPTH: int = 4
