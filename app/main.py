@@ -38,20 +38,33 @@ if __name__ == "__main__":
     logger.info(f"Using settings {settings.dict()}")
     wait_until_dir_exists(settings.CHIA_ROOT)
 
+    server_host = ''
+
+    if (settings.MODE == ExecutionMode.EXPLORER):
+        server_host = settings.CLIMATE_EXPLORER_SERVER_HOST
+    elif (settings.MODE == ExecutionMode.DEV):
+        server_host = "127.0.0.1"
+    elif (settings.MODE == ExecutionMode.REGISTRY):
+        server_host = "127.0.0.1"
+    elif (settings.MODE == ExecutionMode.CLIENT):
+        server_host = "127.0.0.1"
+    else :
+        print(f"Invalid mode {settings.MODE}!")
+        sys.exit(1)
+
     if (
         settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV]
-        or settings.SERVER_HOST in ["127.0.0.1", "localhost"]
+        or server_host in ["127.0.0.1", "localhost"]
     ):
         uvicorn.run(
             app,
-            host=settings.SERVER_HOST,
+            host=server_host,
             port=settings.SERVER_PORT,
             log_level="info",
             log_config=log_config,
         )
     else:
         print(
-            f'Climate Token Driver can only run on localhost in {settings.MODE.name} mode. Please update'
-            f' SERVER_HOST in {settings.CHIA_ROOT / settings.CONFIG_PATH}'
+            f'Climate Token Driver can only run on localhost in {settings.MODE.name} mode.'
         )
         sys.exit(1)
