@@ -1,6 +1,35 @@
+## 1.0.27 (2023-09-29)
+
+### Fix
+
+- break out server host
+
+## 1.0.26 (2023-09-20)
+
+### Feat
+
+- change transaction type from 2050 to 1
+
+## 1.0.25 (2023-09-19)
+
+## 1.0.24 (2023-09-19)
+
 ## 1.0.23 (2023-09-11)
 
 ## 1.0.22 (2023-09-08)
+
+### Feat
+
+- use settings in module
+- make ports confirgurable
+
+### Fix
+
+- configre_ports
+- instance
+- cast to none
+- cast as it
+- add fields to settings class
 
 ## 1.0.21 (2023-07-19)
 
