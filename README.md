@@ -136,10 +136,7 @@ sudo systemctl enable climate-explorer-chia@<USERNAME>
 ## Configurations
 
 Note there are two steps the application loads the configurations:
-1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, `CONFIG_PATH`, and `SERVER_PORT`.
-   Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}`
-   and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the
-   default *flavor* for the binary (though it is overridden by system environment variables).
+1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, and `CONFIG_PATH`. Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}` and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the default *flavor* for the binary (though it is overridden by system environment variables).
 
 1. Then, a `config.yaml` file located at `${CHIA_ROOT}/${CONFIG_PATH}` is loaded, which adds to the configurations after `.env`.
    This part of the configuration is free to change by end binary users.
@@ -147,32 +144,36 @@ Note there are two steps the application loads the configurations:
 
 The whole list of configurable variables are detailed in [config.py](app/config.py), and below we provide brief explanations:
 
-- `MODE`: one of `dev`, `registry`, `client`, and `explorer`.
-          In the first mode, the application essentially enables all functionalities (endpoints), while in the rest, some select endpoints will be allowed.
-          Make sure the binaries are built with `MODE` not equal to `dev`.
-
-- `CHIA_ROOT`: the root of Chia wallets on the local machine, typically `~/.chia/mainnet`.
-- `CONFIG_PATH`: the path of the `config.yaml` file, relative to `${CHIA_ROOT}`.
-- `SERVER_HOST`: the network IP address this application binds to.  Setting to `0.0.0.0` listens on all interfaces, which is appropriate when running the Climate Explorer.  When running Chia Climate Tokenization, the `SERVER_HOST` must be `localhost` or `127.0.0.1` as this prevents the registry from accidentally being available on the public web, which would be a severe security issue.  When in Chia Climate Tokenization mode, the application should only be receiving requests from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine) which is expected to be run on the same host as Chia Climate Tokenization.
-- `SERVER_PORT`: you can leave this blank and the port will be automatically assigned based on `MODE`:
-  - `dev`: 31999
-  - `registry`: 31312
-  - `explorer`: 31313
-  - `client`: 31314
-
+- `MODE (environment variable)`: one of `dev`, `registry`, `client`, and `explorer`. In `dev` mode, the application essentially enables all functionalities (endpoints), while in the rest, some select endpoints will be allowed. Each mode has installers and executable binaries built and available on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page.
+- `CHIA_ROOT (environment variable)`: the root of Chia wallets on the local machine, typically `~/.chia/mainnet`.
+- `CONFIG_PATH (environment variable)`: the path of the `config.yaml` file, relative to `${CHIA_ROOT}`. Rarely needs to be changed.
 - `LOG_PATH`: the path this application write logs to, relative to `${CHIA_ROOT}`.
-- `CADT_API_SERVER_HOST`: the climate warehouse API URL.
-- `CADT_API_KEY`: the climate warehouse API key.
+- `CADT_API_SERVER_HOST`: the CADT API URL in the format of `scheme://domain:port/path`.
+- `CADT_API_KEY`: the CADT API key.
 
-Only when in `registry` and `client` modes, the following configurations are relevant:
+Only when in `registry` (Chia Climate Tokenization) and `client` (Climate Token Driver) modes, the following configurations are relevant:
 
 - `DEFAULT_FEE`: the fee, in mojos, for token-related transactions.
 - `CHIA_HOSTNAME`: the Chia service to connect to.
 - `CHIA_FULL_NODE_RPC_PORT`: the Chia full node RPC port.
 - `CHIA_WALLET_RPC_PORT`: the Chia wallet RPC port.
 
+Only in `registry` mode (Chia Climate Tokenization), the following configurations are relevant:
+
+- `CLIMATE_TOKEN_REGISTRY_PORT`: 31312 by default.
+
+There is no option to set the `SERVER_HOST` in registry mode as this is designed to only integrate with the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine) or other tokenization engines on localhost and will therefore only listen on 127.0.0.1.
+
+Only in `client` mode (Climate Token Driver) are the following configurations relevant:
+
+- `CLIMATE_TOKEN_CLIENT_PORT`: 31314 by default.
+
+As with `registry` mode, `client` mode is only designed to integrate with other tools (such as the [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet)) on localhost and therefore only listens on 127.0.0.1.
+
 Only when in `explorer` mode, the following configurations are relevant:
 
+- `CLIMATE_EXPLORER_SERVER_HOST`: Network interface to bind the climate explorer to. Default is `0.0.0.0` as the Climate Explorer is intended to be a publicly available interface.  Can be set to `127.0.0.1` to be privately available only on localhost.
+- `CLIMATE_EXPLORER_PORT`: 31313 by default.
 - `DB_PATH`: the database this application writes to, relative to `${CHIA_ROOT}`.
 - `BLOCK_START`: the block to start scanning for climate token activities.
 - `BLOCK_RANGE`: the number of blocks to scan for climate token activities at a time.
