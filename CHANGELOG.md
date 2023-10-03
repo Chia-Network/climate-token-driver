@@ -1,3 +1,10 @@
+## 1.0.28 (2023-10-03)
+
+### Fix
+
+- rework wallet indexes
+- update default CADT API in config
+
 ## 1.0.27 (2023-09-29)
 
 ### Fix
