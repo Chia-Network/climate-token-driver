@@ -92,7 +92,15 @@ jobs:
             arch:
               matrix: arm
           - config:
-              app-mode: [registry, explorer, dev]
+              app-mode: registry
+            preconfiguration:
+              name: testneta
+          - config:
+              app-mode: explorer
+            preconfiguration:
+              name: testneta
+          - config:
+              app-mode: dev
             preconfiguration:
               name: testneta
 
