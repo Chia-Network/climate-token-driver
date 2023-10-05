@@ -125,6 +125,8 @@ jobs:
         if: matrix.preconfiguration.name != 'default'
         run: |
           perl -pi -e 's{CADT_API_SERVER_HOST:\ str\ =.*}{CADT_API_SERVER_HOST:\ str\ =\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' app/config.py
+          perl -pi -e 's{CADT_API_SERVER_HOST:.*}{CADT_API_SERVER_HOST:\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' config.yaml
+          cat config.yaml
 
       - name: Create virtual environment
         uses: Chia-Network/actions/create-venv@main

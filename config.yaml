@@ -4,7 +4,7 @@ CLIMATE_EXPLORER_SERVER_HOST: 0.0.0.0
 BLOCK_START: 1500000
 BLOCK_RANGE: 10000
 MIN_DEPTH: 4
-CADT_API_SERVER_HOST: https://api.climatewarehouse.chia.net
+CADT_API_SERVER_HOST: https://observer.climateactiondata.org/api
 CADT_API_KEY:
 CHIA_HOSTNAME: localhost
 CHIA_FULL_NODE_RPC_PORT: 8555
