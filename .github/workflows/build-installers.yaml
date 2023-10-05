@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.name }} ${{ matrix.os.emoji }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
+    name: 👷 ${{ matrix.config.name }} ${{ matrix.os.emoji }} ${{ matrix.preconfiguration.name }} ${{ matrix.os.name }} ${{ matrix.arch.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     strategy:
       fail-fast: false
@@ -81,11 +81,28 @@ jobs:
             artifact-name: x64
             deb-platform: amd64
             electron-builder-options: --x64
+        preconfiguration:
+          - name: default
+            cadt-api-server-host: 'https://observer.climateactiondata.org/api'
+          - name: testneta
+            cadt-api-server-host: 'https://chia-cadt-demo.chiamanaged.com/observer'
         exclude:
           - os:
               matrix: windows
             arch:
               matrix: arm
+          - config:
+              app-mode: registry
+            preconfiguration:
+              name: testneta
+          - config:
+              app-mode: explorer
+            preconfiguration:
+              name: testneta
+          - config:
+              app-mode: dev
+            preconfiguration:
+              name: testneta
 
     steps:
       - name: Checkout Code
@@ -103,6 +120,13 @@ jobs:
           echo "MODE=${{ matrix.config.app-mode }}" > .env
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
           echo 'CONFIG_PATH="climate_token/config/config.yaml"' >> .env
+
+      - name: Apply preconfigurations
+        if: matrix.preconfiguration.name != 'default'
+        run: |
+          perl -pi -e 's{CADT_API_SERVER_HOST:\ str\ =.*}{CADT_API_SERVER_HOST:\ str\ =\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' app/config.py
+          perl -pi -e 's{CADT_API_SERVER_HOST:.*}{CADT_API_SERVER_HOST:\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' config.yaml
+          cat config.yaml
 
       - name: Create virtual environment
         uses: Chia-Network/actions/create-venv@main
@@ -184,7 +208,15 @@ jobs:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
           if-no-files-found: error
-        if: matrix.os.matrix == 'linux'
+        if: matrix.os.matrix == 'linux' && matrix.preconfiguration.name == 'default'
+
+      - name: Upload preconfigured deb
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.app-name }}-${{ matrix.preconfiguration.name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
+          path: ${{ github.workspace }}/deb/*.deb
+          if-no-files-found: error
+        if: matrix.os.matrix == 'linux' && matrix.preconfiguration.name != 'default'
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
@@ -192,6 +224,15 @@ jobs:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
+        if: matrix.preconfiguration.name == 'default'
+
+      - name: Upload preconfigured binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.config.app-name }}-${{ matrix.preconfiguration.name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
+          path: ${{ github.workspace }}/artifacts/*
+          if-no-files-found: error
+        if: matrix.preconfiguration.name != 'default'
 
       - name: Create zip files for release
         uses: thedoctor0/zip-release@0.7.1
@@ -199,26 +240,26 @@ jobs:
           type: 'zip'
           filename: ${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
           directory: 'artifacts'
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && matrix.preconfiguration.name == 'default'
 
       - name: Release executable
         uses: softprops/action-gh-release@v0.1.15
         with:
           files: ./artifacts/${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && matrix.preconfiguration.name == 'default'
 
       - name: Release debs
         uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
             ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.preconfiguration.name == 'default'
 
         # Only do for Intel builds as we know we build ARM and can pass that info along to the apt update automation
       - name: Create artifact with metadata for apt upload
         run: |
           echo "${{ matrix.config.app-name }}" > APTDATA_${{ matrix.config.app-name }}.dat
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
 
       - name: Upload artifact to pass apt data to release job
         uses: actions/upload-artifact@v3
@@ -227,7 +268,7 @@ jobs:
           path: APTDATA_${{ matrix.config.app-name }}.dat
           if-no-files-found: error
           retention-days: 1
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
 
 
   apt-upload:
