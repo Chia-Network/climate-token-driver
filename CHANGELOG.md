@@ -1,3 +1,9 @@
+## 1.0.29 (2023-10-05)
+
+### Fix
+
+- update the default cadt api host
+
 ## 1.0.28 (2023-10-03)
 
 ### Fix
