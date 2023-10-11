@@ -1,3 +1,5 @@
+import json;
+
 from typing import Any, Dict, Tuple
 
 from blspy import G1Element, G2Element
@@ -14,6 +16,7 @@ from app.core import utils
 from app.core.climate_wallet.wallet import ClimateWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
 from app.utils import disallow
+from app.logger import logger
 
 router = APIRouter()
 
@@ -302,6 +305,22 @@ async def create_permissionless_retirement_tx(
         wallet_client=wallet_rpc_client,
     )
 
+    # Create a dictionary with the variables you want to log
+    log_data = {
+        "amount": payment.amount,
+        "fee": payment.fee,
+        "beneficiary_name": payment.beneficiary_name.encode(),
+        "beneficiary_address": payment.beneficiary_address.encode(),
+        "beneficiary_puzzle_hash": payment.beneficiary_puzzle_hash,
+        "wallet_id": cat_wallet_info.id
+    }
+
+    # Convert the dictionary to a JSON-formatted string
+    log_data_json = json.dumps(log_data)
+
+    # Log the JSON-formatted string
+    logger.warning(log_data_json)
+
     result: Dict = await wallet.send_permissionless_retirement_transaction(
         amount=payment.amount,
         fee=payment.fee,
@@ -310,6 +329,7 @@ async def create_permissionless_retirement_tx(
         beneficiary_puzzle_hash=payment.beneficiary_puzzle_hash,
         wallet_id=cat_wallet_info.id,
     )
+
     (transaction_record, *_) = result["transaction_records"]
 
     return schemas.PermissionlessRetirementTxResponse(
