@@ -106,7 +106,7 @@ class ClimateWallet(ClimateWalletBase):
         mode_to_secret_key: Dict[GatewayMode, PrivateKey] = {}
         mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {}
         for mode in GatewayMode:
-            secret_key: PrivateKey = root_sk_to_gateway_sk(root_secret_key, mode=mode)
+            secret_key: PrivateKey = root_sk_to_gateway_sk(root_secret_key)
             public_key: G1Element = secret_key.get_g1()
 
             gateway_puzzle: Program = create_gateway_puzzle()
