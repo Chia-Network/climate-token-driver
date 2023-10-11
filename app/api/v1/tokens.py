@@ -309,9 +309,6 @@ async def create_permissionless_retirement_tx(
     log_data = {
         "amount": payment.amount,
         "fee": payment.fee,
-        "beneficiary_name": payment.beneficiary_name.encode(),
-        "beneficiary_address": payment.beneficiary_address.encode(),
-        "beneficiary_puzzle_hash": payment.beneficiary_puzzle_hash,
         "wallet_id": cat_wallet_info.id
     }
 
