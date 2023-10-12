@@ -46,6 +46,7 @@ from app.core.utils import (
     get_wallet_info_by_id,
 )
 from app.logger import logger
+from chia.consensus.default_constants import DEFAULT_CONSTANTS 
 
 
 @dataclasses.dataclass
@@ -288,6 +289,7 @@ class ClimateWallet(ClimateWalletBase):
         coins: List[Coin] = await self.wallet_client.select_coins(
             amount=amount,
             wallet_id=wallet_id,
+            max_coin_amount=DEFAULT_CONSTANTS.MAX_COIN_AMOUNT,
         )
         if not len(coins):
             raise ValueError(f"Insufficient balance!")
@@ -377,6 +379,7 @@ class ClimateWallet(ClimateWalletBase):
         coins: List[Coin] = await self.wallet_client.select_coins(
             amount=amount + fee,
             wallet_id=wallet_id,
+            max_coin_amount=DEFAULT_CONSTANTS.MAX_COIN_AMOUNT,
         )
         if not len(coins):
             raise ValueError(f"Insufficient balance!")
