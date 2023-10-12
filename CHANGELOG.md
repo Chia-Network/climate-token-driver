@@ -1,3 +1,9 @@
+## 1.0.33 (2023-10-12)
+
+### Fix
+
+- add missing max coin amount in select coin call
+
 ## 1.0.32 (2023-10-11)
 
 ## 1.0.31 (2023-10-11)
