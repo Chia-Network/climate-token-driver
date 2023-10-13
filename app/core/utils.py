@@ -1,3 +1,5 @@
+import json
+
 from typing import Any, Dict, List, Optional
 
 from blspy import G1Element, PrivateKey
@@ -17,6 +19,7 @@ from chia.wallet.wallet_info import WalletInfo
 from app.core.derive_keys import master_sk_to_root_sk
 from app.core.types import TransactionRequest
 from app.logger import logger
+from chia.consensus.default_constants import DEFAULT_CONSTANTS 
 
 
 async def get_constants(
@@ -119,17 +122,25 @@ async def get_created_signed_transactions(
     wallet_client: WalletRpcClient,
 ) -> List[TransactionRecord]:
 
-    maybe_transaction_records = await wallet_client.create_signed_transaction(
+    maybe_transaction_records = await wallet_client.create_signed_transactions(
         coins=transaction_request.coins,
         additions=transaction_request.additions,
         coin_announcements=transaction_request.coin_announcements,
         puzzle_announcements=transaction_request.puzzle_announcements,
         fee=transaction_request.fee,
         wallet_id=wallet_id,
+        max_coin_amount=DEFAULT_CONSTANTS.MAX_COIN_AMOUNT,
     )
+
     if isinstance(maybe_transaction_records, list):
         transaction_records = maybe_transaction_records
     else:
         transaction_records = [maybe_transaction_records]
+
+    # Print out a serialized version of transaction_records
+    try:
+        print(json.dumps(transaction_records, indent=4))
+    except TypeError:
+        print("The objects inside transaction_records are not serializable.")
 
     return transaction_records
