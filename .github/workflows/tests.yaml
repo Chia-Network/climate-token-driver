@@ -37,7 +37,7 @@ jobs:
       - name: Run poetry install
         uses: Chia-Network/actions/poetry@main
         with:
-          python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+          python-executable: ${{ steps.create-venv.outputs.python_executable }}
           poetry-command: "install --with dev"
 
       - name: Run Python tests
