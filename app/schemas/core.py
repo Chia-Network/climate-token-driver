@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, get_type_hints
+from typing import Any, Dict, get_type_hints
 
 from chia.util.byte_types import hexstr_to_bytes
 from pydantic import BaseModel as PydanticBaseModel
@@ -9,15 +9,15 @@ from app.core.types import GatewayMode
 
 class BaseModel(PydanticBaseModel):
     @root_validator(pre=True)
-    def convert(cls, values: Dict[str, Any]):
-        field_to_type: Dict[str, Type] = get_type_hints(cls)
+    def convert(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        field_to_type = get_type_hints(cls)
 
         return_values: Dict[str, Any] = {}
-        for (key, value) in values.items():
+        for key, value in values.items():
             if key not in cls.__fields__.keys():
                 continue
 
-            type_: Type = field_to_type[key]
+            type_ = field_to_type[key]
             if (type_ is bytes) and isinstance(value, str):
                 value = hexstr_to_bytes(value)
 

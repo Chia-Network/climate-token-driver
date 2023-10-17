@@ -1,4 +1,3 @@
-from sqlalchemy import desc, asc
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends
@@ -25,7 +24,7 @@ async def get_activity(
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 10,
-    sort: str = 'desc',
+    sort: str = "desc",
     db: Session = Depends(deps.get_db_session),
 ):
     """Get activity.
@@ -54,7 +53,7 @@ async def get_activity(
             pass
         case _:
             raise ErrorCode().bad_request_error(message="search_by is invalid")
-        
+
     if minHeight is not None:
         activity_filters["and"].append(models.Activity.height >= minHeight)
 
@@ -77,7 +76,7 @@ async def get_activity(
     total: int
 
     order_by_clause = []
-    if sort.lower() == 'desc':
+    if sort.lower() == "desc":
         order_by_clause.append(models.Activity.height.desc())
         order_by_clause.append(models.Activity.coin_id.desc())
     else:

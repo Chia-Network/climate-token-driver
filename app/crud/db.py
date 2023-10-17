@@ -64,7 +64,9 @@ class DBCrudBase(object):
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
 
-    def select_activity_with_pagination(self, model: Any, filters: Any, order_by: Any, limit: int, page: int):
+    def select_activity_with_pagination(
+        self, model: Any, filters: Any, order_by: Any, limit: int, page: int
+    ):
         try:
             query = self.db.query(model).filter(
                 or_(*filters["or"]), and_(*filters["and"])
@@ -82,6 +84,7 @@ class DBCrudBase(object):
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")
 
+
 @dataclasses.dataclass
 class DBCrud(DBCrudBase):
     def create_activity(self, activity: schemas.Activity) -> models.Activity:
@@ -91,7 +94,6 @@ class DBCrud(DBCrudBase):
         self,
         activities: List[schemas.Activity],
     ) -> bool:
-
         db_activities = []
         for activity in activities:
             db_activity = models.Activity(**jsonable_encoder(activity))

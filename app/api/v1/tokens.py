@@ -1,9 +1,9 @@
-import json;
-
+import json
 from typing import Any, Dict, Tuple
 
 from blspy import G1Element, G2Element
 from chia.rpc.wallet_rpc_client import WalletRpcClient
+from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
@@ -15,8 +15,8 @@ from app.config import ExecutionMode
 from app.core import utils
 from app.core.climate_wallet.wallet import ClimateWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
-from app.utils import disallow
 from app.logger import logger
+from app.utils import disallow
 
 router = APIRouter()
 
@@ -39,8 +39,8 @@ async def create_tokenization_tx(
         wallet_client=wallet_rpc_client
     )
 
-    token: schemas.Token = request.token
-    payment: schemas.Payment = request.payment
+    token = request.token
+    payment = request.payment
 
     token_index = ClimateTokenIndex(
         org_uid=token.org_uid,
@@ -68,6 +68,9 @@ async def create_tokenization_tx(
     }
 
     for mode in GatewayMode:
+        if wallet.mode_to_public_key is None:
+            raise ValueError("Wallet mode to public key is None!")
+
         public_key: G1Element = wallet.mode_to_public_key[mode]
 
         mod_hash: bytes
@@ -163,8 +166,8 @@ async def create_detokenization_file(
     This endpoint is to be called by the client.
     """
 
-    token: schemas.TokenOnChain = request.token
-    payment: schemas.Payment = request.payment
+    token = request.token
+    payment = request.payment
 
     token_index = ClimateTokenIndex(
         org_uid=token.org_uid,
@@ -172,10 +175,10 @@ async def create_detokenization_file(
         vintage_year=token.vintage_year,
         sequence_num=token.sequence_num,
     )
-    tail_metadata: schemas.TailMetadataBase = token.detokenization
+    tail_metadata = token.detokenization
 
     mode_to_public_key: Dict[GatewayMode, G1Element] = {
-        GatewayMode.DETOKENIZATION: tail_metadata.public_key,
+        GatewayMode.DETOKENIZATION: G1Element.from_bytes(tail_metadata.public_key),
     }
     mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {
         GatewayMode.DETOKENIZATION: (
@@ -187,7 +190,7 @@ async def create_detokenization_file(
 
     wallet = ClimateWallet(
         token_index=token_index,
-        root_public_key=token.public_key,
+        root_public_key=G1Element.from_bytes(token.public_key),
         mode_to_public_key=mode_to_public_key,
         mode_to_message_and_signature=mode_to_message_and_signature,
         wallet_client=wallet_rpc_client,
@@ -198,9 +201,11 @@ async def create_detokenization_file(
         raise ValueError(f"Asset id {asset_id} inconsistent with request body!")
 
     cat_wallet_info = await utils.get_cat_wallet_info_by_asset_id(
-        asset_id=hexstr_to_bytes(asset_id),
+        asset_id=bytes32.from_hexstr(asset_id),
         wallet_client=wallet_rpc_client,
     )
+    if cat_wallet_info is None:
+        raise ValueError(f"Asset id {asset_id} not found in wallet!")
 
     result: Dict = await wallet.create_detokenization_request(
         amount=payment.amount,
@@ -270,7 +275,7 @@ async def create_permissionless_retirement_tx(
     This endpoint is to be called by the client.
     """
 
-    token: schemas.TokenOnChain = request.token
+    token = request.token
     payment: schemas.RetirementPaymentWithPayer = request.payment
 
     token_index = ClimateTokenIndex(
@@ -279,7 +284,7 @@ async def create_permissionless_retirement_tx(
         vintage_year=token.vintage_year,
         sequence_num=token.sequence_num,
     )
-    tail_metadata: schemas.TailMetadataBase = token.permissionless_retirement
+    tail_metadata = token.permissionless_retirement
 
     mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {
         GatewayMode.PERMISSIONLESS_RETIREMENT: (
@@ -291,7 +296,7 @@ async def create_permissionless_retirement_tx(
 
     wallet = ClimateWallet(
         token_index=token_index,
-        root_public_key=token.public_key,
+        root_public_key=G1Element.from_bytes(token.public_key),
         mode_to_message_and_signature=mode_to_message_and_signature,
         wallet_client=wallet_rpc_client,
         constants=constants,
@@ -301,15 +306,17 @@ async def create_permissionless_retirement_tx(
         raise ValueError(f"Asset id {asset_id} inconsistent with request body!")
 
     cat_wallet_info = await utils.get_cat_wallet_info_by_asset_id(
-        asset_id=hexstr_to_bytes(asset_id),
+        asset_id=bytes32.from_hexstr(asset_id),
         wallet_client=wallet_rpc_client,
     )
+    if cat_wallet_info is None:
+        raise ValueError(f"Asset id {asset_id} not found in wallet!")
 
     # Create a dictionary with the variables you want to log
     log_data = {
         "amount": payment.amount,
         "fee": payment.fee,
-        "wallet_id": cat_wallet_info.id
+        "wallet_id": cat_wallet_info.id,
     }
 
     # Convert the dictionary to a JSON-formatted string

@@ -6,19 +6,19 @@ from chia.types.blockchain_format.program import INFINITE_COST, Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.types.condition_opcodes import ConditionOpcode
-from chia.types.spend_bundle import SpendBundle
 from chia.util.condition_tools import (
     conditions_dict_for_solution,
     pkm_pairs_for_conditions_dict,
 )
+from chia.util.ints import uint64
 from chia.wallet.cat_wallet.cat_utils import (
+    CAT_MOD,
     SpendableCAT,
     construct_cat_puzzle,
     unsigned_spend_bundle_for_spendable_cats,
 )
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
-from chia.wallet.puzzles.cat_loader import CAT_MOD
 
 from app.core.chialisp.gateway import (
     create_gateway_announcement,
@@ -35,7 +35,7 @@ GATEWAY_MOD = load_clvm_locally("gateway_with_conditions.clsp")
 def create_gateway_request_and_spend(
     mode: GatewayMode,
     origin_coin: Coin,
-    amount: int,
+    amount: uint64,
     tail_program: Program,
     coins: Optional[List[Coin]] = None,
     fee: int = 0,
@@ -44,8 +44,7 @@ def create_gateway_request_and_spend(
     from_puzzle_hash: Optional[bytes32] = None,
     to_puzzle_hash: Optional[bytes32] = None,
     key_value_pairs: Optional[List[Tuple[Any, Any]]] = None,
-) -> Tuple[Program, SpendBundle]:
-
+) -> Tuple[TransactionRequest, CoinSpend]:
     tail_program_hash: bytes32 = tail_program.get_tree_hash()
 
     gateway_puzzle: Program = create_gateway_puzzle()
@@ -80,7 +79,7 @@ def create_gateway_request_and_spend(
         lineage_proof = LineageProof(
             parent_name=origin_coin.parent_coin_info,
             inner_puzzle_hash=from_puzzle_hash,
-            amount=origin_coin.amount,
+            amount=uint64(origin_coin.amount),
         )
         gateway_payment = Payment(
             puzzle_hash=gateway_puzzle_hash,
@@ -102,7 +101,7 @@ def create_gateway_request_and_spend(
     tail_solution = Program.to([delegated_puzzle, delegated_solution])
 
     extra_delta: int = 0
-    conditions: List[List] = []
+    conditions = []
 
     conditions.append(
         [ConditionOpcode.CREATE_COIN, None, -113, tail_program, tail_solution]
@@ -159,29 +158,27 @@ def create_gateway_signature(
     ] = None,
     allow_missing: bool = False,
 ) -> G2Element:
-
     if public_key_to_secret_key is None:
         public_key_to_secret_key = {}
 
     if public_key_message_to_signature is None:
         public_key_message_to_signature = {}
 
-    (_, conditions_dict, _) = conditions_dict_for_solution(
+    conditions_dict = conditions_dict_for_solution(
         coin_spend.puzzle_reveal,
         coin_spend.solution,
         INFINITE_COST,
     )
 
     signatures: List[G2Element] = []
-    for (public_key, message) in pkm_pairs_for_conditions_dict(
+    for public_key, message in pkm_pairs_for_conditions_dict(
         conditions_dict,
-        coin_spend.coin.name(),
+        coin_spend.coin,
         agg_sig_additional_data,
     ):
-
         signature: Optional[G2Element] = None
 
-        secret_key: PrivateKey = public_key_to_secret_key.get(public_key)
+        secret_key = public_key_to_secret_key.get(public_key)
         if secret_key is not None:
             signature = AugSchemeMPL.sign(secret_key, message)
 

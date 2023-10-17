@@ -17,7 +17,6 @@ def create_tail_program(
     public_key: G1Element,
     index: Program,
 ) -> Program:
-
     return DELEGATED_TAIL_MOD.curry(public_key, index)
 
 
@@ -25,7 +24,6 @@ def create_mint_with_signature_program(
     public_key: G1Element,
     gateway_puzzle_hash: bytes32,
 ) -> Program:
-
     return MINT_WITH_SIGNATURE_MOD.curry(public_key, gateway_puzzle_hash)
 
 
@@ -33,14 +31,12 @@ def create_melt_all_with_signature_program(
     public_key: G1Element,
     gateway_puzzle_hash: bytes32,
 ) -> Program:
-
     return MELT_ALL_WITH_SIGNATURE_MOD.curry(public_key, gateway_puzzle_hash)
 
 
 def create_melt_all_by_anyone_program(
     gateway_puzzle_hash: bytes32,
 ) -> Program:
-
     return MELT_ALL_BY_ANYONE_MOD.curry(gateway_puzzle_hash)
 
 
@@ -49,18 +45,17 @@ def create_delegated_puzzle(
     gateway_puzzle_hash: bytes32,
     public_key: Optional[G1Element] = None,
 ) -> Program:
-
-    if public_key is None:
-        if mode in [GatewayMode.TOKENIZATION, GatewayMode.DETOKENIZATION]:
-            raise ValueError(f"Mode {mode!s} requires specifying `public_key`!")
-
     if mode == GatewayMode.TOKENIZATION:
+        if public_key is None:
+            raise ValueError("TOKENIZATION requires specifying `public_key`!")
         delegated_puzzle = create_mint_with_signature_program(
             public_key=public_key,
             gateway_puzzle_hash=gateway_puzzle_hash,
         )
 
     elif mode == GatewayMode.DETOKENIZATION:
+        if public_key is None:
+            raise ValueError("DETOKENIZATION requires specifying `public_key`!")
         delegated_puzzle = create_melt_all_with_signature_program(
             public_key=public_key,
             gateway_puzzle_hash=gateway_puzzle_hash,
