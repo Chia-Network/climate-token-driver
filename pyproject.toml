@@ -11,8 +11,7 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-chia-blockchain = { path = "./chia-blockchain", develop = true }
-#chia-blockchain = "^1.7.1"
+#chia-blockchain = { path = "./chia-blockchain", develop = true }
 fastapi = "^0.83.0"
 uvicorn = "^0.18.3"
 SQLAlchemy = "^1.4.41"
@@ -20,7 +19,10 @@ requests = "^2.28.1"
 fastapi-utils = "^0.2.1"
 SQLAlchemy-Utils = "^0.38.3"
 pydantic = { extras = ["dotenv"], version = "^1.10.2" }
-pytest-xdist = "3.3.1"
+chia-blockchain = "2.1.1"
+
+[tool.poetry.group.dev]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 # has to be disabled unfortunately due to developing chia-blockchain
@@ -29,6 +31,10 @@ pytest = "^7.1.2"
 pytest-asyncio = "^0.21.0"
 commitizen = "^2.27.1"
 pytest-xdist = "^3.3.1"
+black = "23.7.0"
+isort = "5.12.0"
+flake8 = "6.1.0"
+mypy = "1.4.1"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
