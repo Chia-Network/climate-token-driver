@@ -34,10 +34,6 @@ jobs:
         with:
           directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
 
-      - name: Create virtual environment for Poetry
-        uses: Chia-Network/actions/create-venv@main
-        id: create-poetry-venv
-
       - name: Run poetry install
         uses: Chia-Network/actions/poetry@main
         with:
