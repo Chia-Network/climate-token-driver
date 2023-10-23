@@ -16,7 +16,7 @@ jobs:
     env:
       CHIA_ROOT: ${{ github.workspace }}/.chia/mainnet
       CHIA_SIMULATOR_ROOT: ${{ github.workspace }}/.chia/simulator
-      BLOCKS_AND_PLOTS_VERSION: 0.33.0
+      BLOCKS_AND_PLOTS_VERSION: 0.35.0
 
     steps:
       - name: Clean workspace
@@ -65,9 +65,6 @@ jobs:
           gh release download ${{ env.BLOCKS_AND_PLOTS_VERSION }} -R Chia-Network/test-cache --archive=tar.gz -O - | tar xzf -
           mkdir "${GITHUB_WORKSPACE}/.chia"
           mv "${GITHUB_WORKSPACE}/test-cache-${{ env.BLOCKS_AND_PLOTS_VERSION }}/"* "${GITHUB_WORKSPACE}/.chia"
-          echo "${GITHUB_WORKSPACE}/.chia"
-          ls -l "${GITHUB_WORKSPACE}/.chia"
-          ls -l "${GITHUB_WORKSPACE}/.chia/test-plots"
 
       - name: Run Python tests
         env:
