@@ -19,6 +19,8 @@ jobs:
 
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Setup Python
         uses: Chia-Network/actions/setup-python@main
@@ -40,8 +42,9 @@ jobs:
           poetry-command: "install --with dev"
 
       - name: Run Python tests
+        env:
+          MODE: dev
+          PYTHONPATH: ".:./chia-blockchain"
         run: |
-          export MODE=dev
-          export PYTHONPATH=.:./chia-blockchain
           python -c "import sys;print(sys.path)"
           python -m pytest -k "not TestActivities" tests
