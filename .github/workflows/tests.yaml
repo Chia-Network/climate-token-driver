@@ -71,7 +71,6 @@ jobs:
           MODE: dev
           PYTHONPATH: ".:./chia-blockchain"
         run: |
-          pip install anyio==3.7.1
           chia init
           chia version
           python -m pytest tests

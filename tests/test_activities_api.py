@@ -1,6 +1,7 @@
 from unittest import mock
 from urllib.parse import urlencode
 
+import anyio
 import fastapi
 import pytest
 from fastapi.encoders import jsonable_encoder
@@ -17,7 +18,10 @@ class TestActivities:
     def test_activities_with_search_by_then_error(
         self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        with monkeypatch.context() as m:
+        with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
+            fastapi_client.portal = (
+                portal  # workaround anyio 4.0.0 incompat with TextClient
+            )
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             test_request = {"search_by": "error", "search": ""}
 
@@ -34,7 +38,10 @@ class TestActivities:
         mock_climate_warehouse_data = mock.MagicMock()
         mock_climate_warehouse_data.return_value = []
 
-        with monkeypatch.context() as m:
+        with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
+            fastapi_client.portal = (
+                portal  # workaround anyio 4.0.0 incompat with TextClient
+            )
             m.setattr(
                 crud.ClimateWareHouseCrud,
                 "combine_climate_units_and_metadata",
@@ -56,7 +63,10 @@ class TestActivities:
         mock_db_data = mock.MagicMock()
         mock_db_data.return_value = ([], 0)
 
-        with monkeypatch.context() as m:
+        with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
+            fastapi_client.portal = (
+                portal  # workaround anyio 4.0.0 incompat with TextClient
+            )
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
 
@@ -255,7 +265,10 @@ class TestActivities:
                 },
             }
         ]
-        with monkeypatch.context() as m:
+        with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
+            fastapi_client.portal = (
+                portal  # workaround anyio 4.0.0 incompat with TextClient
+            )
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
             m.setattr(
@@ -467,7 +480,10 @@ class TestActivities:
             }
         ]
 
-        with monkeypatch.context() as m:
+        with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
+            fastapi_client.portal = (
+                portal  # workaround anyio 4.0.0 incompat with TextClient
+            )
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
             m.setattr(
