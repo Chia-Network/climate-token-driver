@@ -40,4 +40,7 @@ jobs:
           poetry-command: "install --with dev"
 
       - name: Run Python tests
-        run: MODE=dev python -m pytest -k "not TestActivities" tests
+        env:
+          PYTHONPATH: "./chia-blockchain"
+          MODE: dev
+        run: python -m pytest -k "not TestActivities" tests
