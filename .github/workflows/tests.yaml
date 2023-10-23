@@ -13,6 +13,11 @@ jobs:
     name: Python tests
     runs-on: ubuntu-latest
 
+    env:
+      CHIA_ROOT: ${{ github.workspace }}/.chia/mainnet
+      CHIA_SIMULATOR_ROOT: ${{ github.workspace }}/.chia/simulator
+      BLOCKS_AND_PLOTS_VERSION: 0.33.0
+
     steps:
       - name: Clean workspace
         uses: Chia-Network/actions/clean-workspace@main
@@ -50,16 +55,16 @@ jobs:
           path: |
             ${{ github.workspace }}/.chia/blocks
             ${{ github.workspace }}/.chia/test-plots
-          key: 0.35.0
+          key: ${{ env.BLOCKS_AND_PLOTS_VERSION }}
 
       - name: Checkout test blocks and plots
         if: steps.test-blocks-plots.outputs.cache-hit != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download 0.35.0 -R Chia-Network/test-cache --archive=tar.gz -O - | tar xzf -
+          gh release download ${{ env.BLOCKS_AND_PLOTS_VERSION }} -R Chia-Network/test-cache --archive=tar.gz -O - | tar xzf -
           mkdir "${GITHUB_WORKSPACE}/.chia"
-          mv "${GITHUB_WORKSPACE}/test-cache-0.35.0/"* "${GITHUB_WORKSPACE}/.chia"
+          mv "${GITHUB_WORKSPACE}/test-cache-${{ env.BLOCKS_AND_PLOTS_VERSION }}/"* "${GITHUB_WORKSPACE}/.chia"
           echo "${GITHUB_WORKSPACE}/.chia"
           ls -l "${GITHUB_WORKSPACE}/.chia"
           ls -l "${GITHUB_WORKSPACE}/.chia/test-plots"
@@ -68,6 +73,4 @@ jobs:
         env:
           MODE: dev
           PYTHONPATH: ".:./chia-blockchain"
-        run: |
-          python -c "import sys;print(sys.path)"
-          python -m pytest -k "not TestActivities" tests
+        run: python -m pytest -k "not TestActivities" tests
