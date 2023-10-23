@@ -43,4 +43,5 @@ jobs:
         run: |
           export MODE=dev
           export PYTHONPATH=.:./chia-blockchain
+          python -c "import sys;print(sys.path)"
           python -m pytest -k "not TestActivities" tests
