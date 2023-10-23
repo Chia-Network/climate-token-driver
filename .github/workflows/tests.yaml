@@ -73,4 +73,4 @@ jobs:
         run: |
           chia init
           chia version
-          python -m pytest -k "not TestActivities" tests
+          python -m pytest tests
