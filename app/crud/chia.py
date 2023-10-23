@@ -161,7 +161,7 @@ class ClimateWareHouseCrud(object):
 
             try:
                 org_metadata = metadata_by_id[tmp_org_uid]
-                metadata = json.loads(org_metadata.get(f"meta_{asset_id}", "{}"))
+                metadata = json.loads(org_metadata.get(asset_id, "{}"))
             except KeyError:
                 logger.warning("Can not get metadata by org_uid")
                 continue
