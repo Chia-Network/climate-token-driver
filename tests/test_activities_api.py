@@ -9,14 +9,20 @@ from fastapi.testclient import TestClient
 from app import crud, models, schemas
 
 
+async def mock_get_challenge(x: crud.BlockChainCrud) -> str:
+    return "testnet"
+
+
 class TestActivities:
     def test_activities_with_search_by_then_error(
         self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        test_request = {"search_by": "error", "search": ""}
+        with monkeypatch.context() as m:
+            m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
+            test_request = {"search_by": "error", "search": ""}
 
-        params = urlencode(test_request)
-        response = fastapi_client.get("v1/activities/", params=params)
+            params = urlencode(test_request)
+            response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -28,14 +34,16 @@ class TestActivities:
         mock_climate_warehouse_data = mock.MagicMock()
         mock_climate_warehouse_data.return_value = []
 
-        monkeypatch.setattr(
-            crud.ClimateWareHouseCrud,
-            "combine_climate_units_and_metadata",
-            mock_climate_warehouse_data,
-        )
+        with monkeypatch.context() as m:
+            m.setattr(
+                crud.ClimateWareHouseCrud,
+                "combine_climate_units_and_metadata",
+                mock_climate_warehouse_data,
+            )
+            m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
 
-        params = urlencode({})
-        response = fastapi_client.get("v1/activities/", params=params)
+            params = urlencode({})
+            response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == test_response
@@ -48,12 +56,12 @@ class TestActivities:
         mock_db_data = mock.MagicMock()
         mock_db_data.return_value = ([], 0)
 
-        monkeypatch.setattr(
-            crud.DBCrud, "select_activity_with_pagination", mock_db_data
-        )
+        with monkeypatch.context() as m:
+            m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
+            m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
 
-        params = urlencode({})
-        response = fastapi_client.get("v1/activities/", params=params)
+            params = urlencode({})
+            response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == test_response
@@ -247,18 +255,17 @@ class TestActivities:
                 },
             }
         ]
+        with monkeypatch.context() as m:
+            m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
+            m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
+            m.setattr(
+                crud.ClimateWareHouseCrud,
+                "combine_climate_units_and_metadata",
+                mock_climate_warehouse_data,
+            )
 
-        monkeypatch.setattr(
-            crud.DBCrud, "select_activity_with_pagination", mock_db_data
-        )
-        monkeypatch.setattr(
-            crud.ClimateWareHouseCrud,
-            "combine_climate_units_and_metadata",
-            mock_climate_warehouse_data,
-        )
-
-        params = urlencode({})
-        response = fastapi_client.get("v1/activities/", params=params)
+            params = urlencode({})
+            response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == jsonable_encoder(test_response)
@@ -460,17 +467,17 @@ class TestActivities:
             }
         ]
 
-        monkeypatch.setattr(
-            crud.DBCrud, "select_activity_with_pagination", mock_db_data
-        )
-        monkeypatch.setattr(
-            crud.ClimateWareHouseCrud,
-            "combine_climate_units_and_metadata",
-            mock_climate_warehouse_data,
-        )
+        with monkeypatch.context() as m:
+            m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
+            m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
+            m.setattr(
+                crud.ClimateWareHouseCrud,
+                "combine_climate_units_and_metadata",
+                mock_climate_warehouse_data,
+            )
 
-        params = urlencode(test_request)
-        response = fastapi_client.get("v1/activities/", params=params)
+            params = urlencode(test_request)
+            response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == jsonable_encoder(test_response)
