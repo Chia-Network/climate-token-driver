@@ -57,9 +57,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download -R Chia-Network/test-cache 0.35.0 --archive=tar.gz -O - | tar xzf -
+          gh release download 0.35.0 -R Chia-Network/test-cache --archive=tar.gz -O - | tar xzf -
           mkdir "${GITHUB_WORKSPACE}/.chia"
+          ls -l "${GITHUB_WORKSPACE}/.chia"
           mv "${GITHUB_WORKSPACE}/test-cache-0.35.0/"* "${GITHUB_WORKSPACE}/.chia"
+          ls -l "${GITHUB_WORKSPACE}/.chia"
 
       - name: Run Python tests
         env:
