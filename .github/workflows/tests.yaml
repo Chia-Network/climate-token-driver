@@ -59,9 +59,10 @@ jobs:
         run: |
           gh release download 0.35.0 -R Chia-Network/test-cache --archive=tar.gz -O - | tar xzf -
           mkdir "${GITHUB_WORKSPACE}/.chia"
-          ls -l "${GITHUB_WORKSPACE}/.chia"
           mv "${GITHUB_WORKSPACE}/test-cache-0.35.0/"* "${GITHUB_WORKSPACE}/.chia"
+          echo "${GITHUB_WORKSPACE}/.chia"
           ls -l "${GITHUB_WORKSPACE}/.chia"
+          ls -l "${GITHUB_WORKSPACE}/.chia/test-plots"
 
       - name: Run Python tests
         env:
