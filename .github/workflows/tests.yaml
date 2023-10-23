@@ -40,4 +40,4 @@ jobs:
           poetry-command: "install --with dev"
 
       - name: Run Python tests
-        run: python -m pytest -k "not TestActivities" tests
+        run: MODE=dev python -m pytest -k "not TestActivities" tests
