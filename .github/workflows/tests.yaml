@@ -41,6 +41,26 @@ jobs:
         with:
           poetry-command: "install --with dev"
 
+      - name: Cache test blocks and plots
+        uses: actions/cache@v3
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MIN: 1
+        id: test-blocks-plots
+        with:
+          path: |
+            ${{ github.workspace }}/.chia/blocks
+            ${{ github.workspace }}/.chia/test-plots
+          key: 0.35.0
+
+      - name: Checkout test blocks and plots
+        if: steps.test-blocks-plots.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download -R Chia-Network/test-cache 0.35.0 --archive=tar.gz -O - | tar xzf -
+          mkdir "${GITHUB_WORKSPACE}/.chia"
+          mv "${GITHUB_WORKSPACE}/test-cache-0.35.0/"* "${GITHUB_WORKSPACE}/.chia"
+
       - name: Run Python tests
         env:
           MODE: dev
