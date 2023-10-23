@@ -73,4 +73,7 @@ jobs:
         env:
           MODE: dev
           PYTHONPATH: ".:./chia-blockchain"
-        run: python -m pytest -k "not TestActivities" tests
+        run: |
+        chia init
+        chia version
+        python -m pytest -k "not TestActivities" tests
