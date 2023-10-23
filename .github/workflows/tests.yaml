@@ -41,6 +41,6 @@ jobs:
 
       - name: Run Python tests
         env:
-          PYTHONPATH: "./chia-blockchain"
+          PYTHONPATH: ".:./chia-blockchain"
           MODE: dev
         run: python -m pytest -k "not TestActivities" tests
