@@ -2,12 +2,13 @@
 
 import importlib
 import pathlib
+from PyInstaller.utils.hooks import collect_submodules
 
 ROOT = pathlib.Path(importlib.import_module("chia").__file__).absolute().parent.parent
 
 datas = []
-datas.append((f"{ROOT}/chia/wallet/puzzles/*.hex", "./chia/wallet/puzzles"))
-datas.append((f"{ROOT}/chia/wallet/nft_wallet/puzzles/*.hex", "./chia/wallet/nft_wallet/puzzles"))
+for path in sorted({path.parent for path in ROOT.joinpath("chia").rglob("*.hex")}):
+    datas.append((f"{path}/*.hex", path.relative_to(ROOT)))
 datas.append(("./app/core/chialisp/*.hex", "./app/core/chialisp"))
 datas.append(("./.env", "./"))
 datas.append(("./config.yaml", "./"))
@@ -19,7 +20,7 @@ a = Analysis(
     pathex=["./chia-blockchain"],
     binaries=[],
     datas=datas,
-    hiddenimports=[],
+    hiddenimports=[*collect_submodules("chia")],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
