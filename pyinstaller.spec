@@ -7,6 +7,7 @@ ROOT = pathlib.Path(importlib.import_module("chia").__file__).absolute().parent.
 
 datas = []
 datas.append((f"{ROOT}/chia/wallet/puzzles/*.hex", "./chia/wallet/puzzles"))
+datas.append((f"{ROOT}/chia/wallet/nft_wallet/puzzles/*.hex", "./chia/wallet/nft_wallet/puzzles"))
 datas.append(("./app/core/chialisp/*.hex", "./app/core/chialisp"))
 datas.append(("./.env", "./"))
 datas.append(("./config.yaml", "./"))
