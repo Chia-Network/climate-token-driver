@@ -96,10 +96,17 @@ async def get_activity(
         )
         return schemas.ActivitiesResponse()
 
+    logger.warning(f"Got {len(activities)} activities from activities table.")
     activities_with_cw: List[schemas.ActivityWithCW] = []
     for activity in activities:
-        unit: Dict = units.get(activity.asset_id).copy()
+        logger.warning(f"Checking activity: {activity}")
+        unit = units.get(activity.asset_id)
+        if unit is None:
+            continue
+        unit = unit.copy()
+        logger.warning(f"Found matching unit: {unit}")
         token = unit.pop("token", None)
+        logger.warning(f"Got token: {token}")
         org = unit.pop("organization", None)
         project = unit.pop("project", None)
 
