@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-
+from pydantic import ValidationError
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -109,9 +109,20 @@ async def get_activity(
         logger.warning(f"Got token: {token}")
         org = unit.pop("organization", None)
         project = unit.pop("project", None)
+   
+        try:
+            token_on_chain = schemas.TokenOnChain(token)
+            logger.warning("instantiated TokenOnChain with __init__")
+        except ValidationError:
+            logger.warning("failed to instantiate TokenOnChain with __init__")
+            token_on_chain = schemas.TokenOnChain.parse_obj(token)
+            logger.warning("instantiated TokenOnChain with parse_obj")
+        except ValidationError:
+            logger.warning("failed to instantiate TokenOnChain with parse_obj")
+            raise
 
         activity_with_cw = schemas.ActivityWithCW(
-            token=token,
+            token=token_on_chain,
             cw_unit=unit,
             cw_org=org,
             cw_project=project,
