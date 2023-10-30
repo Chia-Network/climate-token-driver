@@ -11,7 +11,7 @@ from app.core.types import GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
 from app.utils import disallow
-
+import pprint
 router = APIRouter()
 
 
@@ -96,17 +96,19 @@ async def get_activity(
         )
         return schemas.ActivitiesResponse()
 
-    print(f"Got {len(activities)} activities from activities table.", flush=True)
+    pp = pprint.PrettyPrinter(indent=4)
+
+    pp.pprint(f"Got {len(activities)} activities from activities table.")
     activities_with_cw: List[schemas.ActivityWithCW] = []
     for activity in activities:
-        print(f"Checking activity: {activity}")
+        pp.pprint(f"Checking activity: {activity}")
         unit = units.get(activity.asset_id)
         if unit is None:
             continue
         unit = unit.copy()
-        print(f"Found matching unit: {unit}")
+        pp.pprint(f"Found matching unit: {unit}")
         token = unit.pop("token", None)
-        print(f"Got token: {token}")
+        pp.pprint(f"Got token: {token}")
         org = unit.pop("organization", None)
         project = unit.pop("project", None)
 
