@@ -96,29 +96,25 @@ async def get_activity(
         )
         return schemas.ActivitiesResponse()
 
-    logger.warning(f"Got {len(activities)} activities from activities table.")
+    print(f"Got {len(activities)} activities from activities table.", flush=True)
     activities_with_cw: List[schemas.ActivityWithCW] = []
     for activity in activities:
-        logger.warning(f"Checking activity: {activity}")
+        print(f"Checking activity: {activity}")
         unit = units.get(activity.asset_id)
         if unit is None:
             continue
         unit = unit.copy()
-        logger.warning(f"Found matching unit: {unit}")
+        print(f"Found matching unit: {unit}")
         token = unit.pop("token", None)
-        logger.warning(f"Got token: {token}")
+        print(f"Got token: {token}")
         org = unit.pop("organization", None)
         project = unit.pop("project", None)
-   
+
         try:
-            token_on_chain = schemas.TokenOnChain(token)
-            logger.warning("instantiated TokenOnChain with __init__")
-        except ValidationError:
-            logger.warning("failed to instantiate TokenOnChain with __init__")
             token_on_chain = schemas.TokenOnChain.parse_obj(token)
-            logger.warning("instantiated TokenOnChain with parse_obj")
+            print("instantiated TokenOnChain with parse_obj", flush=True)
         except ValidationError:
-            logger.warning("failed to instantiate TokenOnChain with parse_obj")
+            print("failed to instantiate TokenOnChain with parse_obj", flush=True)
             raise
 
         activity_with_cw = schemas.ActivityWithCW(
