@@ -159,12 +159,13 @@ class ClimateWareHouseCrud(object):
                 )
                 continue
 
-            try:
-                org_metadata = metadata_by_id[tmp_org_uid]
+            org_metadata: Dict[str, str] = metadata_by_id.get(org_uid)
+            metadata = dict()
+            # some versions perpended "meta_" to the key, so check both ways
+            if asset_id in org_metadata:
                 metadata = json.loads(org_metadata.get(asset_id, "{}"))
-            except KeyError:
-                logger.warning("Can not get metadata by org_uid")
-                continue
+            elif f"meta_{asset_id}" in org_metadata:
+                metadata = json.loads(org_metadata.get(f"meta_{asset_id}", "{}"))
 
             unit["organization"] = org
             unit["token"] = metadata
