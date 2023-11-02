@@ -106,9 +106,7 @@ async def get_activity(
         if unit is None:
             continue
         unit = unit.copy()
-        pp.pprint(f"Found matching unit: {unit}")
         token = unit.pop("token", None)
-        pp.pprint(f"Got token: {token}")
         org = unit.pop("organization", None)
         project = unit.pop("project", None)
 
