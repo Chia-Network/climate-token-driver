@@ -134,19 +134,22 @@ class ClimateWareHouseCrud(object):
 
         onchain_units = []
         for unit in units:
-            asset_id: str = unit["marketplaceIdentifier"]
+            marketplace_id = unit["marketplaceIdentifier"]
 
-            tmp_org_uid: Optional[str] = unit.get("orgUid")
-            if tmp_org_uid is None:
+            if not marketplace_id:
+                continue
+
+            unit_org_uid = unit.get("orgUid")
+            if unit_org_uid is None:
                 logger.warning(
                     f"Can not get climate warehouse orgUid in unit. unit:{unit}"
                 )
                 continue
 
-            org = organization_by_id.get(tmp_org_uid)
+            org = organization_by_id.get(unit_org_uid)
             if org is None:
                 logger.warning(
-                    f"Can not get organization by org_uid. org_uid:{tmp_org_uid}"
+                    f"Can not get organization by org_uid. org_uid:{unit_org_uid}"
                 )
                 continue
 
@@ -159,13 +162,13 @@ class ClimateWareHouseCrud(object):
                 )
                 continue
 
-            org_metadata: Dict[str, str] = metadata_by_id.get(org_uid)
+            org_metadata: Dict[str, str] = metadata_by_id.get(unit_org_uid)
             metadata = dict()
             # some versions perpended "meta_" to the key, so check both ways
-            if asset_id in org_metadata:
-                metadata = json.loads(org_metadata.get(asset_id, "{}"))
-            elif f"meta_{asset_id}" in org_metadata:
-                metadata = json.loads(org_metadata.get(f"meta_{asset_id}", "{}"))
+            if marketplace_id in org_metadata:
+                metadata = json.loads(org_metadata.get(marketplace_id, "{}"))
+            elif f"meta_{marketplace_id}" in org_metadata:
+                metadata = json.loads(org_metadata.get(f"meta_{marketplace_id}", "{}"))
 
             unit["organization"] = org
             unit["token"] = metadata
