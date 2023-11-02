@@ -26,7 +26,6 @@ def create_gateway_puzzle() -> Program:
 def create_gateway_solution(
     conditions_program: Program,
 ) -> Program:
-
     return Program.to([conditions_program])
 
 
@@ -34,7 +33,6 @@ def create_gateway_announcement(
     coin: Coin,
     conditions_program: Program,
 ) -> Announcement:
-
     return Announcement(
         origin_info=coin.name(),
         message=conditions_program.get_tree_hash(),
@@ -45,7 +43,6 @@ def parse_gateway_spend(
     coin_spend: CoinSpend,
     is_cat: bool = True,
 ) -> Tuple[GatewayMode, CoinSpend]:
-
     puzzle: Program = coin_spend.puzzle_reveal.to_program()
     solution: Program = coin_spend.solution.to_program()
     coin: Coin = coin_spend.coin
@@ -67,11 +64,14 @@ def parse_gateway_spend(
         amount: int = condition.at("rrf").as_int()
 
         if amount == -113:
-            tail_program: Program = condition.at("rrrf")
+            tail_program = condition.at("rrrf")
             tail_solution: Program = condition.at("rrrrf")
             break
     else:
-        raise ValueError(f"No TAIL found!")
+        raise ValueError("No TAIL found!")
+
+    if tail_program is None:
+        raise ValueError("No TAIL found!")
 
     (tail_program_mod, _) = tail_program.uncurry()
     if tail_program_mod != DELEGATED_TAIL_MOD:

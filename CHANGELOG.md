@@ -1,13 +1,3 @@
-## 1.0.34 (2023-10-24)
-
-### Feat
-
-- dont use meta_ prefix for cadt metadata
-
-### Fix
-
-- meta_ prefix in tests
-
 ## 1.0.33 (2023-10-12)
 
 ### Fix

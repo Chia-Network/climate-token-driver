@@ -1,6 +1,6 @@
 import dataclasses
 import enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from chia.types.announcement import Announcement
 from chia.types.blockchain_format.coin import Coin
@@ -10,6 +10,7 @@ from chia.types.condition_opcodes import ConditionOpcode
 from chia.wallet.payment import Payment
 
 CLIMATE_WALLET_INDEX = 2
+
 
 class GatewayMode(enum.Enum):
     TOKENIZATION = "tokenization"
@@ -51,7 +52,7 @@ class TransactionRequest(object):
     fee: int = dataclasses.field(default=0)
 
     def to_program(self) -> Program:
-        conditions: List[List] = []
+        conditions = []
         for payment in self.payments:
             conditions.append(
                 [ConditionOpcode.CREATE_COIN] + payment.as_condition_args()
@@ -73,8 +74,8 @@ class TransactionRequest(object):
         return Program.to(conditions)
 
     @property
-    def additions(self) -> List[Dict]:
-        additions: List[Dict] = []
+    def additions(self) -> List[Dict[str, Any]]:
+        additions = []
         for payment in self.payments:
             memos = [bytes.decode(memo) for memo in payment.memos]
 

@@ -38,7 +38,6 @@ async def _get_rpc_client(
     rpc_port: int,
     root_path: Path = DEFAULT_ROOT_PATH,
 ) -> Iterator[RpcClient]:
-
     rpc_client_cls = {
         NodeType.FULL_NODE: FullNodeRpcClient,
         NodeType.WALLET: WalletRpcClient,
@@ -63,7 +62,6 @@ async def _get_rpc_client(
 
 
 async def get_wallet_rpc_client() -> Iterator[WalletRpcClient]:
-
     async for _ in _get_rpc_client(
         node_type=NodeType.WALLET,
         self_hostname=settings.CHIA_HOSTNAME,
@@ -74,7 +72,6 @@ async def get_wallet_rpc_client() -> Iterator[WalletRpcClient]:
 
 
 async def get_full_node_rpc_client() -> Iterator[FullNodeRpcClient]:
-
     async for _ in _get_rpc_client(
         node_type=NodeType.FULL_NODE,
         self_hostname=settings.CHIA_HOSTNAME,

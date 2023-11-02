@@ -1,6 +1,5 @@
-from sqlalchemy import desc, asc
 from typing import Dict, List, Optional
-
+from pydantic import ValidationError
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -12,7 +11,7 @@ from app.core.types import GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
 from app.utils import disallow
-
+import pprint
 router = APIRouter()
 
 
@@ -25,7 +24,7 @@ async def get_activity(
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 10,
-    sort: str = 'desc',
+    sort: str = "desc",
     db: Session = Depends(deps.get_db_session),
 ):
     """Get activity.
@@ -54,7 +53,7 @@ async def get_activity(
             pass
         case _:
             raise ErrorCode().bad_request_error(message="search_by is invalid")
-        
+
     if minHeight is not None:
         activity_filters["and"].append(models.Activity.height >= minHeight)
 
@@ -77,7 +76,7 @@ async def get_activity(
     total: int
 
     order_by_clause = []
-    if sort.lower() == 'desc':
+    if sort.lower() == "desc":
         order_by_clause.append(models.Activity.height.desc())
         order_by_clause.append(models.Activity.coin_id.desc())
     else:
@@ -97,15 +96,29 @@ async def get_activity(
         )
         return schemas.ActivitiesResponse()
 
+    pp = pprint.PrettyPrinter(indent=4)
+
+    pp.pprint(f"Got {len(activities)} activities from activities table.")
     activities_with_cw: List[schemas.ActivityWithCW] = []
     for activity in activities:
-        unit: Dict = units.get(activity.asset_id).copy()
+        pp.pprint(f"Checking activity: {activity}")
+        unit = units.get(activity.asset_id)
+        if unit is None:
+            continue
+        unit = unit.copy()
         token = unit.pop("token", None)
         org = unit.pop("organization", None)
         project = unit.pop("project", None)
 
+        try:
+            token_on_chain = schemas.TokenOnChain.parse_obj(token)
+            print("instantiated TokenOnChain with parse_obj", flush=True)
+        except ValidationError:
+            print("failed to instantiate TokenOnChain with parse_obj", flush=True)
+            raise
+
         activity_with_cw = schemas.ActivityWithCW(
-            token=token,
+            token=token_on_chain,
             cw_unit=unit,
             cw_org=org,
             cw_project=project,

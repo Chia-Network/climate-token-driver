@@ -51,7 +51,6 @@ async def _scan_token_activity(
     climate_warehouse: crud.ClimateWareHouseCrud,
     blockchain: crud.BlockChainCrud,
 ) -> bool:
-
     state = db_crud.select_block_state_first()
     if state.peak_height is None:
         logger.warning("Full node state has not been retrieved.")
@@ -100,9 +99,7 @@ async def _scan_token_activity(
 
         db_crud.batch_insert_ignore_activity(activities)
 
-    db_crud.update_block_state(
-        current_height=target_start_height
-    )
+    db_crud.update_block_state(current_height=target_start_height)
     return True
 
 
@@ -118,9 +115,10 @@ async def scan_token_activity() -> None:
         as_async_contextmanager(deps.get_db_session) as db,
         as_async_contextmanager(deps.get_full_node_rpc_client) as full_node_client,
     ):
-
         db_crud = crud.DBCrud(db=db)
-        climate_warehouse = crud.ClimateWareHouseCrud(url=settings.CADT_API_SERVER_HOST, api_key=settings.CADT_API_KEY)
+        climate_warehouse = crud.ClimateWareHouseCrud(
+            url=settings.CADT_API_SERVER_HOST, api_key=settings.CADT_API_KEY
+        )
         blockchain = crud.BlockChainCrud(full_node_client=full_node_client)
 
         try:
@@ -167,7 +165,6 @@ async def scan_blockchain_state() -> None:
         as_async_contextmanager(deps.get_db_session) as db,
         as_async_contextmanager(deps.get_full_node_rpc_client) as full_node_client,
     ):
-
         db_crud = crud.DBCrud(db=db)
 
         try:

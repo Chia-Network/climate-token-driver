@@ -5,11 +5,9 @@ from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
-from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
 from chia.wallet.cat_wallet.cat_info import CATInfo
-from chia.wallet.cat_wallet.cat_utils import construct_cat_puzzle
-from chia.wallet.puzzles.cat_loader import CAT_MOD
+from chia.wallet.cat_wallet.cat_utils import CAT_MOD, construct_cat_puzzle
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.transaction_sorting import SortKey
 from chia.wallet.util.wallet_types import WalletType
@@ -42,8 +40,8 @@ async def get_transaction(
     """
 
     transaction_record: TransactionRecord = await wallet_rpc_client.get_transaction(
-        wallet_id=None,
-        transaction_id=hexstr_to_bytes(transaction_id),
+        wallet_id=0,
+        transaction_id=bytes32.from_hexstr(transaction_id),
     )
 
     return schemas.Transaction(
@@ -65,7 +63,6 @@ async def get_transactions(
     to_address: Optional[str] = None,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
 ):
-
     """Get transactions.
 
     This endpoint is to be called by the client.
@@ -111,7 +108,8 @@ async def get_transactions(
                 for transaction_record in transaction_records
             ],
         )
-
+    if cat_info is None:
+        raise ValueError(f"Wallet {wallet_id} is not a CAT wallet")
     gateway_puzzle: Program = create_gateway_puzzle()
     gateway_puzzle_hash: bytes32 = gateway_puzzle.get_tree_hash()
     gateway_cat_puzzle: Program = construct_cat_puzzle(
@@ -126,7 +124,7 @@ async def get_transactions(
         if transaction_record.to_puzzle_hash != gateway_puzzle_hash:
             continue
 
-        spend_bundle: SpendBundle = transaction_record.spend_bundle
+        spend_bundle = transaction_record.spend_bundle
         if spend_bundle is None:
             continue
 

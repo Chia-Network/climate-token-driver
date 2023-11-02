@@ -11,13 +11,14 @@ from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.types.mempool_inclusion_status import MempoolInclusionStatus
 from chia.types.spend_bundle import SpendBundle
+from chia.util.ints import uint64
 from chia.wallet.cat_wallet.cat_utils import (
+    CAT_MOD,
     SpendableCAT,
     unsigned_spend_bundle_for_spendable_cats,
 )
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
-from chia.wallet.puzzles.cat_loader import CAT_MOD
 
 from app.core.chialisp.gateway import create_gateway_puzzle
 from app.core.chialisp.tail import create_tail_program
@@ -38,10 +39,9 @@ class TestCATLifecycle:
     @pytest.mark.asyncio
     async def test_cat_lifecycle(
         self,
-        sim_full_node,
-        sim_full_node_client,
+        sim_full_node: SpendSim,
+        sim_full_node_client: SimClient,
     ) -> None:
-
         """
         In this test, we perform the following spends:
 
@@ -82,7 +82,7 @@ class TestCATLifecycle:
         unsigned_gateway_coin_spend: CoinSpend
         signature: G2Element
 
-        ## setup
+        # setup
 
         xch_puzzle: Program = ACS_MOD
         xch_puzzle_hash: bytes32 = xch_puzzle.get_tree_hash()
@@ -93,10 +93,10 @@ class TestCATLifecycle:
             await client.get_coin_records_by_puzzle_hash(xch_puzzle_hash)
         )[0].coin
 
-        ## mint
+        # mint
 
         mode = GatewayMode.TOKENIZATION
-        tokenize_amount: int = 100
+        tokenize_amount: uint64 = uint64(100)
         tokenize_to_puzzle_hash: bytes32 = ACS_MOD_HASH
 
         # gateway mint spend
@@ -141,17 +141,17 @@ class TestCATLifecycle:
             ]
         )
         gateway_coin: Coin = unsigned_gateway_coin_spend.coin
-        cat_coin: Coin = unsigned_gateway_coin_spend.additions().pop()
+        cat_coin: Coin = gateway_spend_bundle.additions().pop()
 
         result = await client.push_tx(spend_bundle)
         assert result == (MempoolInclusionStatus.SUCCESS, None)
 
         await node.farm_block()
 
-        ## split
+        # split
 
-        detokenize_amount: int = 10
-        retire_amount: int = tokenize_amount - detokenize_amount
+        detokenize_amount: uint64 = uint64(10)
+        retire_amount: uint64 = uint64(tokenize_amount - detokenize_amount)
 
         # cat spend
 
@@ -166,7 +166,7 @@ class TestCATLifecycle:
         lineage_proof = LineageProof(
             parent_name=gateway_coin.parent_coin_info,
             inner_puzzle_hash=gateway_puzzle_hash,
-            amount=gateway_coin.amount,
+            amount=uint64(gateway_coin.amount),
         )
         spendable_cat = SpendableCAT(
             coin=cat_coin,
@@ -190,7 +190,7 @@ class TestCATLifecycle:
 
         await node.farm_block()
 
-        ## detokenize
+        # detokenize
 
         mode = GatewayMode.DETOKENIZATION
 
@@ -222,7 +222,7 @@ class TestCATLifecycle:
         lineage_proof = LineageProof(
             parent_name=cat_coin.parent_coin_info,
             inner_puzzle_hash=ACS_MOD_HASH,
-            amount=cat_coin.amount,
+            amount=uint64(cat_coin.amount),
         )
         spendable_cat = SpendableCAT(
             coin=cat_coin_for_detokenization,
@@ -248,7 +248,7 @@ class TestCATLifecycle:
 
         await node.farm_block()
 
-        ## retire
+        # retire
 
         mode = GatewayMode.PERMISSIONLESS_RETIREMENT
 
@@ -280,7 +280,7 @@ class TestCATLifecycle:
         lineage_proof = LineageProof(
             parent_name=cat_coin.parent_coin_info,
             inner_puzzle_hash=ACS_MOD_HASH,
-            amount=cat_coin.amount,
+            amount=uint64(cat_coin.amount),
         )
         spendable_cat = SpendableCAT(
             coin=cat_coin_for_retirement,
