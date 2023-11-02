@@ -1,3 +1,4 @@
+import sys
 import traceback
 
 import uvicorn
@@ -18,7 +19,7 @@ app = FastAPI(
 if settings.MODE == ExecutionMode.DEV:
 
     @app.exception_handler(Exception)
-    async def exception_handler(request: Request, e: Exception):
+    async def exception_handler(request: Request, e: Exception) -> Response:
         content: str = "".join(traceback.format_exception(e))
         return Response(content, status_code=500)
 
@@ -38,24 +39,24 @@ if __name__ == "__main__":
     logger.info(f"Using settings {settings.dict()}")
     wait_until_dir_exists(settings.CHIA_ROOT)
 
-    server_host = ''
+    server_host = ""
 
-    if (settings.MODE == ExecutionMode.EXPLORER):
+    if settings.MODE == ExecutionMode.EXPLORER:
         server_host = settings.CLIMATE_EXPLORER_SERVER_HOST
-    elif (settings.MODE == ExecutionMode.DEV):
+    elif settings.MODE == ExecutionMode.DEV:
         server_host = "127.0.0.1"
-    elif (settings.MODE == ExecutionMode.REGISTRY):
+    elif settings.MODE == ExecutionMode.REGISTRY:
         server_host = "127.0.0.1"
-    elif (settings.MODE == ExecutionMode.CLIENT):
+    elif settings.MODE == ExecutionMode.CLIENT:
         server_host = "127.0.0.1"
-    else :
+    else:
         print(f"Invalid mode {settings.MODE}!")
         sys.exit(1)
 
-    if (
-        settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV]
-        or server_host in ["127.0.0.1", "localhost"]
-    ):
+    if settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV] or server_host in [
+        "127.0.0.1",
+        "localhost",
+    ]:
         uvicorn.run(
             app,
             host=server_host,
@@ -65,6 +66,6 @@ if __name__ == "__main__":
         )
     else:
         print(
-            f'Climate Token Driver can only run on localhost in {settings.MODE.name} mode.'
+            f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode."
         )
         sys.exit(1)

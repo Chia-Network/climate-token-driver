@@ -2,16 +2,18 @@ import enum
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import yaml
 from pydantic import BaseSettings, root_validator, validator
+
 
 class ExecutionMode(enum.Enum):
     DEV = "dev"
     REGISTRY = "registry"
     CLIENT = "client"
     EXPLORER = "explorer"
+
 
 class ServerPort(enum.Enum):
     DEV = 31999
@@ -55,37 +57,43 @@ class Settings(BaseSettings):
     DEV_PORT: Optional[int] = None
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls) -> "Settings":
         if cls._instance is None:
             cls._instance = get_settings()
         return cls._instance
 
     @root_validator
-    def configure_port(cls, values):
+    def configure_port(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if values["MODE"] == ExecutionMode.REGISTRY:
-            values["SERVER_PORT"] = values.get('CLIMATE_TOKEN_REGISTRY_PORT', ServerPort.CLIMATE_TOKEN_REGISTRY.value)
+            values["SERVER_PORT"] = values.get(
+                "CLIMATE_TOKEN_REGISTRY_PORT", ServerPort.CLIMATE_TOKEN_REGISTRY.value
+            )
         elif values["MODE"] == ExecutionMode.CLIENT:
-            values["SERVER_PORT"] = values.get('CLIMATE_TOKEN_CLIENT_PORT', ServerPort.CLIMATE_TOKEN_CLIENT.value)
+            values["SERVER_PORT"] = values.get(
+                "CLIMATE_TOKEN_CLIENT_PORT", ServerPort.CLIMATE_TOKEN_CLIENT.value
+            )
         elif values["MODE"] == ExecutionMode.EXPLORER:
-            values["SERVER_PORT"] = values.get('CLIMATE_EXPLORER_PORT', ServerPort.CLIMATE_EXPLORER.value)
+            values["SERVER_PORT"] = values.get(
+                "CLIMATE_EXPLORER_PORT", ServerPort.CLIMATE_EXPLORER.value
+            )
         elif values["MODE"] == ExecutionMode.DEV:
-            values["SERVER_PORT"] = values.get('DEV_PORT', ServerPort.DEV.value)
+            values["SERVER_PORT"] = values.get("DEV_PORT", ServerPort.DEV.value)
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
-        
+
         print(f"Set SERVER_PORT to {values['SERVER_PORT']}")
         return values
 
     @validator("CHIA_ROOT", pre=True)
-    def expand_root(cls, v):
+    def expand_root(cls, v: str) -> Path:
         return Path(v).expanduser()
 
     @validator("CONFIG_PATH", "LOG_PATH", "DB_PATH")
-    def prepend_root(cls, v, values):
-        v: Path = values["CHIA_ROOT"] / v
-        parent: Path = v.parent
+    def prepend_root(cls, v: str, values: Dict[str, Any]) -> Path:
+        full_dir: Path = values["CHIA_ROOT"] / v
+        parent: Path = full_dir.parent
         parent.mkdir(parents=True, exist_ok=True)
-        return v
+        return full_dir
 
 
 def get_settings() -> Settings:
@@ -103,8 +111,6 @@ def get_settings() -> Settings:
     default_settings = Settings(_env_file=default_env_file)
     config_file: Path = default_settings.CONFIG_PATH
 
-    settings: Settings
-    settings_dict: Dict
     if not config_file.is_file():
         config_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(default_config_file, config_file)
@@ -113,7 +119,7 @@ def get_settings() -> Settings:
         settings_dict = yaml.safe_load(f)
 
     settings_dict = default_settings.dict() | (settings_dict or {})
-    settings = Settings(**settings_dict)
+    Settings(**settings_dict)
     Settings._instance = Settings(**settings_dict)
 
     return Settings._instance
