@@ -1,8 +1,8 @@
+## 1.0.35 (2023-11-02)
+
+## 1.0.34 (2023-10-24)
+
 ## 1.0.33 (2023-10-12)
-
-### Fix
-
-- add missing max coin amount in select coin call
 
 ## 1.0.32 (2023-10-11)
 
@@ -10,20 +10,21 @@
 
 ## 1.0.30 (2023-10-11)
 
-### Fix
-
-- derivation roots
-
 ## 1.0.29 (2023-10-05)
-
-### Fix
-
-- update the default cadt api host
 
 ## 1.0.28 (2023-10-03)
 
+### Feat
+
+- dont use meta_ prefix for cadt metadata
+
 ### Fix
 
+- Update code to interface with Chia 2.0.1+
+- meta_ prefix in tests
+- add missing max coin amount in select coin call
+- derivation roots
+- update the default cadt api host
 - rework wallet indexes
 - update default CADT API in config
 
