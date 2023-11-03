@@ -12,7 +12,7 @@ from sqlalchemy import (
 from app.db.base import Base
 
 
-class Activity(Base):
+class Activity(Base):  # type: ignore[misc]
     __tablename__ = "activity"
 
     id = Column(Integer, primary_key=True, index=True)

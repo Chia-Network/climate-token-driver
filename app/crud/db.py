@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, AnyStr, List, Optional
+from typing import Any, AnyStr, List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, desc, insert, or_, update
@@ -17,7 +17,7 @@ errorcode = ErrorCode()
 class DBCrudBase(object):
     db: Session
 
-    def create_object(self, model: Base):
+    def create_object(self, model: Base) -> Base:
         self.db.add(model)
         self.db.commit()
         self.db.refresh(model)
@@ -57,7 +57,7 @@ class DBCrudBase(object):
             logger.error(f"Update DB Failure:{e}")
             raise errorcode.internal_server_error(message="Update DB Failure")
 
-    def select_first_db(self, model: Any, order_by: Any):
+    def select_first_db(self, model: Any, order_by: Any) -> Any:
         try:
             return self.db.query(model).order_by(desc(order_by)).first()
         except Exception as e:
@@ -66,7 +66,7 @@ class DBCrudBase(object):
 
     def select_activity_with_pagination(
         self, model: Any, filters: Any, order_by: Any, limit: int, page: int
-    ):
+    ) -> Tuple[Any, int]:
         try:
             query = self.db.query(model).filter(
                 or_(*filters["or"]), and_(*filters["and"])
@@ -88,7 +88,10 @@ class DBCrudBase(object):
 @dataclasses.dataclass
 class DBCrud(DBCrudBase):
     def create_activity(self, activity: schemas.Activity) -> models.Activity:
-        return self.create_object(models.Activity(**jsonable_encoder(activity)))
+        new_activity: models.Activity = self.create_object(
+            models.Activity(**jsonable_encoder(activity))
+        )
+        return new_activity
 
     def batch_insert_ignore_activity(
         self,
@@ -108,7 +111,7 @@ class DBCrud(DBCrudBase):
         self,
         peak_height: Optional[int] = None,
         current_height: Optional[int] = None,
-    ):
+    ) -> bool:
         state = models.State()
         if peak_height is not None:
             state.peak_height = peak_height
@@ -122,13 +125,15 @@ class DBCrud(DBCrudBase):
         )
 
     def select_block_state_first(self) -> models.State:
-        return self.select_first_db(
+        selected_state: models.State = self.select_first_db(
             model=models.State,
             order_by=models.State.id,
         )
+        return selected_state
 
     def select_activity_first(self) -> models.Activity:
-        return self.select_first_db(
+        selected_activity: models.Activity = self.select_first_db(
             model=models.Activity,
             order_by=models.Activity.created_at,
         )
+        return selected_activity

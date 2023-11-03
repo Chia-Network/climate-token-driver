@@ -1,23 +1,12 @@
 import functools
-import inspect
 import os
 import time
-from contextlib import asynccontextmanager, contextmanager
 from typing import Callable, List
 
 from fastapi import status
-from fastapi.concurrency import contextmanager_in_threadpool
 
 from app.config import ExecutionMode, settings
 from app.logger import logger
-
-
-def as_async_contextmanager(func: Callable, *args, **kwargs):
-    if inspect.isasyncgenfunction(func):
-        return asynccontextmanager(func)(*args, **kwargs)
-
-    elif inspect.isgeneratorfunction(func):
-        return contextmanager_in_threadpool(contextmanager(func)(*args, **kwargs))
 
 
 def disallow(modes: List[ExecutionMode]):

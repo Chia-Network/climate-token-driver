@@ -33,7 +33,7 @@ class ClimateWareHouseCrud(object):
 
         return headers
 
-    def get_climate_units(self, search: Dict[str, Any]) -> List[Dict]:
+    def get_climate_units(self, search: Dict[str, Any]) -> Any:
         try:
             params = urlencode(search)
             url = urlparse(self.url + "/v1/units")
@@ -51,7 +51,7 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("Call Climate API Timeout")
 
-    def get_climate_projects(self) -> List[Dict]:
+    def get_climate_projects(self) -> Any:
         try:
             url = urlparse(self.url + "/v1/projects")
 
@@ -68,7 +68,7 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("Call Climate API Timeout")
 
-    def get_climate_organizations(self) -> Dict[str, Dict]:
+    def get_climate_organizations(self) -> Any:
         try:
             url = urlparse(self.url + "/v1/organizations")
 
@@ -85,7 +85,7 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("Call Climate API Timeout")
 
-    def get_climate_organizations_metadata(self, org_uid: str) -> Dict[str, Any]:
+    def get_climate_organizations_metadata(self, org_uid: str) -> Any:
         try:
             condition = {"orgUid": org_uid}
 
@@ -162,7 +162,10 @@ class ClimateWareHouseCrud(object):
                 )
                 continue
 
-            org_metadata: Dict[str, str] = metadata_by_id.get(unit_org_uid)
+            org_metadata = metadata_by_id.get(unit_org_uid)
+            if org_metadata is None:
+                continue
+
             metadata = dict()
             # some versions perpended "meta_" to the key, so check both ways
             if marketplace_id in org_metadata:

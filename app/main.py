@@ -37,7 +37,7 @@ app.add_middleware(
 
 if __name__ == "__main__":
     logger.info(f"Using settings {settings.dict()}")
-    wait_until_dir_exists(settings.CHIA_ROOT)
+    wait_until_dir_exists(str(settings.CHIA_ROOT))
 
     server_host = ""
 

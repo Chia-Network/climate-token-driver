@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from blspy import G1Element, PrivateKey
 from chia.consensus.coinbase import create_puzzlehash_for_pk
@@ -31,10 +31,10 @@ async def get_key(
     derivation_index: int = 0,
     prefix: str = "bls1238",
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.Key:
     fingerprint: int = await wallet_rpc_client.get_logged_in_fingerprint()
 
-    result: Dict = await wallet_rpc_client.get_private_key(fingerprint)
+    result = await wallet_rpc_client.get_private_key(fingerprint)
 
     secret_key = PrivateKey.from_bytes(hexstr_to_bytes(result["sk"]))
 
@@ -62,7 +62,7 @@ async def get_key(
 )
 async def parse_key(
     address: str,
-):
+) -> Optional[schemas.Key]:
     try:
         puzzle_hash: bytes = decode_puzzle_hash(address)
     except ValueError:

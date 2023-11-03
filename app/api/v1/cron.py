@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import List
 
 from blspy import G1Element
 from chia.consensus.block_record import BlockRecord
@@ -18,7 +18,7 @@ from app.db.session import get_engine_cls
 from app.errors import ErrorCode
 from app.logger import logger
 from app.models import State
-from app.utils import as_async_contextmanager, disallow
+from app.utils import disallow
 
 router = APIRouter()
 errorcode = ErrorCode()
@@ -27,7 +27,7 @@ lock = asyncio.Lock()
 
 @router.on_event("startup")
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
-async def init_db():
+async def init_db() -> None:
     Engine = await get_engine_cls()
 
     if not database_exists(Engine.url):
@@ -38,7 +38,7 @@ async def init_db():
 
     Base.metadata.create_all(Engine)
 
-    async with as_async_contextmanager(deps.get_db_session) as db:
+    async with deps.get_db_session() as db:
         state = State(id=1, current_height=settings.BLOCK_START, peak_height=None)
         db_state = [jsonable_encoder(state)]
 
@@ -70,11 +70,9 @@ async def _scan_token_activity(
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
-    climate_units: Dict[
-        str, Any
-    ] = climate_warehouse.combine_climate_units_and_metadata(search={})
+    climate_units = climate_warehouse.combine_climate_units_and_metadata(search={})
     for unit in climate_units:
-        token: Optional[Dict] = unit.get("token")
+        token = unit.get("token")
 
         # is None or empty
         if not token:
@@ -112,8 +110,8 @@ async def scan_token_activity() -> None:
 
     async with (
         lock,
-        as_async_contextmanager(deps.get_db_session) as db,
-        as_async_contextmanager(deps.get_full_node_rpc_client) as full_node_client,
+        deps.get_db_session() as db,
+        deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)
         climate_warehouse = crud.ClimateWareHouseCrud(
@@ -145,9 +143,9 @@ async def scan_token_activity() -> None:
 async def _scan_blockchain_state(
     db_crud: crud.DBCrud,
     full_node_client: FullNodeRpcClient,
-):
-    state: Dict = await full_node_client.get_blockchain_state()
-    peak: Dict = state.get("peak")
+) -> None:
+    state = await full_node_client.get_blockchain_state()
+    peak = state.get("peak")
 
     if peak is None:
         logger.warning("Full node is not synced")
@@ -162,8 +160,8 @@ async def _scan_blockchain_state(
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def scan_blockchain_state() -> None:
     async with (
-        as_async_contextmanager(deps.get_db_session) as db,
-        as_async_contextmanager(deps.get_full_node_rpc_client) as full_node_client,
+        deps.get_db_session() as db,
+        deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)
 

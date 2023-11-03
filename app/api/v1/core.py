@@ -1,3 +1,5 @@
+from typing import Dict
+
 from fastapi import APIRouter
 
 from app.api.v1 import activities, cron, keys, tokens, transactions
@@ -9,7 +11,7 @@ router = APIRouter(
 
 
 @router.get("/info")
-async def get_info():
+async def get_info() -> Dict[str, str]:
     return {
         "blockchain_name": "Chia Network",
         "blockchain_name_short": "chia",

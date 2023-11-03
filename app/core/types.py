@@ -33,14 +33,15 @@ class ClimateTokenIndex(object):
     sequence_num: int = 0
 
     def name(self) -> bytes32:
-        return Program.to(
+        to_hash: Program = Program.to(
             [
                 self.org_uid,
                 self.warehouse_project_id,
                 self.vintage_year,
                 self.sequence_num,
             ]
-        ).get_tree_hash()
+        )
+        return to_hash.get_tree_hash()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -71,7 +72,8 @@ class TransactionRequest(object):
         if self.fee:
             conditions.append([ConditionOpcode.RESERVE_FEE, self.fee])
 
-        return Program.to(conditions)
+        ret: Program = Program.to(conditions)
+        return ret
 
     @property
     def additions(self) -> List[Dict[str, Any]]:
