@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import List
 
@@ -15,11 +17,7 @@ from app.core.climate_wallet.wallet import ClimateObserverWallet, ClimateWallet
 from app.core.derive_keys import master_sk_to_root_sk
 from app.core.types import ClimateTokenIndex, GatewayMode
 from tests.wallet.rpc.test_wallet_rpc import wallet_rpc_environment  # noqa: F401
-from tests.wallet.rpc.test_wallet_rpc import (
-    WalletRpcTestEnvironment,
-    farm_transaction,
-    generate_funds,
-)
+from tests.wallet.rpc.test_wallet_rpc import WalletRpcTestEnvironment, farm_transaction, generate_funds
 
 logger = logging.getLogger(__name__)
 
@@ -30,13 +28,9 @@ async def check_transactions(
     transaction_records: List[TransactionRecord],
 ) -> None:
     for transaction_record in transaction_records:
-        tx = await wallet_client.get_transaction(
-            wallet_id=wallet_id, transaction_id=transaction_record.name
-        )
+        tx = await wallet_client.get_transaction(wallet_id=wallet_id, transaction_id=transaction_record.name)
 
-        assert (
-            tx.confirmed_at_height != 0
-        ), f"Transaction {transaction_record.name.hex()} not found!"
+        assert tx.confirmed_at_height != 0, f"Transaction {transaction_record.name.hex()} not found!"
 
 
 async def check_balance(
@@ -45,9 +39,7 @@ async def check_balance(
     amount: int,
 ) -> None:
     result = await wallet_client.get_wallet_balance(wallet_id=wallet_id)
-    assert (
-        result["confirmed_wallet_balance"] == amount
-    ), "Target wallet CAT amount does not match!"
+    assert result["confirmed_wallet_balance"] == amount, "Target wallet CAT amount does not match!"
 
 
 async def get_confirmed_balance(client: WalletRpcClient, wallet_id: int) -> int:
@@ -86,9 +78,7 @@ class TestCATWorkflow:
 
         fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
         result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-        master_secret_key: PrivateKey = PrivateKey.from_bytes(
-            bytes.fromhex(result["sk"])
-        )
+        master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
         root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
 
         token_index = ClimateTokenIndex(
@@ -131,9 +121,7 @@ class TestCATWorkflow:
         assert result["success"]
         cat_wallet_id: int = result["wallet_id"]
 
-        await time_out_assert(
-            60, get_confirmed_balance, amount, wallet_client_2, cat_wallet_id
-        )
+        await time_out_assert(60, get_confirmed_balance, amount, wallet_client_2, cat_wallet_id)
 
     @pytest.mark.asyncio
     async def test_cat_detokenization_workflow(
@@ -155,9 +143,7 @@ class TestCATWorkflow:
 
         fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
         result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-        master_secret_key: PrivateKey = PrivateKey.from_bytes(
-            bytes.fromhex(result["sk"])
-        )
+        master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
         root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
 
         # block: initial fund deposits
@@ -229,9 +215,7 @@ class TestCATWorkflow:
         await farm_transaction(full_node_api, wallet_node_1, spend_bundle)
         await full_node_api.wait_for_wallet_synced(env.wallet_2.node, timeout=60)
         await check_transactions(wallet_client_2, cat_wallet_id, transaction_records)
-        await time_out_assert(
-            60, get_confirmed_balance, 0, wallet_client_2, cat_wallet_id
-        )
+        await time_out_assert(60, get_confirmed_balance, 0, wallet_client_2, cat_wallet_id)
 
     @pytest.mark.asyncio
     async def test_cat_permissionless_retirement_workflow(
@@ -312,9 +296,7 @@ class TestCATWorkflow:
         await full_node_api.process_all_wallet_transactions(
             wallet=env.wallet_2.node.wallet_state_manager.main_wallet, timeout=120
         )
-        await time_out_assert(
-            60, get_confirmed_balance, 0, wallet_client_2, cat_wallet_id
-        )
+        await time_out_assert(60, get_confirmed_balance, 0, wallet_client_2, cat_wallet_id)
 
         # block:
         #   - observer: observe retirement activity
@@ -324,9 +306,7 @@ class TestCATWorkflow:
             root_public_key=climate_wallet_1.root_public_key,
             full_node_client=full_node_client,
         )
-        activities = await climate_observer.get_activities(
-            mode=GatewayMode.PERMISSIONLESS_RETIREMENT
-        )
+        activities = await climate_observer.get_activities(mode=GatewayMode.PERMISSIONLESS_RETIREMENT)
 
         assert activities[0]["metadata"]["bn"] == beneficiary_name.decode()
         assert activities[0]["metadata"]["ba"] == test_address.decode()

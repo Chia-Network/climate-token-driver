@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 import traceback
 
@@ -65,7 +67,5 @@ if __name__ == "__main__":
             log_config=log_config,
         )
     else:
-        print(
-            f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode."
-        )
+        print(f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode.")
         sys.exit(1)

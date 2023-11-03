@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from typing import List
 
@@ -114,9 +116,7 @@ async def scan_token_activity() -> None:
         deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)
-        climate_warehouse = crud.ClimateWareHouseCrud(
-            url=settings.CADT_API_SERVER_HOST, api_key=settings.CADT_API_KEY
-        )
+        climate_warehouse = crud.ClimateWareHouseCrud(url=settings.CADT_API_SERVER_HOST, api_key=settings.CADT_API_KEY)
         blockchain = crud.BlockChainCrud(full_node_client=full_node_client)
 
         try:

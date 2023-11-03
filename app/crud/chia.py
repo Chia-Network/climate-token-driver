@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import json
 from typing import Any, Dict, List, Optional
@@ -41,9 +43,7 @@ class ClimateWareHouseCrud(object):
             r = requests.get(url.geturl(), params=params, headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
-                raise error_code.internal_server_error(
-                    message="Call Climate API Failure"
-                )
+                raise error_code.internal_server_error(message="Call Climate API Failure")
 
             return r.json()
 
@@ -58,9 +58,7 @@ class ClimateWareHouseCrud(object):
             r = requests.get(url.geturl(), headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
-                raise error_code.internal_server_error(
-                    message="Call Climate API Failure"
-                )
+                raise error_code.internal_server_error(message="Call Climate API Failure")
 
             return r.json()
 
@@ -75,9 +73,7 @@ class ClimateWareHouseCrud(object):
             r = requests.get(url.geturl(), headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
-                raise error_code.internal_server_error(
-                    message="Call Climate API Failure"
-                )
+                raise error_code.internal_server_error(message="Call Climate API Failure")
 
             return r.json()
 
@@ -95,9 +91,7 @@ class ClimateWareHouseCrud(object):
             r = requests.get(url.geturl(), params=params, headers=self._headers())
             if r.status_code != requests.codes.ok:
                 logger.error(f"Request Url: {r.url} Error Message: {r.text}")
-                raise error_code.internal_server_error(
-                    message="Call Climate API Failure"
-                )
+                raise error_code.internal_server_error(message="Call Climate API Failure")
 
             return r.json()
 
@@ -105,15 +99,11 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("Call Climate API Timeout")
 
-    def combine_climate_units_and_metadata(
-        self, search: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def combine_climate_units_and_metadata(self, search: Dict[str, Any]) -> List[Dict[str, Any]]:
         # units: [unit]
         units = self.get_climate_units(search)
         if len(units) == 0:
-            logger.warning(
-                f"Search climate warehouse units by search is empty. search:{search}"
-            )
+            logger.warning(f"Search climate warehouse units by search is empty. search:{search}")
             return []
 
         projects = self.get_climate_projects()
@@ -141,25 +131,19 @@ class ClimateWareHouseCrud(object):
 
             unit_org_uid = unit.get("orgUid")
             if unit_org_uid is None:
-                logger.warning(
-                    f"Can not get climate warehouse orgUid in unit. unit:{unit}"
-                )
+                logger.warning(f"Can not get climate warehouse orgUid in unit. unit:{unit}")
                 continue
 
             org = organization_by_id.get(unit_org_uid)
             if org is None:
-                logger.warning(
-                    f"Can not get organization by org_uid. org_uid:{unit_org_uid}"
-                )
+                logger.warning(f"Can not get organization by org_uid. org_uid:{unit_org_uid}")
                 continue
 
             try:
                 warehouse_project_id = unit["issuance"]["warehouseProjectId"]
                 project = project_by_id[warehouse_project_id]
             except KeyError:
-                logger.warning(
-                    f"Can not get project by warehouse_project_id: {warehouse_project_id}"
-                )
+                logger.warning(f"Can not get project by warehouse_project_id: {warehouse_project_id}")
                 continue
 
             org_metadata = metadata_by_id.get(unit_org_uid)

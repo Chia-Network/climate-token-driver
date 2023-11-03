@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import enum
 from typing import Any, Dict, List, Optional
@@ -55,19 +57,13 @@ class TransactionRequest(object):
     def to_program(self) -> Program:
         conditions = []
         for payment in self.payments:
-            conditions.append(
-                [ConditionOpcode.CREATE_COIN] + payment.as_condition_args()
-            )
+            conditions.append([ConditionOpcode.CREATE_COIN] + payment.as_condition_args())
 
         for announcement in self.coin_announcements:
-            conditions.append(
-                [ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, announcement.name()]
-            )
+            conditions.append([ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, announcement.name()])
 
         for announcement in self.puzzle_announcements:
-            conditions.append(
-                [ConditionOpcode.ASSERT_PUZZLE_ANNOUNCEMENT, announcement.name()]
-            )
+            conditions.append([ConditionOpcode.ASSERT_PUZZLE_ANNOUNCEMENT, announcement.name()])
 
         if self.fee:
             conditions.append([ConditionOpcode.RESERVE_FEE, self.fee])

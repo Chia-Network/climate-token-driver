@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from typing import Any, Dict, Tuple
 
@@ -35,9 +37,7 @@ async def create_tokenization_tx(
     This endpoint is to be called by the registry.
     """
 
-    climate_secret_key = await utils.get_climate_secret_key(
-        wallet_client=wallet_rpc_client
-    )
+    climate_secret_key = await utils.get_climate_secret_key(wallet_client=wallet_rpc_client)
 
     token = request.token
     payment = request.payment
@@ -90,9 +90,7 @@ async def create_tokenization_tx(
                 signature=bytes(signature),
             )
         elif mode == GatewayMode.PERMISSIONLESS_RETIREMENT:
-            token_obj[
-                "permissionless_retirement"
-            ] = schemas.PermissionlessRetirementTailMetadata(
+            token_obj["permissionless_retirement"] = schemas.PermissionlessRetirementTailMetadata(
                 mod_hash=mod_hash,
                 signature=bytes(signature),
             )
@@ -101,9 +99,7 @@ async def create_tokenization_tx(
     return schemas.TokenizationTxResponse(
         token=token_on_chain,
         token_hexstr=token_on_chain.hexstr(),
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )
 
 
@@ -122,9 +118,7 @@ async def create_detokenization_tx(
     This endpoint is to be called by the registry.
     """
 
-    climate_secret_key = await utils.get_climate_secret_key(
-        wallet_client=wallet_rpc_client
-    )
+    climate_secret_key = await utils.get_climate_secret_key(wallet_client=wallet_rpc_client)
 
     token: schemas.Token = request.token
     content: str = request.content
@@ -145,9 +139,7 @@ async def create_detokenization_tx(
 
     return schemas.DetokenizationTxResponse(
         token=token,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )
 
 
@@ -218,9 +210,7 @@ async def create_detokenization_file(
     return schemas.DetokenizationFileResponse(
         token=token,
         content=content,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )
 
 
@@ -338,7 +328,5 @@ async def create_permissionless_retirement_tx(
 
     return schemas.PermissionlessRetirementTxResponse(
         token=token,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )

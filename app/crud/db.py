@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 from typing import Any, AnyStr, List, Optional, Tuple
 
@@ -25,11 +27,7 @@ class DBCrudBase(object):
 
     def batch_insert_ignore_db(self, table: AnyStr, models: List[Any]) -> bool:
         try:
-            s = (
-                insert(Base.metadata.tables[table])
-                .prefix_with("OR IGNORE")
-                .values(models)
-            )
+            s = insert(Base.metadata.tables[table]).prefix_with("OR IGNORE").values(models)
             self.db.execute(s)
             self.db.commit()
             return True
@@ -68,16 +66,9 @@ class DBCrudBase(object):
         self, model: Any, filters: Any, order_by: Any, limit: int, page: int
     ) -> Tuple[Any, int]:
         try:
-            query = self.db.query(model).filter(
-                or_(*filters["or"]), and_(*filters["and"])
-            )
+            query = self.db.query(model).filter(or_(*filters["or"]), and_(*filters["and"]))
             return (
-                (
-                    query.order_by(*order_by)
-                    .limit(limit)
-                    .offset((page - 1) * limit)
-                    .all()
-                ),
+                (query.order_by(*order_by).limit(limit).offset((page - 1) * limit).all()),
                 query.count(),
             )
         except Exception as e:
@@ -88,9 +79,7 @@ class DBCrudBase(object):
 @dataclasses.dataclass
 class DBCrud(DBCrudBase):
     def create_activity(self, activity: schemas.Activity) -> models.Activity:
-        new_activity: models.Activity = self.create_object(
-            models.Activity(**jsonable_encoder(activity))
-        )
+        new_activity: models.Activity = self.create_object(models.Activity(**jsonable_encoder(activity)))
         return new_activity
 
     def batch_insert_ignore_activity(

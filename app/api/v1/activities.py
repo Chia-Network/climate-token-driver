@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends
@@ -92,9 +94,7 @@ async def get_activity(
         limit=limit,
     )
     if len(activities) == 0:
-        logger.warning(
-            f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}"
-        )
+        logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
         return schemas.ActivitiesResponse()
 
     activities_with_cw: List[schemas.ActivityWithCW] = []

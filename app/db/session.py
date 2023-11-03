@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -12,9 +14,7 @@ async def get_engine_cls() -> engine.Engine:
         challenge: str = await blockchain_crud.get_challenge()
 
     db_url: str = "sqlite:///" + str(settings.DB_PATH).replace("CHALLENGE", challenge)
-    Engine: engine.Engine = create_engine(
-        db_url, connect_args={"check_same_thread": False, "timeout": 15}
-    )
+    Engine: engine.Engine = create_engine(db_url, connect_args={"check_same_thread": False, "timeout": 15})
 
     return Engine
 

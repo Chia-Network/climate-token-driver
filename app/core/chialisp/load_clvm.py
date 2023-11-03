@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 
 from chia.wallet.puzzles.load_clvm import load_clvm

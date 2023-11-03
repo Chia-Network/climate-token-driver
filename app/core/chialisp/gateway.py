@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional, Tuple
 
 from chia.types.announcement import Announcement

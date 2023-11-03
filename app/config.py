@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 import shutil
 import sys
@@ -56,8 +58,10 @@ class Settings(BaseSettings):
     CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
     DEV_PORT: Optional[int] = None
 
+    _instance: Optional[Settings] = None
+
     @classmethod
-    def get_instance(cls) -> "Settings":
+    def get_instance(cls) -> Settings:
         if cls._instance is None:
             cls._instance = get_settings()
         return cls._instance
@@ -65,17 +69,11 @@ class Settings(BaseSettings):
     @root_validator
     def configure_port(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if values["MODE"] == ExecutionMode.REGISTRY:
-            values["SERVER_PORT"] = values.get(
-                "CLIMATE_TOKEN_REGISTRY_PORT", ServerPort.CLIMATE_TOKEN_REGISTRY.value
-            )
+            values["SERVER_PORT"] = values.get("CLIMATE_TOKEN_REGISTRY_PORT", ServerPort.CLIMATE_TOKEN_REGISTRY.value)
         elif values["MODE"] == ExecutionMode.CLIENT:
-            values["SERVER_PORT"] = values.get(
-                "CLIMATE_TOKEN_CLIENT_PORT", ServerPort.CLIMATE_TOKEN_CLIENT.value
-            )
+            values["SERVER_PORT"] = values.get("CLIMATE_TOKEN_CLIENT_PORT", ServerPort.CLIMATE_TOKEN_CLIENT.value)
         elif values["MODE"] == ExecutionMode.EXPLORER:
-            values["SERVER_PORT"] = values.get(
-                "CLIMATE_EXPLORER_PORT", ServerPort.CLIMATE_EXPLORER.value
-            )
+            values["SERVER_PORT"] = values.get("CLIMATE_EXPLORER_PORT", ServerPort.CLIMATE_EXPLORER.value)
         elif values["MODE"] == ExecutionMode.DEV:
             values["SERVER_PORT"] = values.get("DEV_PORT", ServerPort.DEV.value)
         else:
@@ -102,13 +100,14 @@ def get_settings() -> Settings:
     default_env_file: Path
     default_config_file: Path
     if in_pyinstaller:
-        default_env_file = Path(sys._MEIPASS) / ".env"
-        default_config_file = Path(sys._MEIPASS) / "config.yaml"
+        base_path = getattr(sys, "_MEIPASS")
+        default_env_file = Path(base_path).joinpath(".env")
+        default_config_file = Path(base_path).joinpath("config.yaml")
     else:
         default_env_file = Path(".env")
         default_config_file = Path("config.yaml")
 
-    default_settings = Settings(_env_file=default_env_file)
+    default_settings = Settings(_env_file=default_env_file)  # type: ignore[call-arg]
     config_file: Path = default_settings.CONFIG_PATH
 
     if not config_file.is_file():

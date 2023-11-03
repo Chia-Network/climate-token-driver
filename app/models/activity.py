@@ -1,13 +1,6 @@
-from sqlalchemy import (
-    JSON,
-    BigInteger,
-    Column,
-    DateTime,
-    Integer,
-    String,
-    UniqueConstraint,
-    func,
-)
+from __future__ import annotations
+
+from sqlalchemy import JSON, BigInteger, Column, DateTime, Integer, String, UniqueConstraint, func
 
 from app.db.base import Base
 
