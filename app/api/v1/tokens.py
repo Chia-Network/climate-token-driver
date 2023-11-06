@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from typing import Any, Dict, Tuple
 
@@ -29,15 +31,13 @@ router = APIRouter()
 async def create_tokenization_tx(
     request: schemas.TokenizationTxRequest,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.TokenizationTxResponse:
     """Create and send tokenization tx.
 
     This endpoint is to be called by the registry.
     """
 
-    climate_secret_key = await utils.get_climate_secret_key(
-        wallet_client=wallet_rpc_client
-    )
+    climate_secret_key = await utils.get_climate_secret_key(wallet_client=wallet_rpc_client)
 
     token = request.token
     payment = request.payment
@@ -53,7 +53,7 @@ async def create_tokenization_tx(
         root_secret_key=climate_secret_key,
         wallet_client=wallet_rpc_client,
     )
-    result: Dict = await wallet.send_tokenization_transaction(
+    result = await wallet.send_tokenization_transaction(
         to_puzzle_hash=payment.to_puzzle_hash,
         amount=payment.amount,
         fee=payment.fee,
@@ -90,9 +90,7 @@ async def create_tokenization_tx(
                 signature=bytes(signature),
             )
         elif mode == GatewayMode.PERMISSIONLESS_RETIREMENT:
-            token_obj[
-                "permissionless_retirement"
-            ] = schemas.PermissionlessRetirementTailMetadata(
+            token_obj["permissionless_retirement"] = schemas.PermissionlessRetirementTailMetadata(
                 mod_hash=mod_hash,
                 signature=bytes(signature),
             )
@@ -101,9 +99,7 @@ async def create_tokenization_tx(
     return schemas.TokenizationTxResponse(
         token=token_on_chain,
         token_hexstr=token_on_chain.hexstr(),
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )
 
 
@@ -116,15 +112,13 @@ async def create_detokenization_tx(
     asset_id: str,
     request: schemas.DetokenizationTxRequest,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.DetokenizationTxResponse:
     """Sign and send detokenization tx.
 
     This endpoint is to be called by the registry.
     """
 
-    climate_secret_key = await utils.get_climate_secret_key(
-        wallet_client=wallet_rpc_client
-    )
+    climate_secret_key = await utils.get_climate_secret_key(wallet_client=wallet_rpc_client)
 
     token: schemas.Token = request.token
     content: str = request.content
@@ -140,14 +134,12 @@ async def create_detokenization_tx(
         root_secret_key=climate_secret_key,
         wallet_client=wallet_rpc_client,
     )
-    result: Dict = await wallet.sign_and_send_detokenization_request(content=content)
+    result = await wallet.sign_and_send_detokenization_request(content=content)
     (transaction_record, *_) = result["transaction_records"]
 
     return schemas.DetokenizationTxResponse(
         token=token,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )
 
 
@@ -160,7 +152,7 @@ async def create_detokenization_file(
     asset_id: str,
     request: schemas.DetokenizationFileRequest,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.DetokenizationFileResponse:
     """Create detokenization file.
 
     This endpoint is to be called by the client.
@@ -207,7 +199,7 @@ async def create_detokenization_file(
     if cat_wallet_info is None:
         raise ValueError(f"Asset id {asset_id} not found in wallet!")
 
-    result: Dict = await wallet.create_detokenization_request(
+    result = await wallet.create_detokenization_request(
         amount=payment.amount,
         fee=payment.fee,
         wallet_id=cat_wallet_info.id,
@@ -218,9 +210,7 @@ async def create_detokenization_file(
     return schemas.DetokenizationFileResponse(
         token=token,
         content=content,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )
 
 
@@ -231,13 +221,13 @@ async def create_detokenization_file(
 @disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
 async def parse_detokenization_file(
     content: str,
-):
+) -> schemas.DetokenizationFileParseResponse:
     """Parse detokenization file.
 
     This endpoint is to be called by the registry.
     """
 
-    result: Dict = await ClimateWallet.parse_detokenization_request(content=content)
+    result = await ClimateWallet.parse_detokenization_request(content=content)
     mode: GatewayMode = result["mode"]
     gateway_coin_spend: CoinSpend = result["gateway_coin_spend"]
     spend_bundle: SpendBundle = result["spend_bundle"]
@@ -269,7 +259,7 @@ async def create_permissionless_retirement_tx(
     asset_id: str,
     request: schemas.PermissionlessRetirementTxRequest,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.PermissionlessRetirementTxResponse:
     """Create and send permissionless retirement tx.
 
     This endpoint is to be called by the client.
@@ -325,7 +315,7 @@ async def create_permissionless_retirement_tx(
     # Log the JSON-formatted string
     logger.warning(log_data_json)
 
-    result: Dict = await wallet.send_permissionless_retirement_transaction(
+    result = await wallet.send_permissionless_retirement_transaction(
         amount=payment.amount,
         fee=payment.fee,
         beneficiary_name=payment.beneficiary_name.encode(),
@@ -338,7 +328,5 @@ async def create_permissionless_retirement_tx(
 
     return schemas.PermissionlessRetirementTxResponse(
         token=token,
-        tx=schemas.Transaction(
-            id=transaction_record.name, record=transaction_record.to_json_dict()
-        ),
+        tx=schemas.Transaction(id=transaction_record.name, record=transaction_record.to_json_dict()),
     )

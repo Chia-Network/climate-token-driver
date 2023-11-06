@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import time
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -30,23 +32,10 @@ from chia.wallet.util.wallet_types import WalletType
 
 from app.core.chialisp.gateway import create_gateway_puzzle, parse_gateway_spend
 from app.core.chialisp.tail import create_delegated_puzzle, create_tail_program
-from app.core.climate_wallet.wallet_utils import (
-    create_gateway_request_and_spend,
-    create_gateway_signature,
-)
+from app.core.climate_wallet.wallet_utils import create_gateway_request_and_spend, create_gateway_signature
 from app.core.derive_keys import root_sk_to_gateway_sk
-from app.core.types import (
-    CLIMATE_WALLET_INDEX,
-    ClimateTokenIndex,
-    GatewayMode,
-    TransactionRequest,
-)
-from app.core.utils import (
-    get_constants,
-    get_created_signed_transactions,
-    get_first_puzzle_hash,
-    get_wallet_info_by_id,
-)
+from app.core.types import CLIMATE_WALLET_INDEX, ClimateTokenIndex, GatewayMode, TransactionRequest
+from app.core.utils import get_constants, get_created_signed_transactions, get_first_puzzle_hash, get_wallet_info_by_id
 from app.logger import logger
 
 
@@ -73,12 +62,8 @@ class ClimateWalletBase(object):
 
 @dataclasses.dataclass
 class ClimateWallet(ClimateWalletBase):
-    mode_to_public_key: Optional[Dict[GatewayMode, G1Element]] = dataclasses.field(
-        default=None, kw_only=True
-    )
-    mode_to_secret_key: Optional[Dict[GatewayMode, PrivateKey]] = dataclasses.field(
-        default=None, kw_only=True
-    )
+    mode_to_public_key: Optional[Dict[GatewayMode, G1Element]] = dataclasses.field(default=None, kw_only=True)
+    mode_to_secret_key: Optional[Dict[GatewayMode, PrivateKey]] = dataclasses.field(default=None, kw_only=True)
     mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]]
 
     wallet_client: WalletRpcClient
@@ -93,9 +78,7 @@ class ClimateWallet(ClimateWalletBase):
     ) -> "ClimateWallet":
         root_public_key: G1Element = root_secret_key.get_g1()
         token_index_hash: bytes32 = token_index.name()
-        tail_program = create_tail_program(
-            public_key=root_public_key, index=Program.to(token_index_hash)
-        )
+        tail_program = create_tail_program(public_key=root_public_key, index=Program.to(token_index_hash))
         tail_program_hash: bytes32 = tail_program.get_tree_hash()
 
         logger.info("Creating climate wallet for")
@@ -118,9 +101,7 @@ class ClimateWallet(ClimateWalletBase):
                 public_key=public_key,
             )
             delegated_puzzle_hash: bytes32 = delegated_puzzle.get_tree_hash()
-            message: bytes32 = Program.to(
-                [token_index_hash, delegated_puzzle]
-            ).get_tree_hash()
+            message: bytes32 = Program.to([token_index_hash, delegated_puzzle]).get_tree_hash()
             signature: G2Element = AugSchemeMPL.sign(root_secret_key, message)
 
             mode_to_public_key[mode] = secret_key.get_g1()
@@ -327,9 +308,7 @@ class ClimateWallet(ClimateWalletBase):
             wallet_client=self.wallet_client,
         )
         if len(transaction_records) != 1:
-            raise ValueError(
-                f"Transaction record has unexpected length {len(transaction_records)}!"
-            )
+            raise ValueError(f"Transaction record has unexpected length {len(transaction_records)}!")
 
         transaction_record = transaction_records[0]
         if transaction_record.spend_bundle is None:
@@ -343,9 +322,7 @@ class ClimateWallet(ClimateWalletBase):
 
         key_value_pairs: Optional[List[Tuple[str, Union[str, int]]]] = None
         if gateway_key_values:
-            key_value_pairs = [
-                (key, value) for (key, value) in gateway_key_values.items()
-            ]
+            key_value_pairs = [(key, value) for (key, value) in gateway_key_values.items()]
 
         return await self._create_transaction(
             mode=mode,
@@ -368,9 +345,7 @@ class ClimateWallet(ClimateWalletBase):
         wallet_id: int = 1,
     ) -> Dict[str, Any]:
         self.check_user(is_registry=True)
-        await self.check_wallet(
-            wallet_id=wallet_id, wallet_type=WalletType.STANDARD_WALLET
-        )
+        await self.check_wallet(wallet_id=wallet_id, wallet_type=WalletType.STANDARD_WALLET)
 
         mode = GatewayMode.TOKENIZATION
         if self.mode_to_secret_key is None:
@@ -437,8 +412,7 @@ class ClimateWallet(ClimateWalletBase):
         content: str = bech32_encode("detok", convertbits(bytes(spend_bundle), 8, 5))
 
         transaction_records = [
-            dataclasses.replace(transaction_record, spend_bundle=None)
-            for transaction_record in transaction_records
+            dataclasses.replace(transaction_record, spend_bundle=None) for transaction_record in transaction_records
         ]
 
         await self.wallet_client.push_transactions(txs=transaction_records)
@@ -478,9 +452,7 @@ class ClimateWallet(ClimateWalletBase):
             solution: Program = coin_spend.solution.to_program()
             coin: Coin = coin_spend.coin
 
-            puzzle_args: Optional[Iterator[Program]] = match_cat_puzzle(
-                uncurry_puzzle(puzzle)
-            )
+            puzzle_args: Optional[Iterator[Program]] = match_cat_puzzle(uncurry_puzzle(puzzle))
 
             # gateway spend is a CAT
             if puzzle_args is None:
@@ -517,9 +489,7 @@ class ClimateWallet(ClimateWalletBase):
                 puzzle = coin_spend.puzzle_reveal.to_program()
                 puzzle_args = match_cat_puzzle(uncurry_puzzle(puzzle))
                 if puzzle_args is None:
-                    raise ValueError(
-                        "Did not match CAT - invalid detokenization request"
-                    )
+                    raise ValueError("Did not match CAT - invalid detokenization request")
                 (_, _, inner_puzzle) = puzzle_args
                 inner_puzzle_hash = inner_puzzle.get_tree_hash()
 
@@ -587,9 +557,7 @@ class ClimateWallet(ClimateWalletBase):
             ]
         )
         if gateway_coin_spend is None:
-            raise ValueError(
-                "Invalid detokenization request: Could not find gateway coin spend!"
-            )
+            raise ValueError("Invalid detokenization request: Could not find gateway coin spend!")
 
         transaction_record = TransactionRecord(
             confirmed_at_height=uint32(0),
@@ -634,9 +602,7 @@ class ClimateWallet(ClimateWalletBase):
         if beneficiary_puzzle_hash is None:
             # no beneficiary supplied at all
             if beneficiary_address is None:
-                beneficiary_puzzle_hash = await get_first_puzzle_hash(
-                    self.wallet_client
-                )
+                beneficiary_puzzle_hash = await get_first_puzzle_hash(self.wallet_client)
 
         result = await self._create_client_transaction(
             mode=mode,
@@ -680,9 +646,7 @@ class ClimateObserverWallet(ClimateWalletBase):
         )
         gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 
-        coin_records: List[
-            CoinRecord
-        ] = await self.full_node_client.get_coin_records_by_puzzle_hash(
+        coin_records: List[CoinRecord] = await self.full_node_client.get_coin_records_by_puzzle_hash(
             puzzle_hash=gateway_cat_puzzle_hash,
             start_height=start_height,
             end_height=end_height,
@@ -712,9 +676,7 @@ class ClimateObserverWallet(ClimateWalletBase):
             metadata: Dict[bytes, bytes] = {}
             for key_value_pair in key_value_pairs.as_iter():
                 if (not key_value_pair.listp()) or (key_value_pair.at("r").listp()):
-                    logger.warning(
-                        f"Coin {coin.name()} has incorrect metadata structure"
-                    )
+                    logger.warning(f"Coin {coin.name()} has incorrect metadata structure")
                     continue
 
                 key = key_value_pair.at("f").as_atom()

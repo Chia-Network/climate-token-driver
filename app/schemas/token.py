@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from chia.util.byte_types import hexstr_to_bytes
 from pydantic import Field
 
@@ -8,20 +10,13 @@ from app.schemas.metadata import (
     PermissionlessRetirementTailMetadata,
     TokenizationTailMetadata,
 )
-from app.schemas.payment import (
-    PaymentBase,
-    PaymentWithPayee,
-    PaymentWithPayer,
-    RetirementPaymentWithPayer,
-)
+from app.schemas.payment import PaymentBase, PaymentWithPayee, PaymentWithPayer, RetirementPaymentWithPayer
 from app.schemas.transaction import Transaction
 from app.schemas.types import ChiaJsonObject
 
 
 class Token(BaseModel):
-    org_uid: str = Field(
-        example="3e70df56ff67a6806df6ad101c159363845550d1f9afd81e3e0d5a5ab51af867"
-    )
+    org_uid: str = Field(example="3e70df56ff67a6806df6ad101c159363845550d1f9afd81e3e0d5a5ab51af867")
     warehouse_project_id: str = Field(example="GS1")
     vintage_year: int = Field(example=2099)
     sequence_num: int = Field(example=0)

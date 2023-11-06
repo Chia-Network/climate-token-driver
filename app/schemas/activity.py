@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import Field, validator
 
@@ -26,12 +28,14 @@ class ActivityBase(BaseModel):
     timestamp: int
 
     @validator("mode")
-    def mode_from_str(cls, v):
+    def mode_from_str(cls, v: Union[str, GatewayMode]) -> GatewayMode:
+        if isinstance(v, GatewayMode):
+            return v
         for mode in GatewayMode:
             if (v == mode.name) or (v == mode.value):
                 return mode
 
-        return v
+        raise ValueError(f"Invalid mode {v}")
 
 
 class Activity(ActivityBase):

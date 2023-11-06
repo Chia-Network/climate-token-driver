@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from chia.types.blockchain_format.sized_bytes import bytes32
@@ -14,13 +16,15 @@ class PaymentBase(BaseModel):
 
 
 class PaymentWithPayee(PaymentBase):
-    to_address: str = Field(
+    to_address: Optional[str] = Field(
         default=None,
         example="txch1clzn09v7lapulm7j8mwx9jaqh35uh7jzjeukpv7pj50tv80zze4s5060sx",
     )
 
     @property
     def to_puzzle_hash(self) -> bytes32:
+        if self.to_address is None:
+            raise ValueError("to_address is not set")
         return decode_puzzle_hash(self.to_address)
 
 

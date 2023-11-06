@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional
 
 from blspy import G1Element, PrivateKey
@@ -53,9 +55,7 @@ async def get_cat_wallet_info_by_asset_id(
     wallet_client: WalletRpcClient,
 ) -> Optional[WalletInfo]:
     wallet_objs: List[Dict[str, Any]] = await wallet_client.get_wallets()
-    wallet_infos: List[WalletInfo] = [
-        WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs
-    ]
+    wallet_infos: List[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
     wallet_info: WalletInfo
     for wallet_info in wallet_infos:
@@ -76,9 +76,7 @@ async def get_wallet_info_by_id(
     wallet_client: WalletRpcClient,
 ) -> Optional[WalletInfo]:
     wallet_objs: List[Dict[str, Any]] = await wallet_client.get_wallets()
-    wallet_infos: List[WalletInfo] = [
-        WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs
-    ]
+    wallet_infos: List[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
     wallet_info: WalletInfo
     for wallet_info in wallet_infos:
@@ -96,14 +94,10 @@ async def get_first_puzzle_hash(
     fingerprint: int = await wallet_client.get_logged_in_fingerprint()
     result = await wallet_client.get_private_key(fingerprint=fingerprint)
     master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-    wallet_secret_key: PrivateKey = master_sk_to_wallet_sk_unhardened(
-        master_secret_key, uint32(0)
-    )
+    wallet_secret_key: PrivateKey = master_sk_to_wallet_sk_unhardened(master_secret_key, uint32(0))
     wallet_public_key: G1Element = wallet_secret_key.get_g1()
 
-    first_puzzle_hash: bytes32 = puzzle_for_pk(
-        public_key=wallet_public_key
-    ).get_tree_hash()
+    first_puzzle_hash: bytes32 = puzzle_for_pk(public_key=wallet_public_key).get_tree_hash()
 
     logger.info(f"First puzzle hash = {first_puzzle_hash.hex()}")
 

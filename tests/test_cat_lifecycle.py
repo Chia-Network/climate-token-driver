@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import secrets
 from typing import Dict
@@ -12,20 +14,13 @@ from chia.types.coin_spend import CoinSpend
 from chia.types.mempool_inclusion_status import MempoolInclusionStatus
 from chia.types.spend_bundle import SpendBundle
 from chia.util.ints import uint64
-from chia.wallet.cat_wallet.cat_utils import (
-    CAT_MOD,
-    SpendableCAT,
-    unsigned_spend_bundle_for_spendable_cats,
-)
+from chia.wallet.cat_wallet.cat_utils import CAT_MOD, SpendableCAT, unsigned_spend_bundle_for_spendable_cats
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
 
 from app.core.chialisp.gateway import create_gateway_puzzle
 from app.core.chialisp.tail import create_tail_program
-from app.core.climate_wallet.wallet_utils import (
-    create_gateway_request_and_spend,
-    create_gateway_signature,
-)
+from app.core.climate_wallet.wallet_utils import create_gateway_request_and_spend, create_gateway_signature
 from app.core.types import GatewayMode, TransactionRequest
 
 logger = logging.getLogger(__name__)
@@ -89,9 +84,7 @@ class TestCATLifecycle:
 
         await node.farm_block(xch_puzzle_hash)
 
-        xch_coin: Coin = (
-            await client.get_coin_records_by_puzzle_hash(xch_puzzle_hash)
-        )[0].coin
+        xch_coin: Coin = (await client.get_coin_records_by_puzzle_hash(xch_puzzle_hash))[0].coin
 
         # mint
 
@@ -176,9 +169,7 @@ class TestCATLifecycle:
             inner_puzzle=ACS_MOD,
             inner_solution=transaction_request.to_program(),
         )
-        spend_bundle = unsigned_spend_bundle_for_spendable_cats(
-            CAT_MOD, [spendable_cat]
-        )
+        spend_bundle = unsigned_spend_bundle_for_spendable_cats(CAT_MOD, [spendable_cat])
 
         (
             cat_coin_for_detokenization,
@@ -232,9 +223,7 @@ class TestCATLifecycle:
             inner_puzzle=ACS_MOD,
             inner_solution=transaction_request.to_program(),
         )
-        cat_spend_bundle = unsigned_spend_bundle_for_spendable_cats(
-            CAT_MOD, [spendable_cat]
-        )
+        cat_spend_bundle = unsigned_spend_bundle_for_spendable_cats(CAT_MOD, [spendable_cat])
 
         spend_bundle = SpendBundle.aggregate(
             [
@@ -290,9 +279,7 @@ class TestCATLifecycle:
             inner_puzzle=ACS_MOD,
             inner_solution=transaction_request.to_program(),
         )
-        cat_spend_bundle = unsigned_spend_bundle_for_spendable_cats(
-            CAT_MOD, [spendable_cat]
-        )
+        cat_spend_bundle = unsigned_spend_bundle_for_spendable_cats(CAT_MOD, [spendable_cat])
 
         spend_bundle = SpendBundle.aggregate(
             [

@@ -1,18 +1,11 @@
-from sqlalchemy import (
-    JSON,
-    BigInteger,
-    Column,
-    DateTime,
-    Integer,
-    String,
-    UniqueConstraint,
-    func,
-)
+from __future__ import annotations
+
+from sqlalchemy import JSON, BigInteger, Column, DateTime, Integer, String, UniqueConstraint, func
 
 from app.db.base import Base
 
 
-class Activity(Base):
+class Activity(Base):  # type: ignore[misc]
     __tablename__ = "activity"
 
     id = Column(Integer, primary_key=True, index=True)

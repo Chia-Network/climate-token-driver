@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 import traceback
 
@@ -37,7 +39,7 @@ app.add_middleware(
 
 if __name__ == "__main__":
     logger.info(f"Using settings {settings.dict()}")
-    wait_until_dir_exists(settings.CHIA_ROOT)
+    wait_until_dir_exists(str(settings.CHIA_ROOT))
 
     server_host = ""
 
@@ -65,7 +67,5 @@ if __name__ == "__main__":
             log_config=log_config,
         )
     else:
-        print(
-            f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode."
-        )
+        print(f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode.")
         sys.exit(1)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional, Tuple
 
 from chia.types.announcement import Announcement
@@ -26,7 +28,8 @@ def create_gateway_puzzle() -> Program:
 def create_gateway_solution(
     conditions_program: Program,
 ) -> Program:
-    return Program.to([conditions_program])
+    ret: Program = Program.to([conditions_program])
+    return ret
 
 
 def create_gateway_announcement(
