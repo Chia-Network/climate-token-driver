@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List, Optional
 
 from chia.rpc.wallet_rpc_client import WalletRpcClient
