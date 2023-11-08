@@ -16,7 +16,7 @@ from app.core import utils
 from app.core.climate_wallet.wallet import ClimateWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
 from app.logger import logger
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 
@@ -25,7 +25,7 @@ router = APIRouter()
     "/",
     response_model=schemas.TokenizationTxResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+@disallow_route([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
 async def create_tokenization_tx(
     request: schemas.TokenizationTxRequest,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
@@ -105,7 +105,7 @@ async def create_tokenization_tx(
     "/{asset_id}/detokenize",
     response_model=schemas.DetokenizationTxResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+@disallow_route([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
 async def create_detokenization_tx(
     asset_id: str,
     request: schemas.DetokenizationTxRequest,
@@ -145,7 +145,7 @@ async def create_detokenization_tx(
     "/{asset_id}/request-detokenization",
     response_model=schemas.DetokenizationFileResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])
+@disallow_route([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])
 async def create_detokenization_file(
     asset_id: str,
     request: schemas.DetokenizationFileRequest,
@@ -216,7 +216,7 @@ async def create_detokenization_file(
     "/parse-detokenization",
     response_model=schemas.DetokenizationFileParseResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+@disallow_route([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
 async def parse_detokenization_file(
     content: str,
 ) -> schemas.DetokenizationFileParseResponse:
@@ -252,7 +252,7 @@ async def parse_detokenization_file(
     "/{asset_id}/permissionless-retire",
     response_model=schemas.PermissionlessRetirementTxResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])
+@disallow_route([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])
 async def create_permissionless_retirement_tx(
     asset_id: str,
     request: schemas.PermissionlessRetirementTxRequest,

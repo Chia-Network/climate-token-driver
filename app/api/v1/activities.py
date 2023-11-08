@@ -11,13 +11,13 @@ from app.config import ExecutionMode, settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 
 
 @router.get("/", response_model=schemas.ActivitiesResponse)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
     search: Optional[str] = None,
     search_by: Optional[schemas.ActivitySearchBy] = None,
