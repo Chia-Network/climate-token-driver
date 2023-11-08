@@ -85,8 +85,8 @@ async def _scan_token_activity(
         climate_organizations = list(all_organizations.values())
 
     for org in climate_organizations:
-        org_uid = org.orgUid;
-        org_name = org.name;
+        org_uid = org["orgUid"]
+        org_name = org["name"]
 
         org_metadata = climate_warehouse.get_climate_organizations_metadata(org_uid)
         if not org_metadata:
