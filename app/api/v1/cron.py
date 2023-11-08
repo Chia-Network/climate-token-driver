@@ -84,7 +84,10 @@ async def _scan_token_activity(
         # Convert to a list of all organizations
         climate_organizations = list(all_organizations.values())
 
-    for org_uid, org_name in climate_organizations.items():
+    for org in climate_organizations:
+        org_uid = org.orgUid;
+        org_name = org.name;
+
         org_metadata = climate_warehouse.get_climate_organizations_metadata(org_uid)
         if not org_metadata:
             logger.warning(f"Cannot get metadata in CADT organization: {org_name}")
