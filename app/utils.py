@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import logging
 import os
 import time
 from typing import Callable, List
@@ -8,7 +9,8 @@ from typing import Callable, List
 from fastapi import status
 
 from app.config import ExecutionMode, settings
-from app.logger import logger
+
+logger = logging.getLogger("ClimateToken")
 
 # from typing import Any, Callable, Concatenate, Coroutine, List, ParamSpec, TypeVar
 

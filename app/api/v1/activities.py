@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends
@@ -10,10 +11,10 @@ from app.api import dependencies as deps
 from app.config import ExecutionMode, settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
-from app.logger import logger
 from app.utils import disallow
 
 router = APIRouter()
+logger = logging.getLogger("ClimateToken")
 
 
 @router.get("/", response_model=schemas.ActivitiesResponse)
