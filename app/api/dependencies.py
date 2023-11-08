@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, AbstractAsyncContextManager
 from pathlib import Path
 from typing import AsyncGenerator, AsyncIterator
 
@@ -18,8 +18,11 @@ from app.db.session import get_session_local_cls
 from app.logger import logger
 
 
-@asynccontextmanager
-async def get_db_session() -> AsyncIterator[Session]:
+def get_db_session_context() -> AbstractAsyncContextManager[Session]:
+    return asynccontextmanager(get_db_session)()
+
+
+async def get_db_session() -> Session:
     SessionLocal = await get_session_local_cls()
 
     db = SessionLocal()
