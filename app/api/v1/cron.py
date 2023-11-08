@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import List
 
 from blspy import G1Element
@@ -18,13 +19,13 @@ from app.config import ExecutionMode, settings
 from app.db.base import Base
 from app.db.session import get_engine_cls
 from app.errors import ErrorCode
-from app.logger import logger
 from app.models import State
 from app.utils import disallow
 
 router = APIRouter()
 errorcode = ErrorCode()
 lock = asyncio.Lock()
+logger = logging.getLogger("ClimateToken")
 
 
 @router.on_event("startup")

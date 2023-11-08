@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import logging
 import shutil
 import sys
 from pathlib import Path
@@ -8,6 +9,8 @@ from typing import Any, Dict, Optional
 
 import yaml
 from pydantic import BaseSettings, root_validator, validator
+
+logger = logging.getLogger("ClimateToken")
 
 
 class ExecutionMode(enum.Enum):
@@ -79,7 +82,6 @@ class Settings(BaseSettings):
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
 
-        print(f"Set SERVER_PORT to {values['SERVER_PORT']}")
         return values
 
     @validator("CHIA_ROOT", pre=True)

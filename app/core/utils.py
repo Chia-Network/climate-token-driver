@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, List, Optional
 
 from blspy import G1Element, PrivateKey
@@ -20,7 +21,8 @@ from chia.wallet.wallet_info import WalletInfo
 
 from app.core.derive_keys import master_sk_to_root_sk
 from app.core.types import TransactionRequest
-from app.logger import logger
+
+logger = logging.getLogger("ClimateToken")
 
 
 async def get_constants(

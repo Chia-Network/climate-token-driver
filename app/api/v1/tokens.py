@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any, Dict, Tuple
 
 from blspy import G1Element, G2Element
@@ -15,10 +16,10 @@ from app.config import ExecutionMode
 from app.core import utils
 from app.core.climate_wallet.wallet import ClimateWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
-from app.logger import logger
 from app.utils import disallow
 
 router = APIRouter()
+logger = logging.getLogger("ClimateToken")
 
 
 @router.post(
