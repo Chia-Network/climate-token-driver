@@ -74,12 +74,12 @@ async def _scan_token_activity(
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
     # Check if SCAN_ALL_ORGANIZATIONS is defined and True, otherwise treat as False
-    scan_all = getattr(settings, 'SCAN_ALL_ORGANIZATIONS', False)
+    scan_all = getattr(settings, "SCAN_ALL_ORGANIZATIONS", False)
 
     all_organizations = climate_warehouse.get_climate_organizations()
     if not scan_all:
         # Convert to a list of organizations where `isHome` is True
-        climate_organizations = [org for org in all_organizations.values() if org.get('isHome', False)]
+        climate_organizations = [org for org in all_organizations.values() if org.get("isHome", False)]
     else:
         # Convert to a list of all organizations
         climate_organizations = list(all_organizations.values())
@@ -96,15 +96,24 @@ async def _scan_token_activity(
         for key, value_str in org_metadata.items():
             try:
                 tokenization_dict = json.loads(value_str)
-                required_fields = ['org_uid', 'warehouse_project_id', 'vintage_year', 'sequence_num', 'public_key', 'index']
-                optional_fields = ['permissionless_retirement', 'detokenization']
+                required_fields = [
+                    "org_uid",
+                    "warehouse_project_id",
+                    "vintage_year",
+                    "sequence_num",
+                    "public_key",
+                    "index",
+                ]
+                optional_fields = ["permissionless_retirement", "detokenization"]
 
-                if not all(field in tokenization_dict for field in required_fields) or not any(field in tokenization_dict for field in optional_fields):
+                if not all(field in tokenization_dict for field in required_fields) or not any(
+                    field in tokenization_dict for field in optional_fields
+                ):
                     # not a tokenization record
                     continue
 
                 public_key = G1Element.from_bytes(hexstr_to_bytes(tokenization_dict["public_key"]))
-                activities = await blockchain.get_activities(
+                activities: List[schemas.Activity] = await blockchain.get_activities(
                     org_uid=tokenization_dict["org_uid"],
                     warehouse_project_id=tokenization_dict["warehouse_project_id"],
                     vintage_year=tokenization_dict["vintage_year"],
@@ -112,12 +121,14 @@ async def _scan_token_activity(
                     public_key=public_key,
                     start_height=state.current_height,
                     end_height=end_height,
-                    peak_height=state.peak_height
+                    peak_height=state.peak_height,
                 )
-                
-                if activities:
-                    db_crud.batch_insert_ignore_activity(activities)
-                    logger.info(f"Activities for {org_name} and asset id: {key} added to the database.")
+
+                if len(activities) == 0:
+                    continue
+
+                db_crud.batch_insert_ignore_activity(activities)
+                logger.info(f"Activities for {org_name} and asset id: {key} added to the database.")
 
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
@@ -126,6 +137,7 @@ async def _scan_token_activity(
 
     db_crud.update_block_state(current_height=target_start_height)
     return True
+
 
 @router.on_event("startup")
 @repeat_every(seconds=60, logger=logger)
