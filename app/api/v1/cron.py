@@ -41,7 +41,7 @@ async def init_db() -> None:
 
     Base.metadata.create_all(Engine)
 
-    async with deps.get_db_session() as db:
+    async with deps.get_db_session_context() as db:
         state = State(id=1, current_height=settings.BLOCK_START, peak_height=None)
         db_state = [jsonable_encoder(state)]
 
@@ -148,7 +148,7 @@ async def scan_token_activity() -> None:
 
     async with (
         lock,
-        deps.get_db_session() as db,
+        deps.get_db_session_context() as db,
         deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)
@@ -196,7 +196,7 @@ async def _scan_blockchain_state(
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def scan_blockchain_state() -> None:
     async with (
-        deps.get_db_session() as db,
+        deps.get_db_session_context() as db,
         deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)
