@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
     CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
     DEV_PORT: Optional[int] = None
+    SCAN_ALL_ORGANIZATIONS: Optional[bool] = False
 
     _instance: Optional[Settings] = None
 

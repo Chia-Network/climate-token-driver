@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from typing import List
 
 from blspy import G1Element
@@ -72,32 +73,67 @@ async def _scan_token_activity(
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
-    climate_units = climate_warehouse.combine_climate_units_and_metadata(search={})
-    for unit in climate_units:
-        token = unit.get("token")
+    # Check if SCAN_ALL_ORGANIZATIONS is defined and True, otherwise treat as False
+    scan_all = getattr(settings, "SCAN_ALL_ORGANIZATIONS", False)
 
-        # is None or empty
-        if not token:
-            logger.warning(f"Can not get token in climate warehouse unit. unit:{unit}")
+    all_organizations = climate_warehouse.get_climate_organizations()
+    if not scan_all:
+        # Convert to a list of organizations where `isHome` is True
+        climate_organizations = [org for org in all_organizations.values() if org.get("isHome", False)]
+    else:
+        # Convert to a list of all organizations
+        climate_organizations = list(all_organizations.values())
+
+    for org in climate_organizations:
+        org_uid = org["orgUid"]
+        org_name = org["name"]
+
+        org_metadata = climate_warehouse.get_climate_organizations_metadata(org_uid)
+        if not org_metadata:
+            logger.warning(f"Cannot get metadata in CADT organization: {org_name}")
             continue
 
-        public_key = G1Element.from_bytes(hexstr_to_bytes(token["public_key"]))
+        for key, value_str in org_metadata.items():
+            try:
+                tokenization_dict = json.loads(value_str)
+                required_fields = [
+                    "org_uid",
+                    "warehouse_project_id",
+                    "vintage_year",
+                    "sequence_num",
+                    "public_key",
+                    "index",
+                ]
+                optional_fields = ["permissionless_retirement", "detokenization"]
 
-        activities: List[schemas.Activity] = await blockchain.get_activities(
-            org_uid=token["org_uid"],
-            warehouse_project_id=token["warehouse_project_id"],
-            vintage_year=token["vintage_year"],
-            sequence_num=token["sequence_num"],
-            public_key=public_key,
-            start_height=start_height,
-            end_height=end_height,
-            peak_height=state.peak_height,
-        )
+                if not all(field in tokenization_dict for field in required_fields) or not any(
+                    field in tokenization_dict for field in optional_fields
+                ):
+                    # not a tokenization record
+                    continue
 
-        if len(activities) == 0:
-            continue
+                public_key = G1Element.from_bytes(hexstr_to_bytes(tokenization_dict["public_key"]))
+                activities: List[schemas.Activity] = await blockchain.get_activities(
+                    org_uid=tokenization_dict["org_uid"],
+                    warehouse_project_id=tokenization_dict["warehouse_project_id"],
+                    vintage_year=tokenization_dict["vintage_year"],
+                    sequence_num=tokenization_dict["sequence_num"],
+                    public_key=public_key,
+                    start_height=state.current_height,
+                    end_height=end_height,
+                    peak_height=state.peak_height,
+                )
 
-        db_crud.batch_insert_ignore_activity(activities)
+                if len(activities) == 0:
+                    continue
+
+                db_crud.batch_insert_ignore_activity(activities)
+                logger.info(f"Activities for {org_name} and asset id: {key} added to the database.")
+
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
+            except Exception as e:
+                logger.error(f"An error occurred for organization {org_name} under key {key}: {str(e)}")
 
     db_crud.update_block_state(current_height=target_start_height)
     return True
