@@ -1,3 +1,16 @@
+## 1.0.36 (2023-11-13)
+
+### Feat
+
+- optimized sub-optimal scan_token_activity cron
+
+### Fix
+
+- issues with token pydantic classes and forward refs
+- issues with reading from DBs due to bad context manager code
+- activities scan
+- activities scan
+
 ## 1.0.35 (2023-11-02)
 
 ## 1.0.34 (2023-10-24)
