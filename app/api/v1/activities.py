@@ -1,7 +1,8 @@
-from typing import Dict, List, Optional
-from pydantic import ValidationError
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -11,7 +12,7 @@ from app.core.types import GatewayMode
 from app.errors import ErrorCode
 from app.logger import logger
 from app.utils import disallow
-import pprint
+
 router = APIRouter()
 
 
@@ -26,7 +27,7 @@ async def get_activity(
     limit: int = 10,
     sort: str = "desc",
     db: Session = Depends(deps.get_db_session),
-):
+) -> schemas.ActivitiesResponse:
     """Get activity.
 
     This endpoint is to be called by the explorer.
@@ -34,7 +35,7 @@ async def get_activity(
 
     db_crud = crud.DBCrud(db=db)
 
-    activity_filters = {"or": [], "and": []}
+    activity_filters: Dict[str, Any] = {"or": [], "and": []}
     cw_filters = {}
     match search_by:
         case schemas.ActivitySearchBy.ONCHAIN_METADATA:
@@ -91,17 +92,11 @@ async def get_activity(
         limit=limit,
     )
     if len(activities) == 0:
-        logger.warning(
-            f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}"
-        )
+        logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
         return schemas.ActivitiesResponse()
 
-    pp = pprint.PrettyPrinter(indent=4)
-
-    pp.pprint(f"Got {len(activities)} activities from activities table.")
     activities_with_cw: List[schemas.ActivityWithCW] = []
     for activity in activities:
-        pp.pprint(f"Checking activity: {activity}")
         unit = units.get(activity.asset_id)
         if unit is None:
             continue

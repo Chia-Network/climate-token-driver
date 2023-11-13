@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from unittest import mock
 from urllib.parse import urlencode
 
@@ -19,9 +21,7 @@ class TestActivities:
         self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
-            fastapi_client.portal = (
-                portal  # workaround anyio 4.0.0 incompat with TextClient
-            )
+            fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             test_request = {"search_by": "error", "search": ""}
 
@@ -39,9 +39,7 @@ class TestActivities:
         mock_climate_warehouse_data.return_value = []
 
         with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
-            fastapi_client.portal = (
-                portal  # workaround anyio 4.0.0 incompat with TextClient
-            )
+            fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(
                 crud.ClimateWareHouseCrud,
                 "combine_climate_units_and_metadata",
@@ -64,9 +62,7 @@ class TestActivities:
         mock_db_data.return_value = ([], 0)
 
         with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
-            fastapi_client.portal = (
-                portal  # workaround anyio 4.0.0 incompat with TextClient
-            )
+            fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
 
@@ -76,9 +72,7 @@ class TestActivities:
         assert response.status_code == fastapi.status.HTTP_200_OK
         assert response.json() == test_response
 
-    def test_activities_then_success(
-        self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_activities_then_success(self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
         test_activity_data = models.activity.Activity(
             org_uid="cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
             amount=10000,
@@ -103,9 +97,7 @@ class TestActivities:
             activities=[
                 schemas.activity.ActivityWithCW(
                     **jsonable_encoder(test_activity_data),
-                    cw_org={
-                        "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"
-                    },
+                    cw_org={"orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"},
                     cw_project={
                         "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
                         "warehouseProjectId": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
@@ -234,9 +226,7 @@ class TestActivities:
                     "createdAt": "2022-10-24T06:25:13.440Z",
                     "updatedAt": "2022-10-24T06:25:13.440Z",
                 },
-                "organization": {
-                    "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"
-                },
+                "organization": {"orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"},
                 "token": {
                     "org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
                     "warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
@@ -266,9 +256,7 @@ class TestActivities:
             }
         ]
         with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
-            fastapi_client.portal = (
-                portal  # workaround anyio 4.0.0 incompat with TextClient
-            )
+            fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
             m.setattr(
@@ -345,9 +333,7 @@ class TestActivities:
                         "bp": "0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
                     },
                     **jsonable_encoder(test_activity_data),
-                    cw_org={
-                        "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"
-                    },
+                    cw_org={"orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"},
                     cw_project={
                         "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
                         "warehouseProjectId": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
@@ -448,9 +434,7 @@ class TestActivities:
                     "createdAt": "2022-10-24T06:25:13.440Z",
                     "updatedAt": "2022-10-24T06:25:13.440Z",
                 },
-                "organization": {
-                    "orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"
-                },
+                "organization": {"orgUid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd"},
                 "token": {
                     "org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
                     "warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
@@ -481,9 +465,7 @@ class TestActivities:
         ]
 
         with anyio.from_thread.start_blocking_portal() as portal, monkeypatch.context() as m:
-            fastapi_client.portal = (
-                portal  # workaround anyio 4.0.0 incompat with TextClient
-            )
+            fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
             m.setattr(

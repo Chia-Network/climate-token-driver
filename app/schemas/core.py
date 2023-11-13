@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, get_type_hints
 
 from chia.util.byte_types import hexstr_to_bytes

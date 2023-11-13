@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import enum
 from typing import Any, Dict, List, Optional
@@ -33,14 +35,15 @@ class ClimateTokenIndex(object):
     sequence_num: int = 0
 
     def name(self) -> bytes32:
-        return Program.to(
+        to_hash: Program = Program.to(
             [
                 self.org_uid,
                 self.warehouse_project_id,
                 self.vintage_year,
                 self.sequence_num,
             ]
-        ).get_tree_hash()
+        )
+        return to_hash.get_tree_hash()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -54,24 +57,19 @@ class TransactionRequest(object):
     def to_program(self) -> Program:
         conditions = []
         for payment in self.payments:
-            conditions.append(
-                [ConditionOpcode.CREATE_COIN] + payment.as_condition_args()
-            )
+            conditions.append([ConditionOpcode.CREATE_COIN] + payment.as_condition_args())
 
         for announcement in self.coin_announcements:
-            conditions.append(
-                [ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, announcement.name()]
-            )
+            conditions.append([ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, announcement.name()])
 
         for announcement in self.puzzle_announcements:
-            conditions.append(
-                [ConditionOpcode.ASSERT_PUZZLE_ANNOUNCEMENT, announcement.name()]
-            )
+            conditions.append([ConditionOpcode.ASSERT_PUZZLE_ANNOUNCEMENT, announcement.name()])
 
         if self.fee:
             conditions.append([ConditionOpcode.RESERVE_FEE, self.fee])
 
-        return Program.to(conditions)
+        ret: Program = Program.to(conditions)
+        return ret
 
     @property
     def additions(self) -> List[Dict[str, Any]]:

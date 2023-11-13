@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.coin import Coin
@@ -33,7 +33,7 @@ router = APIRouter()
 async def get_transaction(
     transaction_id: str,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.Transaction:
     """Get transaction by id.
 
     This endpoint is to be called by the registry or the client.
@@ -62,15 +62,13 @@ async def get_transactions(
     reverse: bool = False,
     to_address: Optional[str] = None,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
-):
+) -> schemas.Transactions:
     """Get transactions.
 
     This endpoint is to be called by the client.
     """
 
-    transaction_records: List[
-        TransactionRecord
-    ] = await wallet_rpc_client.get_transactions(
+    transaction_records: List[TransactionRecord] = await wallet_rpc_client.get_transactions(
         wallet_id=wallet_id,
         start=start,
         end=end,
@@ -82,9 +80,7 @@ async def get_transactions(
     wallet_objs: List[ChiaJsonObject] = await wallet_rpc_client.get_wallets(
         wallet_type=WalletType.CAT,
     )
-    wallet_infos: List[WalletInfo] = [
-        WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs
-    ]
+    wallet_infos: List[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
     wallet_info: Optional[WalletInfo]
     cat_info: Optional[CATInfo] = None
@@ -103,10 +99,7 @@ async def get_transactions(
             sort_key=sort_key,
             reverse=reverse,
             to_address=to_address,
-            transactions=[
-                transaction_record.to_json_dict()
-                for transaction_record in transaction_records
-            ],
+            transactions=[transaction_record.to_json_dict() for transaction_record in transaction_records],
         )
     if cat_info is None:
         raise ValueError(f"Wallet {wallet_id} is not a CAT wallet")
@@ -119,7 +112,7 @@ async def get_transactions(
     )
     gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 
-    transactions: List[Dict] = []
+    transactions = []
     for transaction_record in transaction_records:
         if transaction_record.to_puzzle_hash != gateway_puzzle_hash:
             continue
@@ -135,15 +128,13 @@ async def get_transactions(
                 break
 
         else:
-            raise ValueError(
-                f"No coin with puzzle hash {gateway_cat_puzzle_hash.hex()}"
-            )
+            raise ValueError(f"No coin with puzzle hash {gateway_cat_puzzle_hash.hex()}")
 
         mode: GatewayMode
         tail_spend: CoinSpend
         (mode, tail_spend) = parse_gateway_spend(coin_spend=coin_spend, is_cat=True)
 
-        transaction: Dict = transaction_record.to_json_dict()
+        transaction = transaction_record.to_json_dict()
         transaction["type"] = CLIMATE_WALLET_INDEX + mode.to_int()
         transaction["type_name"] = mode.name
 

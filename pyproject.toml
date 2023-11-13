@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Chia Climate Token Driver"
-version = "1.0.35"
+version = "1.0.36"
 description = "https://github.com/Chia-Network/climate-token-driver"
 authors = ["Harry Hsu <stmharry@hashgreen.net>",
            "Chia Network Inc <hello@chia.net>"]
@@ -46,3 +46,14 @@ changelog_start_rev = "1.0.3"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version =  ['py38', 'py39', 'py310', 'py311']
+include = '''
+^/(
+    [^/]*.py
+    | (app|tests)/.*\.pyi?
+)$
+'''
+exclude = ''

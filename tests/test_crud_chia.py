@@ -1,23 +1,23 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List
 from unittest import mock
 
 import pytest
 
-from app import crud
+from app import crud, schemas
 
 
 class TestClimateWareHouseCrud:
-    def test_combine_climate_units_and_metadata_empty_units_then_success(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_combine_climate_units_and_metadata_empty_units_then_success(self, monkeypatch: pytest.MonkeyPatch) -> None:
         mock_units = mock.MagicMock()
         mock_units.return_value = []
 
         monkeypatch.setattr(crud.ClimateWareHouseCrud, "get_climate_units", mock_units)
 
-        response = crud.ClimateWareHouseCrud(
-            url=mock.MagicMock(), api_key=None
-        ).combine_climate_units_and_metadata(search={})
+        response = crud.ClimateWareHouseCrud(url=mock.MagicMock(), api_key=None).combine_climate_units_and_metadata(
+            search={}
+        )
 
         assert len(response) == 0
 
@@ -71,20 +71,16 @@ class TestClimateWareHouseCrud:
         ]
         mock_projects.return_value = []
 
-        monkeypatch.setattr(
-            crud.ClimateWareHouseCrud, "get_climate_projects", mock_projects
-        )
+        monkeypatch.setattr(crud.ClimateWareHouseCrud, "get_climate_projects", mock_projects)
         monkeypatch.setattr(crud.ClimateWareHouseCrud, "get_climate_units", mock_units)
 
-        response = crud.ClimateWareHouseCrud(
-            url=mock.MagicMock(), api_key=None
-        ).combine_climate_units_and_metadata(search={})
+        response = crud.ClimateWareHouseCrud(url=mock.MagicMock(), api_key=None).combine_climate_units_and_metadata(
+            search={}
+        )
 
         assert len(response) == 0
 
-    def test_combine_climate_units_and_metadata_empty_orgs_then_success(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_combine_climate_units_and_metadata_empty_orgs_then_success(self, monkeypatch: pytest.MonkeyPatch) -> None:
         test_response: List[Dict[str, Any]] = [
             {
                 "correspondingAdjustmentDeclaration": "Committed",
@@ -275,22 +271,59 @@ class TestClimateWareHouseCrud:
             "0x8df0a9aa3739e24467b8a6409b49efe355dd4999a51215aed1f944314af07c60": '{"org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd","warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",        "vintage_year": 2099,"sequence_num": 0,"index": "0x8b0aa9633464b5437f4b980b864a3ab5dda49e6a754ef2b1cde6d30fb28a9330","public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",        "asset_id": "0x8df0a9aa3739e24467b8a6409b49efe355dd4999a51215aed1f944314af07c60","tokenization": {            "mod_hash": "0xbe97af91e9833541c4c5dd0ab08bad1b0653cccd96e56ae43b7314469e458f5b","public_key": "0x8cba9cb11eed6e2a04843d94c9cabecc3f8eb3118f3a4c1dd5260684f462a8c886db5963f2dcac03f54a745a42777e7c"},        "detokenization": {"mod_hash": "0xed13201cb8b52b4c7ef851e220a3d2bddd57120e6e6afde2aabe3fcc400765ea",   "public_key": "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d",            "signature": "0xa627c8779c2d8096444d44879294c7d963180c166564e9c9569c23c3a744af514aae03aeaa5e2d5fd12d0c008c1630410e9d4516b58863658f7ac5b35d09d8810fb28ed43b3f6243c645f0bd934b434aac87cd5718dafd87b51d8bf9c821ba24"},"permissionless_retirement": {"mod_hash": "0x36ab0a0666149598070b7c40ab10c3aaff51384d4ad4544a1c301636e917c039","signature": "0xaa1f6b71999333761fbd9eb914ce5ab1c3acb83e7fa7eb5b59c226f20b644c835f8238edbe3ddfeed1a916f0307fe1200174a211b8169ace5afcd9162f88b46565f3ffbbf6dfdf8d154e6337e30829c23ab3f6796d9a319bf0d9168685541d62"}}'
         }
 
-        monkeypatch.setattr(
-            crud.ClimateWareHouseCrud, "get_climate_projects", mock_projects
-        )
+        monkeypatch.setattr(crud.ClimateWareHouseCrud, "get_climate_projects", mock_projects)
         monkeypatch.setattr(crud.ClimateWareHouseCrud, "get_climate_units", mock_units)
-        monkeypatch.setattr(
-            crud.ClimateWareHouseCrud, "get_climate_organizations", mock_orgs
-        )
+        monkeypatch.setattr(crud.ClimateWareHouseCrud, "get_climate_organizations", mock_orgs)
         monkeypatch.setattr(
             crud.ClimateWareHouseCrud,
             "get_climate_organizations_metadata",
             mock_org_metadata,
         )
 
-        response = crud.ClimateWareHouseCrud(
-            url=mock.MagicMock(), api_key=None
-        ).combine_climate_units_and_metadata(search={})
+        response = crud.ClimateWareHouseCrud(url=mock.MagicMock(), api_key=None).combine_climate_units_and_metadata(
+            search={}
+        )
 
         print(f"EMLEML: {response}")
         assert response == test_response
+
+    def test_PermissionlessRetirementTxRequest(self) -> None:
+        test_data = {
+            "token": {
+                "org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
+                "warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
+                "vintage_year": "2099",
+                "sequence_num": 0,
+                "asset_id": "0x8df0a9aa3739e24467b8a6409b49efe355dd4999a51215aed1f944314af07c60",
+                "index": "0x8b0aa9633464b5437f4b980b864a3ab5dda49e6a754ef2b1cde6d30fb28a9330",
+                "public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",
+                "permissionless_retirement": {
+                    "signature": "0xaa1f6b71999333761fbd9eb914ce5ab1c3acb83e7fa7eb5b59c226f20b644c835f8238edbe3ddfeed1a916f0307fe1200174a211b8169ace5afcd9162f88b46565f3ffbbf6dfdf8d154e6337e30829c23ab3f6796d9a319bf0d9168685541d62",
+                    "mod_hash": "0x36ab0a0666149598070b7c40ab10c3aaff51384d4ad4544a1c301636e917c039",
+                },
+            },
+            "payment": {"amount": 5, "fee": 5, "beneficiary_name": "fred", "beneficiary_address": "bar"},
+        }
+
+        schemas.PermissionlessRetirementTxRequest.parse_obj(test_data)
+
+    def test_DetokenizationFileRequest(self) -> None:
+        test_data = {
+            "token": {
+                "org_uid": "cf7af8da584b6c115ba8247c5cdd05506c3b3c5c632ed975cc2b16262493e2bd",
+                "warehouse_project_id": "c9b98579-debb-49f3-b417-0adbae4ed5c7",
+                "vintage_year": "2099",
+                "sequence_num": 0,
+                "asset_id": "0x8df0a9aa3739e24467b8a6409b49efe355dd4999a51215aed1f944314af07c60",
+                "index": "0x8b0aa9633464b5437f4b980b864a3ab5dda49e6a754ef2b1cde6d30fb28a9330",
+                "public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",
+                "detokenization": {
+                    "signature": "0xa627c8779c2d8096444d44879294c7d963180c166564e9c9569c23c3a744af514aae03aeaa5e2d5fd12d0c008c1630410e9d4516b58863658f7ac5b35d09d8810fb28ed43b3f6243c645f0bd934b434aac87cd5718dafd87b51d8bf9c821ba24",
+                    "mod_hash": "0xed13201cb8b52b4c7ef851e220a3d2bddd57120e6e6afde2aabe3fcc400765ea",
+                    "public_key": "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d",
+                },
+            },
+            "payment": {"amount": 5, "fee": 5, "beneficiary_name": "fred", "beneficiary_address": "bar"},
+        }
+
+        schemas.DetokenizationFileRequest.parse_obj(test_data)

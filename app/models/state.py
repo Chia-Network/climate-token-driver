@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Column, DateTime, Integer, func
@@ -5,7 +7,7 @@ from sqlalchemy import BigInteger, Column, DateTime, Integer, func
 from app.db.base import Base
 
 
-class State(Base):
+class State(Base):  # type: ignore[misc]
     __tablename__ = "state"
 
     id = Column(Integer, primary_key=True, index=True)
