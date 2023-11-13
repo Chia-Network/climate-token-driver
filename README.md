@@ -1,5 +1,6 @@
 # Climate Token Driver Suite
 
+![Minimum Chia Version](https://raw.githubusercontent.com/Chia-Network/core-registry-api/main/minimumChiaVersion.svg)
 ![Tested Up to Chia Version](https://raw.githubusercontent.com/Chia-Network/core-registry-api/main/testedChiaVersion.svg)
 
 This application can run in 4 modes, each providing a separate application with a distinct use case:
