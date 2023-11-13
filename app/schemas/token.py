@@ -74,11 +74,12 @@ class DetokenizationFileParseResponse(BaseModel):
     gateway_coin_spend: ChiaJsonObject
 
 
-class DetokenizationFileRequest(BaseModel):
-    class _TokenOnChain(TokenOnChainBase):
-        detokenization: DetokenizationTailMetadata
+class _TokenOnChain_Detokenize(TokenOnChainBase):
+    detokenization: DetokenizationTailMetadata
 
-    token: _TokenOnChain
+
+class DetokenizationFileRequest(BaseModel):
+    token: _TokenOnChain_Detokenize
     payment: PaymentBase
 
 
@@ -88,11 +89,12 @@ class DetokenizationFileResponse(BaseModel):
     tx: Transaction
 
 
-class PermissionlessRetirementTxRequest(BaseModel):
-    class _TokenOnChain(TokenOnChainBase):
-        permissionless_retirement: PermissionlessRetirementTailMetadata
+class _TokenOnChain_Permissionless(TokenOnChainBase):
+    permissionless_retirement: PermissionlessRetirementTailMetadata
 
-    token: _TokenOnChain
+
+class PermissionlessRetirementTxRequest(BaseModel):
+    token: _TokenOnChain_Permissionless
     payment: RetirementPaymentWithPayer
 
 

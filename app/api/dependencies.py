@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from contextlib import asynccontextmanager, AbstractAsyncContextManager
+from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator, AsyncIterator
 
