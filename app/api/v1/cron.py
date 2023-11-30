@@ -130,8 +130,9 @@ async def _scan_token_activity(
                 db_crud.batch_insert_ignore_activity(activities)
                 logger.info(f"Activities for {org_name} and asset id: {key} added to the database.")
 
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
+            # This is causing logging for benign errors, so commenting out for now
+            # except json.JSONDecodeError as e:
+               # logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
             except Exception as e:
                 logger.error(f"An error occurred for organization {org_name} under key {key}: {str(e)}")
 
