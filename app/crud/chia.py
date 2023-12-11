@@ -34,6 +34,50 @@ class ClimateWareHouseCrud(object):
             headers["x-api-key"] = self.api_key
 
         return headers
+    
+    def _get_paginated_data(self, path: str, search_params: Dict[str, Any]) -> List[Any]:
+        """
+        Generic function to retrieve paginated data from a given path.
+
+        Args:
+            path: API endpoint path.
+            search_params: A dictionary of search parameters including pagination.
+
+        Returns:
+            A list of all data retrieved from the paginated API.
+        """
+        all_data = []
+        page = 1
+        limit = 10
+
+        try:
+            while True:
+                # Update search parameters with current page and limit
+                params = {**search_params, "page": page, "limit": limit}
+                encoded_params = urlencode(params)
+
+                # Construct the URL
+                url = urlparse(f"{self.url}{path}?{encoded_params}")
+
+                response = requests.get(url.geturl(), headers=self._headers())
+                if response.status_code != requests.codes.ok:
+                    logger.error(f"Request Url: {response.url} Error Message: {response.text}")
+                    raise error_code.internal_server_error(message="API Call Failure")
+
+                data = response.json()
+
+                all_data.extend(data['data'])  # Add data from the current page
+
+                if page >= data['pageCount']:
+                    break  # Exit loop if all pages have been processed
+
+                page += 1
+
+            return all_data
+
+        except TimeoutError as e:
+            logger.error("API Call Timeout, ErrorMessage: " + str(e))
+            raise error_code.internal_server_error("API Call Timeout")
 
     def get_climate_units(self, search: Dict[str, Any]) -> Any:
         """
@@ -45,38 +89,8 @@ class ClimateWareHouseCrud(object):
         Returns:
             A JSON object containing all the climate units.
         """
-        all_units = []  # List to store all units
-        page = 1
-        limit = 10
-
-        try:
-            while True:
-                # Update search parameters with current page and limit
-                search_with_pagination = {**search, "page": page, "limit": limit, "hasMarketplaceIdentifier": True}
-                params = urlencode(search_with_pagination)
-
-                # Construct the URL
-                url = urlparse(f"{self.url}/v1/units?{params}")
-
-                response = requests.get(url.geturl(), headers=self._headers())
-                if response.status_code != requests.codes.ok:
-                    logger.error(f"Request Url: {response.url} Error Message: {response.text}")
-                    raise error_code.internal_server_error(message="Call Climate API Failure")
-
-                data = response.json()
-
-                all_units.extend(data['data'])  # Add the units from the current page
-
-                if page >= data['pageCount']:
-                    break  # Exit loop if all pages have been processed
-
-                page += 1
-
-            return all_units
-
-        except TimeoutError as e:
-            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
-            raise error_code.internal_server_error("Call Climate API Timeout")
+        search_with_marketplace = {**search, "hasMarketplaceIdentifier": True}
+        return self._get_paginated_data("/v1/units", search_with_marketplace)
 
     def get_climate_projects(self) -> Any:
         """
@@ -85,34 +99,8 @@ class ClimateWareHouseCrud(object):
         Returns:
             A JSON object containing all the climate projects.
         """
-        all_projects = []
-        page = 1
-        limit = 10
-
-        try:
-            while True:
-                # Construct the URL with page and limit parameters
-                url = urlparse(f"{self.url}/v1/projects?page={page}&limit={limit}&onlyMarketplaceProjects=true")
-
-                response = requests.get(url.geturl(), headers=self._headers())
-                if response.status_code != requests.codes.ok:
-                    logger.error(f"Request Url: {response.url} Error Message: {response.text}")
-                    raise error_code.internal_server_error(message="Call Climate API Failure")
-
-                data = response.json()
-
-                all_projects.extend(data['data'])  # Add the projects from the current page
-
-                if page >= data['pageCount']:
-                    break  # Exit loop if all pages have been processed
-
-                page += 1
-
-            return all_projects
-
-        except TimeoutError as e:
-            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
-            raise error_code.internal_server_error("Call Climate API Timeout")
+        search_params = {"onlyMarketplaceProjects": True}
+        return self._get_paginated_data("/v1/projects", search_params)
 
     def get_climate_organizations(self) -> Any:
         try:
