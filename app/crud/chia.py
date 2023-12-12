@@ -35,36 +35,72 @@ class ClimateWareHouseCrud(object):
 
         return headers
 
-    def get_climate_units(self, search: Dict[str, Any]) -> Any:
+    def _get_paginated_data(self, path: str, search_params: Dict[str, Any]) -> List[Any]:
+        """
+        Generic function to retrieve paginated data from a given path.
+
+        Args:
+            path: API endpoint path.
+            search_params: A dictionary of search parameters including pagination.
+
+        Returns:
+            A list of all data retrieved from the paginated API.
+        """
+        all_data = []
+        page = 1
+        limit = 10
+
         try:
-            params = urlencode(search)
-            url = urlparse(self.url + "/v1/units")
+            while True:
+                # Update search parameters with current page and limit
+                params = {**search_params, "page": page, "limit": limit}
+                encoded_params = urlencode(params)
 
-            r = requests.get(url.geturl(), params=params, headers=self._headers())
-            if r.status_code != requests.codes.ok:
-                logger.error(f"Request Url: {r.url} Error Message: {r.text}")
-                raise error_code.internal_server_error(message="Call Climate API Failure")
+                # Construct the URL
+                url = urlparse(f"{self.url}{path}?{encoded_params}")
 
-            return r.json()
+                response = requests.get(url.geturl(), headers=self._headers())
+                if response.status_code != requests.codes.ok:
+                    logger.error(f"Request Url: {response.url} Error Message: {response.text}")
+                    raise error_code.internal_server_error(message="API Call Failure")
+
+                data = response.json()
+
+                all_data.extend(data["data"])  # Add data from the current page
+
+                if page >= data["pageCount"]:
+                    break  # Exit loop if all pages have been processed
+
+                page += 1
+
+            return all_data
 
         except TimeoutError as e:
-            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
-            raise error_code.internal_server_error("Call Climate API Timeout")
+            logger.error("API Call Timeout, ErrorMessage: " + str(e))
+            raise error_code.internal_server_error("API Call Timeout")
+
+    def get_climate_units(self, search: Dict[str, Any]) -> Any:
+        """
+        Retrieves all climate units using pagination and given search parameters.
+
+        Args:
+            search: A dictionary of search parameters.
+
+        Returns:
+            A JSON object containing all the climate units.
+        """
+        search_with_marketplace = {**search, "hasMarketplaceIdentifier": True}
+        return self._get_paginated_data("/v1/units", search_with_marketplace)
 
     def get_climate_projects(self) -> Any:
-        try:
-            url = urlparse(self.url + "/v1/projects")
+        """
+        Retrieves all climate projects using pagination.
 
-            r = requests.get(url.geturl(), headers=self._headers())
-            if r.status_code != requests.codes.ok:
-                logger.error(f"Request Url: {r.url} Error Message: {r.text}")
-                raise error_code.internal_server_error(message="Call Climate API Failure")
-
-            return r.json()
-
-        except TimeoutError as e:
-            logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
-            raise error_code.internal_server_error("Call Climate API Timeout")
+        Returns:
+            A JSON object containing all the climate projects.
+        """
+        search_params = {"onlyMarketplaceProjects": True}
+        return self._get_paginated_data("/v1/projects", search_params)
 
     def get_climate_organizations(self) -> Any:
         try:
@@ -142,7 +178,7 @@ class ClimateWareHouseCrud(object):
             try:
                 warehouse_project_id = unit["issuance"]["warehouseProjectId"]
                 project = project_by_id[warehouse_project_id]
-            except KeyError:
+            except (KeyError, TypeError):
                 logger.warning(f"Can not get project by warehouse_project_id: {warehouse_project_id}")
                 continue
 

@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import importlib.metadata
 import logging
+
 import uvicorn
-import toml
+
 from app.config import settings
 
-# Parse pyproject.toml to get the version
-with open('pyproject.toml', 'r') as toml_file:
-    pyproject = toml.load(toml_file)
-version = pyproject['tool']['poetry']['version']
+version = importlib.metadata.version("Chia Climate Token Driver")
 
 # Define the log format with version
 log_format = f"%(asctime)s,%(msecs)d {version} %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s"

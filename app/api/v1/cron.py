@@ -132,7 +132,7 @@ async def _scan_token_activity(
 
             # This is causing logging for benign errors, so commenting out for now
             # except json.JSONDecodeError as e:
-               # logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
+            # logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
             except Exception as e:
                 logger.error(f"An error occurred for organization {org_name} under key {key}: {str(e)}")
 
