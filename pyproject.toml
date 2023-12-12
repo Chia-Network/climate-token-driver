@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Chia Climate Token Driver"
-version = "1.0.36"
+version = "1.0.37"
 description = "https://github.com/Chia-Network/climate-token-driver"
 authors = ["Harry Hsu <stmharry@hashgreen.net>",
            "Chia Network Inc <hello@chia.net>"]
@@ -21,6 +21,7 @@ fastapi-utils = "^0.2.1"
 SQLAlchemy-Utils = "^0.38.3"
 pydantic = { extras = ["dotenv"], version = "^1.10.2" }
 chia-blockchain = "2.1.1"
+toml = "^0.10.2"
 
 [tool.poetry.group.dev]
 optional = true

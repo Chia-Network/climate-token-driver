@@ -65,6 +65,7 @@ class TestActivities:
             fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
+            m.setattr(crud.ClimateWareHouseCrud, "combine_climate_units_and_metadata", mock.MagicMock(return_value={}))
 
             params = urlencode({})
             response = fastapi_client.get("v1/activities/", params=params)
