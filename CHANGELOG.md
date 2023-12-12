@@ -1,3 +1,15 @@
+## 1.0.37 (2023-12-12)
+
+### Feat
+
+- paginate cadt request
+- add version to log output
+- add version to log output
+
+### Refactor
+
+- consolidate common functionality
+
 ## 1.0.36 (2023-11-13)
 
 ### Feat
