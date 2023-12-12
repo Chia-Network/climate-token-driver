@@ -34,7 +34,7 @@ class ClimateWareHouseCrud(object):
             headers["x-api-key"] = self.api_key
 
         return headers
-    
+
     def _get_paginated_data(self, path: str, search_params: Dict[str, Any]) -> List[Any]:
         """
         Generic function to retrieve paginated data from a given path.
@@ -66,9 +66,9 @@ class ClimateWareHouseCrud(object):
 
                 data = response.json()
 
-                all_data.extend(data['data'])  # Add data from the current page
+                all_data.extend(data["data"])  # Add data from the current page
 
-                if page >= data['pageCount']:
+                if page >= data["pageCount"]:
                     break  # Exit loop if all pages have been processed
 
                 page += 1
@@ -82,10 +82,10 @@ class ClimateWareHouseCrud(object):
     def get_climate_units(self, search: Dict[str, Any]) -> Any:
         """
         Retrieves all climate units using pagination and given search parameters.
-        
+
         Args:
             search: A dictionary of search parameters.
-            
+
         Returns:
             A JSON object containing all the climate units.
         """
@@ -95,7 +95,7 @@ class ClimateWareHouseCrud(object):
     def get_climate_projects(self) -> Any:
         """
         Retrieves all climate projects using pagination.
-        
+
         Returns:
             A JSON object containing all the climate projects.
         """
@@ -178,7 +178,7 @@ class ClimateWareHouseCrud(object):
             try:
                 warehouse_project_id = unit["issuance"]["warehouseProjectId"]
                 project = project_by_id[warehouse_project_id]
-            except KeyError:
+            except (KeyError, TypeError):
                 logger.warning(f"Can not get project by warehouse_project_id: {warehouse_project_id}")
                 continue
 
