@@ -1,6 +1,6 @@
 from typing import Optional
 
-from blspy import G1Element, PrivateKey
+from chia_rs import G1Element, PrivateKey
 from chia.consensus.coinbase import create_puzzlehash_for_pk
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32

@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, Tuple
 
-from blspy import G1Element, G2Element
+from chia_rs import G1Element, G2Element
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend

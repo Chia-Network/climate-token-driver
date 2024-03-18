@@ -20,7 +20,7 @@ requests = "^2.28.1"
 fastapi-utils = "^0.2.1"
 SQLAlchemy-Utils = "^0.38.3"
 pydantic = { extras = ["dotenv"], version = "^1.10.2" }
-chia-blockchain = "2.1.1"
+chia-blockchain = "2.2.1"
 toml = "^0.10.2"
 
 [tool.poetry.group.dev]

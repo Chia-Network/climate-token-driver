@@ -1,17 +1,18 @@
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 from typing import List
 
 import pytest
-from blspy import PrivateKey
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.simulator.full_node_simulator import FullNodeSimulator
-from chia.simulator.time_out_assert import time_out_assert
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.wallet import Wallet
 from chia.wallet.wallet_node import WalletNode
+from chia_rs import PrivateKey
 
 from app.core.climate_wallet.wallet import ClimateObserverWallet, ClimateWallet
 from app.core.derive_keys import master_sk_to_root_sk
@@ -20,6 +21,26 @@ from tests.wallet.rpc.test_wallet_rpc import wallet_rpc_environment  # noqa: F40
 from tests.wallet.rpc.test_wallet_rpc import WalletRpcTestEnvironment, farm_transaction, generate_funds
 
 logger = logging.getLogger(__name__)
+
+
+async def time_out_assert_custom_interval(timeout: float, interval, function, value=True, *args, **kwargs):  # type: ignore[no-untyped-def]
+    __tracebackhide__ = True
+
+    start = time.time()
+    while time.time() - start < timeout:
+        if asyncio.iscoroutinefunction(function):
+            f_res = await function(*args, **kwargs)
+        else:
+            f_res = function(*args, **kwargs)
+        if value == f_res:
+            return None
+        await asyncio.sleep(interval)
+    assert False, f"Timed assertion timed out after {timeout} seconds: expected {value!r}, got {f_res!r}"
+
+
+async def time_out_assert(timeout: int, function, value=True, *args, **kwargs):  # type: ignore[no-untyped-def]
+    __tracebackhide__ = True
+    await time_out_assert_custom_interval(timeout, 0.05, function, value, *args, **kwargs)
 
 
 async def check_transactions(
@@ -56,7 +77,7 @@ class TestCATWorkflow:
             ("Ivern", "Daisy!", 2019, 100, 10),
         ],
     )
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_cat_tokenization_workflow(
         self,
         wallet_rpc_environment: WalletRpcTestEnvironment,  # noqa: F811
@@ -123,7 +144,7 @@ class TestCATWorkflow:
 
         await time_out_assert(60, get_confirmed_balance, amount, wallet_client_2, cat_wallet_id)
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_cat_detokenization_workflow(
         self,
         wallet_rpc_environment: WalletRpcTestEnvironment,  # noqa: F811
@@ -217,7 +238,7 @@ class TestCATWorkflow:
         await check_transactions(wallet_client_2, cat_wallet_id, transaction_records)
         await time_out_assert(60, get_confirmed_balance, 0, wallet_client_2, cat_wallet_id)
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_cat_permissionless_retirement_workflow(
         self,
         wallet_rpc_environment: WalletRpcTestEnvironment,  # noqa: F811
