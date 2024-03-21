@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from blspy import PrivateKey
+from chia_rs import PrivateKey
 from chia.wallet.derive_keys import _derive_path_unhardened
 
 

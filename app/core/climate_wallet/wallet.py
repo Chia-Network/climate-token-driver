@@ -4,7 +4,7 @@ import dataclasses
 import time
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
-from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
+from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.consensus.constants import ConsensusConstants
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.rpc.wallet_rpc_client import WalletRpcClient
@@ -13,7 +13,7 @@ from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_record import CoinRecord
 from chia.types.coin_spend import CoinSpend
-from chia.types.spend_bundle import SpendBundle
+from chia.types.spend_bundle import SpendBundle, estimate_fees
 from chia.util.bech32m import bech32_decode, bech32_encode, convertbits
 from chia.util.ints import uint32, uint64
 from chia.wallet.cat_wallet.cat_utils import (
@@ -502,7 +502,7 @@ class ClimateWallet(ClimateWalletBase):
                 "mode": mode,
                 "from_puzzle_hash": inner_puzzle_hash,
                 "amount": amount,
-                "fee": spend_bundle.fees() - amount,
+                "fee": estimate_fees(spend_bundle) - amount,
                 "asset_id": asset_id,
                 "gateway_coin_spend": coin_spend,
             }
@@ -564,7 +564,7 @@ class ClimateWallet(ClimateWalletBase):
             created_at_time=uint64(int(time.time())),
             to_puzzle_hash=gateway_coin_spend.coin.puzzle_hash,
             amount=uint64(gateway_coin_spend.coin.amount),
-            fee_amount=uint64(spend_bundle.fees() - gateway_coin_spend.coin.amount),
+            fee_amount=uint64(estimate_fees(spend_bundle) - gateway_coin_spend.coin.amount),
             confirmed=False,
             sent=uint32(0),
             spend_bundle=spend_bundle,
@@ -642,7 +642,7 @@ class ClimateObserverWallet(ClimateWalletBase):
         gateway_cat_puzzle: Program = construct_cat_puzzle(
             mod_code=CAT_MOD,
             limitations_program_hash=self.tail_program_hash,
-            inner_puzzle=gateway_puzzle,
+            inner_puzzle_or_hash=gateway_puzzle,
         )
         gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 

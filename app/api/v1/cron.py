@@ -4,7 +4,7 @@ import asyncio
 import json
 from typing import List
 
-from blspy import G1Element
+from chia_rs import G1Element
 from chia.consensus.block_record import BlockRecord
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.util.byte_types import hexstr_to_bytes

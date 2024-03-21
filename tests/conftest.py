@@ -14,10 +14,9 @@ from tests.conftest import *  # noqa
 
 @pytest_asyncio.fixture(scope="function")
 async def sim_full_node():
-    sim_full_node = await SpendSim.create()
-    await sim_full_node.farm_block()
-    yield sim_full_node
-    await sim_full_node.close()
+    async with SpendSim.managed() as sim_full_node:
+        await sim_full_node.farm_block()
+        yield sim_full_node
 
 
 @pytest_asyncio.fixture(scope="function")

@@ -5,7 +5,6 @@ import secrets
 from typing import Dict
 
 import pytest
-from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.clvm.spend_sim import SimClient, SpendSim
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
@@ -17,6 +16,7 @@ from chia.util.ints import uint64
 from chia.wallet.cat_wallet.cat_utils import CAT_MOD, SpendableCAT, unsigned_spend_bundle_for_spendable_cats
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
+from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 
 from app.core.chialisp.gateway import create_gateway_puzzle
 from app.core.chialisp.tail import create_tail_program
@@ -31,7 +31,7 @@ ZEROS = bytes32([0] * 32)
 
 
 class TestCATLifecycle:
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_cat_lifecycle(
         self,
         sim_full_node: SpendSim,

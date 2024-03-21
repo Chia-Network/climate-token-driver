@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode, urlparse
 
 import requests
-from blspy import G1Element
+from chia_rs import G1Element
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.coin_record import CoinRecord
