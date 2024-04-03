@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
+from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import INFINITE_COST, Program
 from chia.types.blockchain_format.sized_bytes import bytes32
@@ -47,7 +47,7 @@ def create_gateway_request_and_spend(
     gateway_cat_puzzle: Program = construct_cat_puzzle(
         mod_code=CAT_MOD,
         limitations_program_hash=tail_program_hash,
-        inner_puzzle=gateway_puzzle,
+        inner_puzzle_or_hash=gateway_puzzle,
     )
     gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 
