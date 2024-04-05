@@ -178,6 +178,8 @@ jobs:
       - name: Sign windows artifacts
         if: matrix.os.matrix == 'windows'
         uses: chia-network/actions/digicert/windows-sign@main
+        env:
+          SM_TOOLS_DOWNLOAD_URL: ${{ vars.SM_TOOLS_DOWNLOAD_URL }}
         with:
           sm_api_key: ${{ secrets.SM_API_KEY }}
           sm_client_cert_file_b64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}

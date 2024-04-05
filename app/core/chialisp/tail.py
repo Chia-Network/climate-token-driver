@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from blspy import G1Element
+from chia_rs import G1Element
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 
