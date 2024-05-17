@@ -9,4 +9,4 @@ def master_sk_to_root_sk(master: PrivateKey) -> PrivateKey:
 
 
 def root_sk_to_gateway_sk(root: PrivateKey) -> PrivateKey:
-    return _derive_path_unhardened(root, [0])
+    return _derive_path_unhardened(root, [1])
