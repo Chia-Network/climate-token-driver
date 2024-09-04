@@ -6,10 +6,10 @@ import time
 from typing import List
 
 import pytest
+from chia._tests.environments.wallet import WalletStateTransition, WalletTestFramework
 from chia._tests.wallet.rpc.test_wallet_rpc import WalletRpcTestEnvironment, farm_transaction, generate_funds
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.simulator.full_node_simulator import FullNodeSimulator
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.wallet import Wallet
 from chia.wallet.wallet_node import WalletNode
@@ -77,30 +77,40 @@ async def get_confirmed_balance(client: WalletRpcClient, wallet_id: int) -> int:
         ("Ivern", "Daisy!", 2019, 100, 10),
     ],
 )
+@pytest.mark.parametrize(
+    "wallet_environments",
+    [
+        {
+            "num_environments": 2,
+            "blocks_needed": [1, 1],
+            "config_overrides": {"automatically_add_unknown_cats": True},
+        }
+    ],
+    indirect=True,
+)
 @pytest.mark.anyio
 async def test_cat_tokenization_workflow(
-    self,
-    wallet_rpc_environment: WalletRpcTestEnvironment,  # noqa: F811
+    wallet_environments: WalletTestFramework,
     org_uid: str,
     warehouse_project_id: str,
     vintage_year: int,
     amount: int,
     fee: int,
 ) -> None:
-    env = wallet_rpc_environment
+    env_1 = wallet_environments.environments[0]
+    env_2 = wallet_environments.environments[1]
 
-    wallet_node_1: WalletNode = env.wallet_1.node
-    wallet_client_1: WalletRpcClient = env.wallet_1.rpc_client
+    env_1.wallet_aliases = {
+        "xch": 1,
+        "cat": 2,
+    }
+    env_2.wallet_aliases = {
+        "xch": 1,
+        "cat": 2,
+    }
 
-    wallet_client_2: WalletRpcClient = env.wallet_2.rpc_client
-    wallet_2: Wallet = env.wallet_2.wallet
-
-    full_node_api: FullNodeSimulator = env.full_node.api
-
-    # block:
-    #   - registry: fund deposit
-
-    await generate_funds(full_node_api, env.wallet_1)
+    wallet_client_1: WalletRpcClient = env_1.rpc_client
+    wallet_2: Wallet = env_2.xch_wallet
 
     fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
     result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
@@ -113,9 +123,6 @@ async def test_cat_tokenization_workflow(
         vintage_year=vintage_year,
     )
 
-    # block:
-    #   - registry: tokenization
-
     climate_wallet_1 = await ClimateWallet.create(
         token_index=token_index,
         root_secret_key=root_secret_key,
@@ -126,23 +133,44 @@ async def test_cat_tokenization_workflow(
         amount=amount,
         fee=fee,
     )
-    transaction_records: List[TransactionRecord] = result["transaction_records"]
 
-    await full_node_api.process_all_wallet_transactions(
-        wallet=wallet_node_1.wallet_state_manager.main_wallet, timeout=120
+    await wallet_environments.process_pending_states(
+        [
+            WalletStateTransition(
+                pre_block_balance_updates={
+                    "xch": {
+                        "unconfirmed_wallet_balance": -amount - fee,
+                        "<=#spendable_balance": -amount - fee,
+                        ">=#pending_change": 1,  # any amount increase
+                        "<=#max_send_amount": -amount - fee,
+                        "pending_coin_removal_count": 1,
+                    }
+                },
+                post_block_balance_updates={
+                    "xch": {
+                        "confirmed_wallet_balance": -amount - fee,
+                        ">=#spendable_balance": 1,
+                        "<=#pending_change": -1,  # any amount increase
+                        ">=#max_send_amount": 1,
+                        "pending_coin_removal_count": -1,
+                    }
+                },
+            ),
+            WalletStateTransition(
+                pre_block_balance_updates={},
+                post_block_balance_updates={
+                    "cat": {
+                        "init": True,
+                        "confirmed_wallet_balance": amount,
+                        "unconfirmed_wallet_balance": amount,
+                        "spendable_balance": amount,
+                        "max_send_amount": amount,
+                        "unspent_coin_count": 1,
+                    }
+                },
+            ),
+        ]
     )
-    await check_transactions(wallet_client_1, 1, transaction_records)
-
-    # block:
-    #   - client: create CAT wallet
-
-    result = await wallet_client_2.get_stray_cats()
-    asset_id = bytes32.fromhex(result[0]["asset_id"])
-    result = await wallet_client_2.create_wallet_for_existing_cat(asset_id=asset_id)
-    assert result["success"]
-    cat_wallet_id: int = result["wallet_id"]
-
-    await time_out_assert(60, get_confirmed_balance, amount, wallet_client_2, cat_wallet_id)
 
 
 @pytest.mark.anyio

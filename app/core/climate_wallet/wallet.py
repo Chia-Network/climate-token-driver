@@ -238,11 +238,12 @@ class ClimateWallet(ClimateWalletBase):
                 gateway_spend_bundle,
             ]
         )
+        additions = spend_bundle.additions()
         first_transaction_record = dataclasses.replace(
             first_transaction_record,
             spend_bundle=spend_bundle,
-            additions=spend_bundle.additions(),
-            removals=spend_bundle.removals(),
+            additions=additions,
+            removals=[rem for rem in spend_bundle.removals() if rem not in additions],
             type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
             name=spend_bundle.name(),
             memos=list(compute_memos(spend_bundle).items()),
