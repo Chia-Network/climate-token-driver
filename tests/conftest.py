@@ -1,27 +1,22 @@
 from __future__ import annotations
 
 import pytest
-import pytest_asyncio
-from chia.clvm.spend_sim import SimClient, SpendSim
+
+# import all fixtures from chia-blockchain test suite
+from chia._tests.conftest import *  # noqa
+from chia._tests.wallet.conftest import *  # noqa
+from chia._tests.wallet.rpc.test_wallet_rpc import *  # noqa
+from chia.clvm.spend_sim import sim_and_client
 from fastapi.testclient import TestClient
 
 from app.core.types import ClimateTokenIndex
 from app.main import app
 
-# import all fixtures from chia-blockchain test suite
-from tests.conftest import *  # noqa
 
-
-@pytest_asyncio.fixture(scope="function")
-async def sim_full_node():
-    async with SpendSim.managed() as sim_full_node:
-        await sim_full_node.farm_block()
-        yield sim_full_node
-
-
-@pytest_asyncio.fixture(scope="function")
-async def sim_full_node_client(sim_full_node):
-    return SimClient(sim_full_node)
+@pytest.fixture(scope="function")
+async def sim_utils():
+    async with sim_and_client(pass_prefarm=True) as (sim, client):
+        yield sim, client
 
 
 @pytest.fixture(scope="function")

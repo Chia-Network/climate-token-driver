@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from chia_rs import G1Element, PrivateKey
-from chia.consensus.constants import ConsensusConstants
+from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
@@ -17,6 +16,7 @@ from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
 from chia.wallet.util.wallet_types import WalletType
 from chia.wallet.wallet_info import WalletInfo
+from chia_rs import G1Element, PrivateKey
 
 from app.core.derive_keys import master_sk_to_root_sk
 from app.core.types import TransactionRequest
@@ -34,7 +34,7 @@ async def get_constants(
         filename="config.yaml",
     )
     constant_overrides = config["network_overrides"]["constants"][network_name]
-    constants = DEFAULT_CONSTANTS.replace_str_to_bytes(**constant_overrides)
+    constants = replace_str_to_bytes(DEFAULT_CONSTANTS, **constant_overrides)
 
     return constants
 
@@ -115,11 +115,10 @@ async def get_created_signed_transactions(
     transaction_records = await wallet_client.create_signed_transactions(
         coins=transaction_request.coins,
         additions=transaction_request.additions,
-        coin_announcements=transaction_request.coin_announcements,
-        puzzle_announcements=transaction_request.puzzle_announcements,
         fee=uint64(transaction_request.fee),
         wallet_id=wallet_id,
         tx_config=DEFAULT_TX_CONFIG,
+        extra_conditions=(*transaction_request.coin_announcements, *transaction_request.puzzle_announcements),
     )
 
     return transaction_records

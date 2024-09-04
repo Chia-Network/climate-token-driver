@@ -4,11 +4,11 @@ import dataclasses
 import enum
 from typing import Any, Dict, List, Optional
 
-from chia.types.announcement import Announcement
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.condition_opcodes import ConditionOpcode
+from chia.wallet.conditions import CreateCoinAnnouncement, CreatePuzzleAnnouncement
 from chia.wallet.payment import Payment
 
 CLIMATE_WALLET_INDEX = 2
@@ -50,8 +50,8 @@ class ClimateTokenIndex(object):
 class TransactionRequest(object):
     coins: Optional[List[Coin]] = dataclasses.field(default=None)
     payments: List[Payment] = dataclasses.field(default_factory=list)
-    coin_announcements: List[Announcement] = dataclasses.field(default_factory=list)
-    puzzle_announcements: List[Announcement] = dataclasses.field(default_factory=list)
+    coin_announcements: List[CreateCoinAnnouncement] = dataclasses.field(default_factory=list)
+    puzzle_announcements: List[CreatePuzzleAnnouncement] = dataclasses.field(default_factory=list)
     fee: int = dataclasses.field(default=0)
 
     def to_program(self) -> Program:
@@ -60,10 +60,10 @@ class TransactionRequest(object):
             conditions.append([ConditionOpcode.CREATE_COIN] + payment.as_condition_args())
 
         for announcement in self.coin_announcements:
-            conditions.append([ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, announcement.name()])
+            conditions.append(announcement.to_program())
 
         for announcement in self.puzzle_announcements:
-            conditions.append([ConditionOpcode.ASSERT_PUZZLE_ANNOUNCEMENT, announcement.name()])
+            conditions.append(announcement.to_program())
 
         if self.fee:
             conditions.append([ConditionOpcode.RESERVE_FEE, self.fee])

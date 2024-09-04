@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import yaml
-from pydantic import BaseSettings, root_validator, validator
+from pydantic import root_validator, validator
+from pydantic_settings import BaseSettings
 
 
 class ExecutionMode(enum.Enum):
@@ -67,7 +68,7 @@ class Settings(BaseSettings):
             cls._instance = get_settings()
         return cls._instance
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def configure_port(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if values["MODE"] == ExecutionMode.REGISTRY:
             values["SERVER_PORT"] = values.get("CLIMATE_TOKEN_REGISTRY_PORT", ServerPort.CLIMATE_TOKEN_REGISTRY.value)
