@@ -547,7 +547,6 @@ class ClimateWallet(ClimateWalletBase):
 
         aggregated_signature: G2Element = AugSchemeMPL.aggregate(signatures)
         if aggregated_signature == G2Element():
-            breakpoint()
             raise ValueError("Invalid detokenization request!")
 
         spend_bundle = SpendBundle.aggregate(
