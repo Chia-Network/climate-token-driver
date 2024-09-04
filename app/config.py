@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     MODE: ExecutionMode
     CHIA_ROOT: Path = Path("~/.chia/mainnet")
     CONFIG_PATH: Path = Path("climate_token/config/config.yaml")
-    SERVER_PORT: Optional[int]
+    SERVER_PORT: Optional[int] = 31999
 
     # Visible configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
