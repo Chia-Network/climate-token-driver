@@ -7,12 +7,11 @@ from typing import List
 
 import pytest
 from chia._tests.environments.wallet import WalletStateTransition, WalletTestFramework
-from chia._tests.wallet.rpc.test_wallet_rpc import WalletRpcTestEnvironment, farm_transaction, generate_funds
+from chia._tests.wallet.rpc.test_wallet_rpc import WalletRpcTestEnvironment, generate_funds
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.simulator.full_node_simulator import FullNodeSimulator
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.wallet import Wallet
-from chia.wallet.wallet_node import WalletNode
 from chia_rs import PrivateKey
 
 from app.core.climate_wallet.wallet import ClimateObserverWallet, ClimateWallet
@@ -173,33 +172,45 @@ async def test_cat_tokenization_workflow(
     )
 
 
+@pytest.mark.parametrize(
+    "wallet_environments",
+    [
+        {
+            "num_environments": 2,
+            "blocks_needed": [1, 1],
+            "config_overrides": {"automatically_add_unknown_cats": True},
+        }
+    ],
+    indirect=True,
+)
 @pytest.mark.anyio
 async def test_cat_detokenization_workflow(
-    self,
-    wallet_rpc_environment: WalletRpcTestEnvironment,  # noqa: F811
+    wallet_environments: WalletTestFramework,
     token_index: ClimateTokenIndex,
     amount: int = 10,
     fee: int = 10,
 ) -> None:
-    env: WalletRpcTestEnvironment = wallet_rpc_environment
+    env_1 = wallet_environments.environments[0]
+    env_2 = wallet_environments.environments[1]
 
-    wallet_node_1: WalletNode = env.wallet_1.node
-    wallet_client_1: WalletRpcClient = env.wallet_1.rpc_client
+    env_1.wallet_aliases = {
+        "xch": 1,
+        "cat": 2,
+    }
+    env_2.wallet_aliases = {
+        "xch": 1,
+        "cat": 2,
+    }
 
-    wallet_client_2: WalletRpcClient = env.wallet_2.rpc_client
-    wallet_2: Wallet = env.wallet_2.wallet
+    wallet_client_1: WalletRpcClient = env_1.rpc_client
 
-    full_node_api: FullNodeSimulator = env.full_node.api
+    wallet_client_2: WalletRpcClient = env_2.rpc_client
+    wallet_2: Wallet = env_2.xch_wallet
 
     fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
     result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
     master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
     root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
-
-    # block: initial fund deposits
-
-    await generate_funds(full_node_api, env.wallet_1)
-    await generate_funds(full_node_api, env.wallet_2)
 
     # block:
     #   - registry: tokenization
@@ -215,18 +226,44 @@ async def test_cat_detokenization_workflow(
         amount=amount,
         fee=fee,
     )
-    # spend_bundle: SpendBundle = result["spend_bundle"]
-    transaction_records: List[TransactionRecord] = result["transaction_records"]
 
-    result = await wallet_client_2.create_wallet_for_existing_cat(
-        asset_id=climate_wallet_1.tail_program.get_tree_hash()
+    await wallet_environments.process_pending_states(
+        [
+            WalletStateTransition(
+                pre_block_balance_updates={
+                    "xch": {
+                        "unconfirmed_wallet_balance": -amount - fee,
+                        "<=#spendable_balance": -amount - fee,
+                        ">=#pending_change": 1,  # any amount increase
+                        "<=#max_send_amount": -amount - fee,
+                        "pending_coin_removal_count": 1,
+                    }
+                },
+                post_block_balance_updates={
+                    "xch": {
+                        "confirmed_wallet_balance": -amount - fee,
+                        ">=#spendable_balance": 1,
+                        "<=#pending_change": -1,  # any amount increase
+                        ">=#max_send_amount": 1,
+                        "pending_coin_removal_count": -1,
+                    }
+                },
+            ),
+            WalletStateTransition(
+                pre_block_balance_updates={},
+                post_block_balance_updates={
+                    "cat": {
+                        "init": True,
+                        "confirmed_wallet_balance": amount,
+                        "unconfirmed_wallet_balance": amount,
+                        "spendable_balance": amount,
+                        "max_send_amount": amount,
+                        "unspent_coin_count": 1,
+                    }
+                },
+            ),
+        ]
     )
-    cat_wallet_id: int = result["wallet_id"]
-
-    await full_node_api.process_all_wallet_transactions(
-        wallet=wallet_node_1.wallet_state_manager.main_wallet, timeout=120
-    )
-    await check_transactions(wallet_client_1, 1, transaction_records)
 
     # block:
     #   - client: create detokenization request
@@ -244,10 +281,9 @@ async def test_cat_detokenization_workflow(
     result = await climate_wallet_2.create_detokenization_request(
         amount=amount,
         fee=fee,
-        wallet_id=cat_wallet_id,
+        wallet_id=env_2.wallet_aliases["cat"],
     )
     content: str = result["content"]
-    transaction_records = result["transaction_records"]
 
     result = await ClimateWallet.parse_detokenization_request(
         content=content,
@@ -260,12 +296,57 @@ async def test_cat_detokenization_workflow(
     result = await climate_wallet_1.sign_and_send_detokenization_request(
         content=content,
     )
-    spend_bundle = result["spend_bundle"]
 
-    await farm_transaction(full_node_api, wallet_node_1, spend_bundle)
-    await full_node_api.wait_for_wallet_synced(env.wallet_2.node, timeout=60)
-    await check_transactions(wallet_client_2, cat_wallet_id, transaction_records)
-    await time_out_assert(60, get_confirmed_balance, 0, wallet_client_2, cat_wallet_id)
+    # TODO: this will fail without this:
+    # https://github.com/Chia-Network/chia-blockchain/blob/long_lived/vault/chia/wallet/wallet_state_manager.py#L1829-L1840
+    await wallet_environments.process_pending_states(
+        [
+            WalletStateTransition(
+                pre_block_balance_updates={
+                    "xch": {
+                        # Should probably review whether or not this is intentional/desired
+                        "pending_coin_removal_count": 2,
+                    }
+                },
+                post_block_balance_updates={
+                    "xch": {
+                        "pending_coin_removal_count": -2,
+                    }
+                },
+            ),
+            WalletStateTransition(
+                pre_block_balance_updates={
+                    "xch": {
+                        "unconfirmed_wallet_balance": -fee,
+                        "<=#spendable_balance": -fee,
+                        ">=#pending_change": 1,  # any amount increase
+                        "<=#max_send_amount": -fee,
+                        "pending_coin_removal_count": 1,
+                    },
+                    "cat": {
+                        "unconfirmed_wallet_balance": -amount,
+                        "spendable_balance": -amount,
+                        "max_send_amount": -amount,
+                        "pending_coin_removal_count": 1,
+                    },
+                },
+                post_block_balance_updates={
+                    "xch": {
+                        "confirmed_wallet_balance": -fee,
+                        ">=#spendable_balance": 1,
+                        "<=#pending_change": -1,  # any amount increase
+                        ">=#max_send_amount": 1,
+                        "pending_coin_removal_count": -1,
+                    },
+                    "cat": {
+                        "confirmed_wallet_balance": -amount,
+                        "unspent_coin_count": -1,
+                        "pending_coin_removal_count": -1,
+                    },
+                },
+            ),
+        ]
+    )
 
 
 @pytest.mark.anyio
