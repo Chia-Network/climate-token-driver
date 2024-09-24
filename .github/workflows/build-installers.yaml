@@ -299,7 +299,7 @@ jobs:
           echo "github.sha is ${{ github.sha }}"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
 
       - name: Parse meta files for apt variables
         id: apt-metadata
