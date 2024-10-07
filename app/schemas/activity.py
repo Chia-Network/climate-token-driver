@@ -57,3 +57,9 @@ class ActivityWithCW(ActivityBase):
 class ActivitiesResponse(BaseModel):
     activities: List[ActivityWithCW] = Field(default_factory=list)
     total: int = 0
+
+class ActivityByCwUnitIdResponse(BaseModel):
+    activity: ActivityWithCW = Field(default_factory=ActivityWithCW)
+
+class ActivityByCwUnitIdRequest(BaseModel):
+    cw_unit_id: str = Field(example='bd941858-f8b0-4327-839f-0c13f46e181e')

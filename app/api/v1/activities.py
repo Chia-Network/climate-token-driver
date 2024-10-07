@@ -15,7 +15,6 @@ from app.utils import disallow
 
 router = APIRouter()
 
-
 @router.get("/", response_model=schemas.ActivitiesResponse)
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
@@ -123,3 +122,74 @@ async def get_activity(
         activities_with_cw.append(activity_with_cw)
 
     return schemas.ActivitiesResponse(activities=activities_with_cw, total=total)
+
+
+@router.get("/by-cw-unit-id", response_model=schemas.ActivitiesResponse)
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+async def get_activity_by_cw_unit_id(
+        cw_unit_id: str,
+        db: Session = Depends(deps.get_db_session),
+) -> schemas.ActivitiesResponse:
+    """Get a single activity based on the unit's unitWarehouseId.
+
+    This endpoint is to be called by the explorer.
+    """
+
+    print(f"****** {cw_unit_id}")
+    db_crud = crud.DBCrud(db=db)
+
+    activity_filters: Dict[str, Any] = {"or": [], "and": []}
+    cw_filters: Dict[str, str] = {"warehouseUnitId": cw_unit_id}
+
+    climate_data = crud.ClimateWareHouseCrud(
+        url=settings.CADT_API_SERVER_HOST,
+        api_key=settings.CADT_API_KEY,
+    ).combine_climate_units_and_metadata(search=cw_filters)
+    if len(climate_data) == 0:
+        logger.warning(f"Failed to retrieve unit from climate warehouse. search:{cw_filters}")
+        return schemas.ActivitiesResponse()
+
+    units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
+    if len(units) != 0:
+        activity_filters["and"].append(models.Activity.asset_id.in_(units.keys()))
+
+    activities: models.Activity
+    total: int
+
+    (activities, total) = db_crud.select_activity_with_pagination(
+        model=models.Activity,
+        filters=activity_filters,
+        order_by='desc',
+        page=1,
+        limit=10,
+    )
+    if len(activities) == 0:
+        logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
+        return schemas.ActivitiesResponse()
+
+    activity = activities[0]
+    unit = units.get(activity.asset_id)
+    if unit is None:
+        logger.warning(f"Activity asset ID does not match cw_unit ID. requested cw_unit_id (warehouseUnitId): {cw_unit_id}")
+    unit = unit.copy()
+    token = unit.pop("token", None)
+    org = unit.pop("organization", None)
+    project = unit.pop("project", None)
+
+    try:
+        token_on_chain = schemas.TokenOnChain.parse_obj(token)
+        print("instantiated TokenOnChain with parse_obj", flush=True)
+    except ValidationError:
+        print("failed to instantiate TokenOnChain with parse_obj", flush=True)
+        raise
+
+    activity_with_cw = schemas.ActivityWithCW(
+        token=token_on_chain,
+        cw_unit=unit,
+        cw_org=org,
+        cw_project=project,
+        metadata=activity.metadata_,
+        **jsonable_encoder(activity),
+    )
+
+    return schemas.ActivitiesResponse(activity=activity_with_cw)
