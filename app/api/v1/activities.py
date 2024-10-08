@@ -124,18 +124,17 @@ async def get_activity(
     return schemas.ActivitiesResponse(activities=activities_with_cw, total=total)
 
 
-@router.get("/by-cw-unit-id", response_model=schemas.ActivitiesResponse)
+@router.get("/by-cw-unit-id", response_model=schemas.ActivityByCwUnitIdResponse)
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity_by_cw_unit_id(
         cw_unit_id: str,
         db: Session = Depends(deps.get_db_session),
-) -> schemas.ActivitiesResponse:
+) -> schemas.ActivityByCwUnitIdResponse:
     """Get a single activity based on the unit's unitWarehouseId.
 
     This endpoint is to be called by the explorer.
     """
 
-    print(f"****** {cw_unit_id}")
     db_crud = crud.DBCrud(db=db)
 
     activity_filters: Dict[str, Any] = {"or": [], "and": []}
@@ -147,25 +146,27 @@ async def get_activity_by_cw_unit_id(
     ).combine_climate_units_and_metadata(search=cw_filters)
     if len(climate_data) == 0:
         logger.warning(f"Failed to retrieve unit from climate warehouse. search:{cw_filters}")
-        return schemas.ActivitiesResponse()
+        return schemas.ActivityByCwUnitIdResponse()
 
     units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
     if len(units) != 0:
         activity_filters["and"].append(models.Activity.asset_id.in_(units.keys()))
 
-    activities: models.Activity
+    activities: [models.Activity]
     total: int
+    page = 1
+    limit = 10
 
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
         order_by='desc',
-        page=1,
-        limit=10,
+        page=page,
+        limit=limit,
     )
     if len(activities) == 0:
         logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
-        return schemas.ActivitiesResponse()
+        return schemas.ActivityByCwUnitIdResponse()
 
     activity = activities[0]
     unit = units.get(activity.asset_id)
@@ -192,4 +193,4 @@ async def get_activity_by_cw_unit_id(
         **jsonable_encoder(activity),
     )
 
-    return schemas.ActivitiesResponse(activity=activity_with_cw)
+    return schemas.ActivityByCwUnitIdResponse(activity=activity_with_cw)

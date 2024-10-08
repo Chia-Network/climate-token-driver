@@ -65,6 +65,10 @@ class ClimateWareHouseCrud(object):
                     raise error_code.internal_server_error(message="API Call Failure")
 
                 data = response.json()
+                if data is None:
+                    # some cadt endpoints return null with no pagination info if no data is found
+                    # to prevent an infinite loop need to assume that there is no data matching the search from this iteration on
+                    return all_data
 
                 all_data.extend(data["data"])  # Add data from the current page
 
