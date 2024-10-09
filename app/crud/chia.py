@@ -70,7 +70,15 @@ class ClimateWareHouseCrud(object):
                     # to prevent an infinite loop need to assume that there is no data matching the search from this iteration on
                     return all_data
 
-                all_data.extend(data["data"])  # Add data from the current page
+                try:
+                    if data["page"] and data["pageCount"] and data["data"]:
+                        all_data.extend(data["data"]) # Add data from the current page
+                    else:
+                        all_data.append(data) # data was not paginated, append and return
+                        return all_data
+                except:
+                    all_data.append(data)  # data was not paginated, append and return
+                    return all_data
 
                 if page >= data["pageCount"]:
                     break  # Exit loop if all pages have been processed
@@ -183,7 +191,7 @@ class ClimateWareHouseCrud(object):
                 warehouse_project_id = unit["issuance"]["warehouseProjectId"]
                 project = project_by_id[warehouse_project_id]
             except (KeyError, TypeError):
-                logger.warning(f"Can not get project by warehouse_project_id: {warehouse_project_id}")
+                logger.warning(f"Can not get project by warehouse_project_id")
                 continue
 
             org_metadata = metadata_by_id.get(unit_org_uid)

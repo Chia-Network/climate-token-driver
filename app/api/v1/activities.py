@@ -160,7 +160,7 @@ async def get_activity_by_cw_unit_id(
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
-        order_by='desc',
+        order_by=[models.Activity.height.asc()],
         page=page,
         limit=limit,
     )
