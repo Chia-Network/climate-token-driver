@@ -59,5 +59,5 @@ class ActivitiesResponse(BaseModel):
     activities: List[ActivityWithCW] = Field(default_factory=list)
     total: int = 0
 
-class ActivityByCwUnitIdResponse(BaseModel):
+class ActivityRecordResponse(BaseModel):
     activity: ActivityWithCW = Field(default=None)

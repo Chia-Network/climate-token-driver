@@ -124,12 +124,14 @@ async def get_activity(
     return schemas.ActivitiesResponse(activities=activities_with_cw, total=total)
 
 
-@router.get("/by-cw-unit-id", response_model=schemas.ActivityByCwUnitIdResponse)
+@router.get("/activity-record", response_model=schemas.ActivityRecordResponse)
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity_by_cw_unit_id(
         cw_unit_id: str,
+        asset_token_id: str,
+        action_mode: str,
         db: Session = Depends(deps.get_db_session),
-) -> schemas.ActivityByCwUnitIdResponse:
+) -> schemas.ActivityRecordResponse:
     """Get a single activity based on the unit's unitWarehouseId.
 
     This endpoint is to be called by the explorer.
@@ -137,7 +139,6 @@ async def get_activity_by_cw_unit_id(
 
     db_crud = crud.DBCrud(db=db)
 
-    activity_filters: Dict[str, Any] = {"or": [], "and": []}
     cw_filters: Dict[str, str] = {"warehouseUnitId": cw_unit_id}
 
     climate_data = crud.ClimateWareHouseCrud(
@@ -146,36 +147,44 @@ async def get_activity_by_cw_unit_id(
     ).combine_climate_units_and_metadata(search=cw_filters)
     if len(climate_data) == 0:
         logger.warning(f"Failed to retrieve unit from climate warehouse. search:{cw_filters}")
-        return schemas.ActivityByCwUnitIdResponse()
+        return schemas.ActivityRecordResponse()
 
-    units = {unit["marketplaceIdentifier"]: unit for unit in climate_data}
-    if len(units) != 0:
-        activity_filters["and"].append(models.Activity.asset_id.in_(units.keys()))
+    unit_with_metadata = climate_data[0]
+
+    activity_filters: Dict[str, Any] = {"or": [], "and": []}
+    if unit_with_metadata["marketplaceIdentifier"]:
+        activity_filters["and"].append(models.Activity.asset_id == unit_with_metadata["marketplaceIdentifier"])
+    else:
+        logger.warning(f"retrieved unit does not contain marketplace identifier. unable to get actvity record")
+        return schemas.ActivityRecordResponse()
+
+    activity_filters["and"].append(models.Activity.mode == action_mode)
 
     activities: [models.Activity]
     total: int
-    page = 1
-    limit = 10
 
+    # total ignored
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
         order_by=[models.Activity.height.asc()],
-        page=page,
-        limit=limit,
     )
     if len(activities) == 0:
-        logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
-        return schemas.ActivityByCwUnitIdResponse()
+        logger.warning(f"No data to get from activities. filters:{activity_filters}")
+        return schemas.ActivityRecordResponse()
 
-    activity = activities[0]
-    unit = units.get(activity.asset_id)
-    if unit is None:
-        logger.warning(f"Activity asset ID does not match cw_unit ID. requested cw_unit_id (warehouseUnitId): {cw_unit_id}")
-    unit = unit.copy()
-    token = unit.pop("token", None)
-    org = unit.pop("organization", None)
-    project = unit.pop("project", None)
+    try:
+        activity = next((activity for activity in activities if activity.asset_id == asset_token_id and activity.mode == action_mode), None)
+        if activity is None:
+            return schemas.ActivityRecordResponse()
+    except:
+        logger.warning(f"an exception occurred while processing activity record")
+        return schemas.ActivityRecordResponse()
+
+    unit_with_metadata = unit_with_metadata.copy()
+    token = unit_with_metadata.pop("token", None)
+    org = unit_with_metadata.pop("organization", None)
+    project = unit_with_metadata.pop("project", None)
 
     try:
         token_on_chain = schemas.TokenOnChain.parse_obj(token)
@@ -186,11 +195,11 @@ async def get_activity_by_cw_unit_id(
 
     activity_with_cw = schemas.ActivityWithCW(
         token=token_on_chain,
-        cw_unit=unit,
+        cw_unit=unit_with_metadata,
         cw_org=org,
         cw_project=project,
         metadata=activity.metadata_,
         **jsonable_encoder(activity),
     )
 
-    return schemas.ActivityByCwUnitIdResponse(activity=activity_with_cw)
+    return schemas.ActivityRecordResponse(activity=activity_with_cw)
