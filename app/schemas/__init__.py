@@ -6,7 +6,7 @@ from app.schemas.activity import (  # noqa: F401
     ActivityBase,
     ActivitySearchBy,
     ActivityWithCW,
-    ActivityByCwUnitIdResponse
+    ActivityRecordResponse
 )
 from app.schemas.key import Key  # noqa: F401
 from app.schemas.metadata import (  # noqa: F401
