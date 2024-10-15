@@ -57,9 +57,10 @@ class ClimateWareHouseCrud(object):
                 encoded_params = urlencode(params)
 
                 # Construct the URL
-                url = urlparse(f"{self.url}{path}?{encoded_params}")
+                url_obj = urlparse(f"{self.url}{path}?{encoded_params}")
+                url = url_obj.geturl()
 
-                response = requests.get(url.geturl(), headers=self._headers())
+                response = requests.get(url, headers=self._headers())
                 if response.status_code != requests.codes.ok:
                     logger.error(f"Request Url: {response.url} Error Message: {response.text}")
                     raise error_code.internal_server_error(message="API Call Failure")
@@ -71,7 +72,7 @@ class ClimateWareHouseCrud(object):
                     return all_data
 
                 try:
-                    if data["page"] and data["pageCount"] and data["data"]:
+                    if data["page"] and (data["pageCount"] >= 0) and len(data["data"]) >= 0: # page count can be 0 (as of when this was written)
                         all_data.extend(data["data"]) # Add data from the current page
                     else:
                         all_data.append(data) # data was not paginated, append and return
