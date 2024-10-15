@@ -128,7 +128,7 @@ async def get_activity(
 @disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity_by_cw_unit_id(
         cw_unit_id: str,
-        asset_token_id: str,
+        coin_id: str,
         action_mode: str,
         db: Session = Depends(deps.get_db_session),
 ) -> schemas.ActivityRecordResponse:
@@ -139,6 +139,8 @@ async def get_activity_by_cw_unit_id(
 
     db_crud = crud.DBCrud(db=db)
 
+
+    # fetch unit and related data from CADT
     cw_filters: Dict[str, str] = {"warehouseUnitId": cw_unit_id}
 
     climate_data = crud.ClimateWareHouseCrud(
@@ -151,19 +153,21 @@ async def get_activity_by_cw_unit_id(
 
     unit_with_metadata = climate_data[0]
 
+    # set filters to fetch activity data related to specified unit
     activity_filters: Dict[str, Any] = {"or": [], "and": []}
     if unit_with_metadata["marketplaceIdentifier"]:
         activity_filters["and"].append(models.Activity.asset_id == unit_with_metadata["marketplaceIdentifier"])
     else:
-        logger.warning(f"retrieved unit does not contain marketplace identifier. unable to get actvity record")
+        logger.warning(f"retrieved unit does not contain marketplace identifier. unable to get activity record")
         return schemas.ActivityRecordResponse()
 
     activity_filters["and"].append(models.Activity.mode == action_mode)
+    activity_filters["and"].append(models.Activity.coin_id == coin_id)
 
     activities: [models.Activity]
     total: int
 
-    # total ignored
+    # fetch activities with filters, 'total' var ignored
     (activities, total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
@@ -174,7 +178,7 @@ async def get_activity_by_cw_unit_id(
         return schemas.ActivityRecordResponse()
 
     try:
-        activity = next((activity for activity in activities if activity.asset_id == asset_token_id and activity.mode == action_mode), None)
+        activity = next((activity for activity in activities if activity.coin_id == coin_id and activity.mode == action_mode), None)
         if activity is None:
             return schemas.ActivityRecordResponse()
     except:

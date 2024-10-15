@@ -45,6 +45,7 @@ class Activity(ActivityBase):
     vintage_year: int
     sequence_num: int
     asset_id: bytes
+    coin_id: bytes
 
 
 class ActivityWithCW(ActivityBase):
