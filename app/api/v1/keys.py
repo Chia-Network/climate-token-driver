@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends
 from app import schemas
 from app.api import dependencies as deps
 from app.config import ExecutionMode
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 
@@ -22,7 +22,7 @@ router = APIRouter()
     "/",
     response_model=schemas.Key,
 )
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.EXPLORER])
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.EXPLORER])
 async def get_key(
     hardened: bool = False,
     derivation_index: int = 0,
