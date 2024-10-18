@@ -4,7 +4,6 @@ import dataclasses
 import time
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
-from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.consensus.constants import ConsensusConstants
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.rpc.wallet_rpc_client import WalletRpcClient
@@ -12,7 +11,7 @@ from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_record import CoinRecord
-from chia.types.coin_spend import CoinSpend
+from chia.types.coin_spend import CoinSpend, make_spend
 from chia.types.spend_bundle import SpendBundle, estimate_fees
 from chia.util.bech32m import bech32_decode, bech32_encode, convertbits
 from chia.util.ints import uint32, uint64
@@ -29,6 +28,7 @@ from chia.wallet.uncurried_puzzle import uncurry_puzzle
 from chia.wallet.util.compute_memos import compute_memos
 from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
 from chia.wallet.util.wallet_types import WalletType
+from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 
 from app.core.chialisp.gateway import create_gateway_puzzle, parse_gateway_spend
 from app.core.chialisp.tail import create_delegated_puzzle, create_tail_program
@@ -137,7 +137,7 @@ class ClimateWallet(ClimateWalletBase):
     @property
     def delegated_signatures(self) -> Dict[Tuple[bytes, bytes], G2Element]:
         return {
-            (bytes(self.root_public_key), message): signature
+            (self.root_public_key, message): signature
             for (
                 mode,
                 (message, signature),
@@ -224,12 +224,12 @@ class ClimateWallet(ClimateWalletBase):
             aggregated_signature=signature,
         )
 
-        transaction_records = await get_created_signed_transactions(
+        response = await get_created_signed_transactions(
             transaction_request=transaction_request,
             wallet_id=wallet_id,
             wallet_client=self.wallet_client,
         )
-        (first_transaction_record, *rest_transaction_records) = transaction_records
+        (first_transaction_record, *rest_transaction_records) = response.transactions
         if first_transaction_record.spend_bundle is None:
             raise ValueError("No spend bundle created!")
         spend_bundle = SpendBundle.aggregate(
@@ -287,7 +287,6 @@ class ClimateWallet(ClimateWalletBase):
                 logger.info(f"    - {key}: {value}")
 
         transaction_request: TransactionRequest
-        transaction_records: List[TransactionRecord]
 
         # this is a hack to get inner puzzle hash for `origin_coin`
 
@@ -302,15 +301,15 @@ class ClimateWallet(ClimateWalletBase):
             ],
             fee=0,
         )
-        transaction_records = await get_created_signed_transactions(
+        response = await get_created_signed_transactions(
             transaction_request=transaction_request,
             wallet_id=wallet_id,
             wallet_client=self.wallet_client,
         )
-        if len(transaction_records) != 1:
-            raise ValueError(f"Transaction record has unexpected length {len(transaction_records)}!")
+        if len(response.transactions) != 1:
+            raise ValueError(f"Transaction record has unexpected length {len(response.transactions)}!")
 
-        transaction_record = transaction_records[0]
+        transaction_record = response.transactions[0]
         if transaction_record.spend_bundle is None:
             raise ValueError("No spend bundle created!")
         coin_spend: CoinSpend = transaction_record.spend_bundle.coin_spends[0]
@@ -355,7 +354,7 @@ class ClimateWallet(ClimateWalletBase):
 
         gateway_secret_key: PrivateKey = self.mode_to_secret_key[mode]
         gateway_public_key: G1Element = self.mode_to_public_key[mode]
-        public_key_to_secret_key = {bytes(gateway_public_key): gateway_secret_key}
+        public_key_to_secret_key = {gateway_public_key: gateway_secret_key}
 
         coins: List[Coin] = await self.wallet_client.select_coins(
             amount=amount + fee,
@@ -466,7 +465,7 @@ class ClimateWallet(ClimateWalletBase):
             if inner_puzzle != gateway_puzzle:
                 continue
 
-            inner_coin_spend = CoinSpend(
+            inner_coin_spend = make_spend(
                 coin=coin,
                 puzzle_reveal=inner_puzzle,
                 solution=inner_solution,
@@ -523,7 +522,7 @@ class ClimateWallet(ClimateWalletBase):
             raise ValueError("No public keys provided for the registry!")
         gateway_secret_key: PrivateKey = self.mode_to_secret_key[mode]
         gateway_public_key: G1Element = self.mode_to_public_key[mode]
-        public_key_to_secret_key = {bytes(gateway_public_key): gateway_secret_key}
+        public_key_to_secret_key = {gateway_public_key: gateway_secret_key}
 
         (_, data) = bech32_decode(content, max_length=len(content))
         if data is None:
