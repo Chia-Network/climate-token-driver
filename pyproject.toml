@@ -33,7 +33,7 @@ optional = true
 # has to be disabled unfortunately due to developing chia-blockchain
 # chia-dev-tools = "^1.1.1"
 pytest = "^7.1.2"
-commitizen = "^2.27.1"
+commitizen = "^3.29.1"
 pytest-xdist = "^3.3.1"
 black = "23.7.0"
 isort = "5.12.0"
