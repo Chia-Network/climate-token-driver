@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+from email.policy import default
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import Field, validator
@@ -44,6 +45,7 @@ class Activity(ActivityBase):
     vintage_year: int
     sequence_num: int
     asset_id: bytes
+    coin_id: bytes
 
 
 class ActivityWithCW(ActivityBase):
@@ -57,3 +59,6 @@ class ActivityWithCW(ActivityBase):
 class ActivitiesResponse(BaseModel):
     activities: List[ActivityWithCW] = Field(default_factory=list)
     total: int = 0
+
+class ActivityRecordResponse(BaseModel):
+    activity: ActivityWithCW = Field(default=None)
