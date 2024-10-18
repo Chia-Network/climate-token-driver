@@ -20,10 +20,11 @@ router = APIRouter()
 async def get_activity(
     search: Optional[str] = None,
     search_by: Optional[schemas.ActivitySearchBy] = None,
-    minHeight: Optional[int] = None,
+    min_height: Optional[int] = None,
     mode: Optional[GatewayMode] = None,
     page: int = 1,
     limit: int = 10,
+    org_uid: Optional[str] = None,
     sort: str = "desc",
     db: Session = Depends(deps.get_db_session),
 ) -> schemas.ActivitiesResponse:
@@ -54,8 +55,11 @@ async def get_activity(
         case _:
             raise ErrorCode().bad_request_error(message="search_by is invalid")
 
-    if minHeight is not None:
-        activity_filters["and"].append(models.Activity.height >= minHeight)
+    if min_height is not None:
+        activity_filters["and"].append(models.Activity.height >= min_height)
+
+    if org_uid is not None:
+        cw_filters["orgUid"] = org_uid
 
     climate_data = crud.ClimateWareHouseCrud(
         url=settings.CADT_API_SERVER_HOST,
