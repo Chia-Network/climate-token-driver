@@ -229,30 +229,34 @@ class ClimateWallet(ClimateWalletBase):
             wallet_id=wallet_id,
             wallet_client=self.wallet_client,
         )
-        (first_transaction_record, *rest_transaction_records) = response.transactions
-        if first_transaction_record.spend_bundle is None:
-            raise ValueError("No spend bundle created!")
-        spend_bundle = SpendBundle.aggregate(
-            [
-                first_transaction_record.spend_bundle,
-                gateway_spend_bundle,
-            ]
-        )
-        first_transaction_record = dataclasses.replace(
-            first_transaction_record,
-            spend_bundle=spend_bundle,
-            additions=spend_bundle.additions(),
-            removals=spend_bundle.removals(),
-            type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
-            name=spend_bundle.name(),
-            memos=list(compute_memos(spend_bundle).items()),
-        )
-        transaction_records = [first_transaction_record, *rest_transaction_records]
+        new_txs = []
+        for tx in response.transactions:
+            if unsigned_gateway_coin_spend.coin in tx.additions:
+                spend_bundle = SpendBundle.aggregate(
+                    [gateway_spend_bundle] + ([] if tx.spend_bundle is None else [tx.spend_bundle])
+                )
+                additions = [
+                    add for add in tx.additions if add != unsigned_gateway_coin_spend.coin
+                ] + gateway_spend_bundle.additions()
+            else:
+                spend_bundle = tx.spend_bundle
+                additions = tx.additions
+            removals = [rem for rem in tx.removals if rem not in additions]
+            new_tx = dataclasses.replace(
+                tx,
+                spend_bundle=spend_bundle,
+                additions=additions,
+                removals=removals,
+                type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
+                name=spend_bundle.name(),
+                memos=list(compute_memos(spend_bundle).items()),
+            )
+            new_txs.append(new_tx)
 
         return {
-            "transaction_id": first_transaction_record.name,
-            "transaction_records": transaction_records,
-            "spend_bundle": spend_bundle,
+            "transaction_id": new_txs[0].name,
+            "transaction_records": new_txs,
+            "spend_bundle": SpendBundle.aggregate([tx.spend_bundle for tx in new_txs if tx.spend_bundle is not None]),
         }
 
     async def _create_client_transaction(
@@ -558,6 +562,7 @@ class ClimateWallet(ClimateWalletBase):
         if gateway_coin_spend is None:
             raise ValueError("Invalid detokenization request: Could not find gateway coin spend!")
 
+        additions = spend_bundle.additions()
         transaction_record = TransactionRecord(
             confirmed_at_height=uint32(0),
             created_at_time=uint64(int(time.time())),
@@ -567,8 +572,8 @@ class ClimateWallet(ClimateWalletBase):
             confirmed=False,
             sent=uint32(0),
             spend_bundle=spend_bundle,
-            additions=spend_bundle.additions(),
-            removals=spend_bundle.removals(),
+            additions=additions,
+            removals=[rem for rem in spend_bundle.removals() if rem not in additions],
             wallet_id=uint32(wallet_id),
             sent_to=[],
             trade_id=None,
