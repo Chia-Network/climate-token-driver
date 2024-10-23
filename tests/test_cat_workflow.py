@@ -7,6 +7,7 @@ from typing import List
 
 import pytest
 from chia._tests.wallet.rpc.test_wallet_rpc import WalletRpcTestEnvironment, farm_transaction, generate_funds
+from chia.rpc.wallet_request_types import GetPrivateKey
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.simulator.full_node_simulator import FullNodeSimulator
 from chia.types.blockchain_format.sized_bytes import bytes32
@@ -103,10 +104,9 @@ class TestCATWorkflow:
 
         await generate_funds(full_node_api, env.wallet_1)
 
-        fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
-        result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-        master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-        root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
+        fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+        result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
+        root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
         token_index = ClimateTokenIndex(
             org_uid=org_uid,
@@ -163,10 +163,9 @@ class TestCATWorkflow:
 
         full_node_api: FullNodeSimulator = env.full_node.api
 
-        fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
-        result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-        master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-        root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
+        fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+        result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
+        root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
         # block: initial fund deposits
 
@@ -257,10 +256,9 @@ class TestCATWorkflow:
         full_node_api: FullNodeSimulator = env.full_node.api
         full_node_client = env.full_node.rpc_client
 
-        fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
-        result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-        master_secret_key = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-        root_secret_key = master_sk_to_root_sk(master_secret_key)
+        fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+        result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
+        root_secret_key = master_sk_to_root_sk(result.private_key.sk)
 
         # block: initial fund deposits
 
