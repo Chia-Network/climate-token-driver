@@ -236,9 +236,8 @@ class ClimateWallet(ClimateWalletBase):
                     [gateway_spend_bundle] + ([] if tx.spend_bundle is None else [tx.spend_bundle])
                 )
                 additions = [
-                    *(add for add in tx.additions if add != unsigned_gateway_coin_spend.coin),
-                    *gateway_spend_bundle.additions(),
-                ]
+                    add for add in tx.additions if add != unsigned_gateway_coin_spend.coin
+                ] + gateway_spend_bundle.additions()
             else:
                 spend_bundle = tx.spend_bundle
                 additions = tx.additions
