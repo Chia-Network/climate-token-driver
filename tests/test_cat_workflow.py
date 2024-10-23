@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pytest
 from chia._tests.environments.wallet import WalletStateTransition, WalletTestFramework
-from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.rpc.wallet_request_types import GetPrivateKey
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.wallet.wallet import Wallet
@@ -435,18 +434,12 @@ async def test_cat_permissionless_retirement_workflow(
         ]
     )
 
-    async with FullNodeRpcClient.create_as_context(
-        self_hostname,
-        wallet_environments.full_node.full_node.state_changed_callback.__self__.listen_port,  # a hack
-        wallet_environments.full_node.full_node.root_path,
-        wallet_environments.full_node.config,
-    ) as client_node:
-        climate_observer = ClimateObserverWallet(
-            token_index=token_index,
-            root_public_key=climate_wallet_1.root_public_key,
-            full_node_client=client_node,
-        )
-        activities = await climate_observer.get_activities(mode=GatewayMode.PERMISSIONLESS_RETIREMENT)
+    climate_observer = ClimateObserverWallet(
+        token_index=token_index,
+        root_public_key=climate_wallet_1.root_public_key,
+        full_node_client=wallet_environments.full_node_rpc_client,
+    )
+    activities = await climate_observer.get_activities(mode=GatewayMode.PERMISSIONLESS_RETIREMENT)
 
     assert activities[0]["metadata"]["bn"] == beneficiary_name.decode()
     assert activities[0]["metadata"]["ba"] == test_address.decode()
