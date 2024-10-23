@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from chia._tests.environments.wallet import WalletStateTransition, WalletTestFramework
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
+from chia.rpc.wallet_request_types import GetPrivateKey
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.wallet.wallet import Wallet
 from chia_rs import PrivateKey
@@ -56,10 +57,9 @@ async def test_cat_tokenization_workflow(
     wallet_client_1: WalletRpcClient = env_1.rpc_client
     wallet_2: Wallet = env_2.xch_wallet
 
-    fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
-    result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-    master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-    root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
+    fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+    result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
+    root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
     token_index = ClimateTokenIndex(
         org_uid=org_uid,
@@ -148,14 +148,12 @@ async def test_cat_detokenization_workflow(
     }
 
     wallet_client_1: WalletRpcClient = env_1.rpc_client
-
     wallet_client_2: WalletRpcClient = env_2.rpc_client
     wallet_2: Wallet = env_2.xch_wallet
 
-    fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
-    result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-    master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-    root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
+    fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+    result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
+    root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
     # block:
     #   - registry: tokenization
@@ -242,8 +240,6 @@ async def test_cat_detokenization_workflow(
         content=content,
     )
 
-    # TODO: this will fail without this:
-    # https://github.com/Chia-Network/chia-blockchain/blob/long_lived/vault/chia/wallet/wallet_state_manager.py#L1829-L1840
     await wallet_environments.process_pending_states(
         [
             WalletStateTransition(
@@ -331,10 +327,9 @@ async def test_cat_permissionless_retirement_workflow(
     wallet_client_2: WalletRpcClient = env_2.rpc_client
     wallet_2: Wallet = env_2.xch_wallet
 
-    fingerprint: int = await wallet_client_1.get_logged_in_fingerprint()
-    result = await wallet_client_1.get_private_key(fingerprint=fingerprint)
-    master_secret_key = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
-    root_secret_key = master_sk_to_root_sk(master_secret_key)
+    fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+    result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
+    root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
     climate_wallet_1 = await ClimateWallet.create(
         token_index=token_index,
