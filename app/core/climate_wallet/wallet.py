@@ -233,7 +233,7 @@ class ClimateWallet(ClimateWalletBase):
         for tx in response.transactions:
             if unsigned_gateway_coin_spend.coin in tx.additions:
                 spend_bundle = SpendBundle.aggregate(
-                    [gateway_spend_bundle, *([] if tx.spend_bundle is None else [tx.spend_bundle])]
+                    [gateway_spend_bundle] + ([] if tx.spend_bundle is None else [tx.spend_bundle])
                 )
                 additions = [
                     *(add for add in tx.additions if add != unsigned_gateway_coin_spend.coin),
