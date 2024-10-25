@@ -6,10 +6,10 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode, urlparse
 
 import requests
-from chia_rs import G1Element
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.coin_record import CoinRecord
+from chia_rs import G1Element
 from fastapi.encoders import jsonable_encoder
 
 from app import schemas
@@ -46,7 +46,7 @@ class ClimateWareHouseCrud(object):
         Returns:
             A list of all data retrieved from the paginated API.
         """
-        all_data = []
+        all_data: list[Any] = []
         page = 1
         limit = 10
 
@@ -68,16 +68,19 @@ class ClimateWareHouseCrud(object):
                 data = response.json()
                 if data is None:
                     # some cadt endpoints return null with no pagination info if no data is found
-                    # to prevent an infinite loop need to assume that there is no data matching the search from this iteration on
+                    # to prevent an infinite loop need to assume that there is no data matching
+                    # the search from this iteration on
                     return all_data
 
                 try:
-                    if data["page"] and (data["pageCount"] >= 0) and len(data["data"]) >= 0: # page count can be 0 (as of when this was written)
-                        all_data.extend(data["data"]) # Add data from the current page
+                    if (
+                        data["page"] and (data["pageCount"] >= 0) and len(data["data"]) >= 0
+                    ):  # page count can be 0 (as of when this was written)
+                        all_data.extend(data["data"])  # Add data from the current page
                     else:
-                        all_data.append(data) # data was not paginated, append and return
+                        all_data.append(data)  # data was not paginated, append and return
                         return all_data
-                except:
+                except Exception:
                     all_data.append(data)  # data was not paginated, append and return
                     return all_data
 
@@ -192,7 +195,7 @@ class ClimateWareHouseCrud(object):
                 warehouse_project_id = unit["issuance"]["warehouseProjectId"]
                 project = project_by_id[warehouse_project_id]
             except (KeyError, TypeError):
-                logger.warning(f"Can not get project by warehouse_project_id")
+                logger.warning("Can not get project by warehouse_project_id")
                 continue
 
             org_metadata = metadata_by_id.get(unit_org_uid)
