@@ -10,7 +10,7 @@ This application can run in 4 modes, each providing a separate application with 
   - Use case: A registry would use this to tokenize carbon credits onto the Chia blockchain
   - Port: 31312
   - Application Name: climate-tokenization-chia
-  - Only listens on localhost for connections from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)_
+  - Only listens on localhost for connections from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)
 - **Climate Explorer**:
   - Mode: Explorer
   - Use case: A registry (or interested observer) would use this to track all on-chain activity related to tokenized carbon credits

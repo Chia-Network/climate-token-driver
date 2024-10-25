@@ -46,7 +46,7 @@ class ClimateWareHouseCrud(object):
         Returns:
             A list of all data retrieved from the paginated API.
         """
-        all_data: list[Any] = []
+        all_data: list[dict[str, Any]] = []
         page = 1
         limit = 10
 
