@@ -48,14 +48,21 @@ jobs:
         with:
           python-version: ${{ matrix.python.major_dot_minor }}
 
-      - uses: ./.github/actions/install
-        with:
-          python-version: ${{ matrix.python.major_dot_minor }}
-          development: true
+      - name: Create virtual environment
+        uses: Chia-Network/actions/create-venv@main
+        id: create-venv
 
-      - uses: chia-network/actions/activate-venv@main
+      - name: Activate virtual environment
+        uses: Chia-Network/actions/activate-venv@main
+        with:
+          directories: ${{ steps.create-venv.outputs.activate-venv-directories }}
+
+      - name: Run poetry install
+        uses: Chia-Network/actions/poetry@main
+        with:
+          poetry-command: "install --with dev"
 
       - env:
           CHIA_MANAGE_CLVM_CHECK_USE_CACHE: "false"
           CHIA_MANAGE_MYPY_CHECK_EXCLUSIONS: "true"
-        run: pre-commit run --all-files --verbose
+        run: poetry run pre-commit run --all-files --verbose
