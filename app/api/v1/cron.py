@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import List
+from typing import List, Optional
 
 from chia_rs import G1Element
 from chia.consensus.block_record import BlockRecord
@@ -182,13 +182,12 @@ async def _scan_blockchain_state(
     full_node_client: FullNodeRpcClient,
 ) -> None:
     state = await full_node_client.get_blockchain_state()
-    peak = state.get("peak")
+    peak_block_record: Optional[BlockRecord] = state["peak"]
 
-    if peak is None:
+    if peak_block_record is None:
         logger.warning("Full node is not synced")
         return
 
-    peak_block_record = BlockRecord.from_json_dict(peak)
     db_crud.update_block_state(peak_height=peak_block_record.height)
 
 
