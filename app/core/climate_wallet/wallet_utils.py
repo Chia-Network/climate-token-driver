@@ -98,7 +98,7 @@ def create_gateway_request_and_spend(
     extra_delta: int = 0
     conditions = []
 
-    conditions.append([ConditionOpcode.CREATE_COIN, None, -113, tail_program, tail_solution])
+    conditions.append(Program.to([ConditionOpcode.CREATE_COIN, None, -113, tail_program, tail_solution]))
 
     if to_puzzle_hash is None:
         if mode in [GatewayMode.TOKENIZATION]:
@@ -107,7 +107,7 @@ def create_gateway_request_and_spend(
         extra_delta = -amount
 
     else:
-        conditions.append([ConditionOpcode.CREATE_COIN, to_puzzle_hash, amount, [to_puzzle_hash]])
+        conditions.append(Program.to([ConditionOpcode.CREATE_COIN, to_puzzle_hash, amount, [to_puzzle_hash]]))
 
     conditions_program = Program.to(conditions)
     gateway_announcement = create_gateway_announcement(
@@ -118,7 +118,7 @@ def create_gateway_request_and_spend(
         coins=coins,
         payments=[gateway_payment],
         coin_announcements=[gateway_announcement],
-        fee=fee,
+        fee=uint64(fee),
     )
 
     gateway_solution: Program = create_gateway_solution(

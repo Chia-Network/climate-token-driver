@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
+from chia.rpc.wallet_request_types import GetPrivateKey
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.config import load_config
@@ -42,10 +43,11 @@ async def get_constants(
 async def get_climate_secret_key(
     wallet_client: WalletRpcClient,
 ) -> PrivateKey:
-    fingerprint: int = await wallet_client.get_logged_in_fingerprint()
-    result = await wallet_client.get_private_key(fingerprint=fingerprint)
+    fingerprint = await wallet_client.get_logged_in_fingerprint()
+    assert fingerprint.fingerprint is not None
+    result = await wallet_client.get_private_key(GetPrivateKey(fingerprint=fingerprint.fingerprint))
 
-    master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
+    master_secret_key = result.private_key.sk
     root_secret_key: PrivateKey = master_sk_to_root_sk(master_secret_key)
     return root_secret_key
 
@@ -91,9 +93,11 @@ async def get_wallet_info_by_id(
 async def get_first_puzzle_hash(
     wallet_client: WalletRpcClient,
 ) -> bytes32:
-    fingerprint: int = await wallet_client.get_logged_in_fingerprint()
-    result = await wallet_client.get_private_key(fingerprint=fingerprint)
-    master_secret_key: PrivateKey = PrivateKey.from_bytes(bytes.fromhex(result["sk"]))
+    fingerprint = await wallet_client.get_logged_in_fingerprint()
+    assert fingerprint.fingerprint is not None
+
+    result = await wallet_client.get_private_key(GetPrivateKey(fingerprint=fingerprint.fingerprint))
+    master_secret_key = result.private_key.sk
     wallet_secret_key: PrivateKey = master_sk_to_wallet_sk_unhardened(master_secret_key, uint32(0))
     wallet_public_key: G1Element = wallet_secret_key.get_g1()
 
@@ -109,10 +113,7 @@ async def get_created_signed_transactions(
     wallet_id: int,
     wallet_client: WalletRpcClient,
 ) -> List[TransactionRecord]:
-    if transaction_request.coins is None:
-        transaction_request.coins = []  # type: ignore
-
-    transaction_records = await wallet_client.create_signed_transactions(
+    response = await wallet_client.create_signed_transactions(
         coins=transaction_request.coins,
         additions=transaction_request.additions,
         fee=uint64(transaction_request.fee),
@@ -121,4 +122,4 @@ async def get_created_signed_transactions(
         extra_conditions=(*transaction_request.coin_announcements, *transaction_request.puzzle_announcements),
     )
 
-    return transaction_records
+    return response.transactions

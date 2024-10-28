@@ -59,7 +59,7 @@ class TestCATLifecycle:
         melt_secret_key: PrivateKey = AugSchemeMPL.key_gen(secrets.token_bytes(64))
         melt_public_key: G1Element = melt_secret_key.get_g1()
 
-        public_key_to_secret_key: Dict[bytes, PrivateKey] = {
+        public_key_to_secret_key: Dict[G1Element, PrivateKey] = {
             root_public_key: root_secret_key,
             mint_public_key: mint_secret_key,
             melt_public_key: melt_secret_key,
@@ -67,7 +67,7 @@ class TestCATLifecycle:
 
         tail_program: Program = create_tail_program(
             public_key=root_public_key,
-            index=Program.to(["registry", "project", "vintage"]).get_tree_hash(),
+            index=Program.to(Program.to(["registry", "project", "vintage"]).get_tree_hash()),
         )
         tail_program_hash: bytes32 = tail_program.get_tree_hash()
 

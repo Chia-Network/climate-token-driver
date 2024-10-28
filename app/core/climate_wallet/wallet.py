@@ -28,6 +28,7 @@ from chia.wallet.uncurried_puzzle import uncurry_puzzle
 from chia.wallet.util.compute_memos import compute_memos
 from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
 from chia.wallet.util.wallet_types import WalletType
+from chia.wallet.wallet_spend_bundle import WalletSpendBundle
 from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 
 from app.core.chialisp.gateway import create_gateway_puzzle, parse_gateway_spend
@@ -135,7 +136,7 @@ class ClimateWallet(ClimateWalletBase):
         return self.wallet_client is not None
 
     @property
-    def delegated_signatures(self) -> Dict[Tuple[bytes, bytes], G2Element]:
+    def delegated_signatures(self) -> Dict[Tuple[G1Element, bytes], G2Element]:
         return {
             (self.root_public_key, message): signature
             for (
@@ -188,7 +189,7 @@ class ClimateWallet(ClimateWalletBase):
         to_puzzle_hash: Optional[bytes32] = None,
         key_value_pairs: Optional[List[Tuple[Any, Any]]] = None,
         gateway_public_key: Optional[G1Element] = None,
-        public_key_to_secret_key: Optional[Dict[bytes, PrivateKey]] = None,
+        public_key_to_secret_key: Optional[Dict[G1Element, PrivateKey]] = None,
         allow_missing_signature: bool = False,
         wallet_id: int = 1,
     ) -> Dict[str, Any]:
@@ -224,22 +225,22 @@ class ClimateWallet(ClimateWalletBase):
             aggregated_signature=signature,
         )
 
-        response = await get_created_signed_transactions(
+        transactions = await get_created_signed_transactions(
             transaction_request=transaction_request,
             wallet_id=wallet_id,
             wallet_client=self.wallet_client,
         )
         new_txs = []
-        for tx in response.transactions:
+        for tx in transactions:
             if unsigned_gateway_coin_spend.coin in tx.additions:
-                spend_bundle = SpendBundle.aggregate(
+                spend_bundle = WalletSpendBundle.aggregate(
                     [gateway_spend_bundle] + ([] if tx.spend_bundle is None else [tx.spend_bundle])
                 )
                 additions = [
                     add for add in tx.additions if add != unsigned_gateway_coin_spend.coin
                 ] + gateway_spend_bundle.additions()
             else:
-                spend_bundle = tx.spend_bundle
+                spend_bundle = WalletSpendBundle.aggregate(([] if tx.spend_bundle is None else [tx.spend_bundle]))
                 additions = tx.additions
             removals = [rem for rem in tx.removals if rem not in additions]
             new_tx = dataclasses.replace(
@@ -303,17 +304,17 @@ class ClimateWallet(ClimateWalletBase):
                     memos=[],
                 )
             ],
-            fee=0,
+            fee=uint64(0),
         )
-        response = await get_created_signed_transactions(
+        transactions = await get_created_signed_transactions(
             transaction_request=transaction_request,
             wallet_id=wallet_id,
             wallet_client=self.wallet_client,
         )
-        if len(response.transactions) != 1:
-            raise ValueError(f"Transaction record has unexpected length {len(response.transactions)}!")
+        if len(transactions) != 1:
+            raise ValueError(f"Transaction record has unexpected length {len(transactions)}!")
 
-        transaction_record = response.transactions[0]
+        transaction_record = transactions[0]
         if transaction_record.spend_bundle is None:
             raise ValueError("No spend bundle created!")
         coin_spend: CoinSpend = transaction_record.spend_bundle.coin_spends[0]
@@ -461,8 +462,8 @@ class ClimateWallet(ClimateWalletBase):
             if puzzle_args is None:
                 continue
 
-            (_, asset_id, inner_puzzle) = puzzle_args
-            asset_id = asset_id.as_atom()
+            (_, asset_id_program, inner_puzzle) = puzzle_args
+            asset_id = asset_id_program.as_atom()
             inner_solution = solution.at("f")
 
             # check for gateway puzzle
@@ -553,10 +554,10 @@ class ClimateWallet(ClimateWalletBase):
         if aggregated_signature == G2Element():
             raise ValueError("Invalid detokenization request!")
 
-        spend_bundle = SpendBundle.aggregate(
+        spend_bundle = WalletSpendBundle.aggregate(
             [
                 unsigned_spend_bundle,
-                SpendBundle(coin_spends=[], aggregated_signature=aggregated_signature),
+                WalletSpendBundle(coin_spends=[], aggregated_signature=aggregated_signature),
             ]
         )
         if gateway_coin_spend is None:
@@ -677,20 +678,20 @@ class ClimateObserverWallet(ClimateWalletBase):
             delegated_solution: Program = tail_solution.at("r")
             key_value_pairs: Program = delegated_solution.at("f")
 
-            metadata: Dict[bytes, bytes] = {}
+            metadata: Dict[str, str] = {}
             for key_value_pair in key_value_pairs.as_iter():
                 if (not key_value_pair.listp()) or (key_value_pair.at("r").listp()):
                     logger.warning(f"Coin {coin.name()} has incorrect metadata structure")
                     continue
 
-                key = key_value_pair.at("f").as_atom()
-                value = key_value_pair.at("r").as_atom()
+                key_bytes = key_value_pair.at("f").as_atom()
+                value_bytes = key_value_pair.at("r").as_atom()
 
-                key = key.decode()
+                key = key_bytes.decode()
                 if key in ["bp"]:
-                    value = f"0x{value.hex()}"
+                    value = f"0x{value_bytes.hex()}"
                 elif key in ["ba", "bn"]:
-                    value = value.decode()
+                    value = value_bytes.decode()
                 else:
                     raise ValueError("Unknown key '{key}'!")
 
