@@ -63,7 +63,7 @@ class DBCrudBase(object):
             raise errorcode.internal_server_error(message="Select DB Failure")
 
     def select_activity_with_pagination(
-            self, model: Any, filters: Any, order_by: Any, limit: int = None, page: int = None
+        self, model: Any, filters: Any, order_by: Any, limit: Optional[int] = None, page: Optional[int] = None
     ) -> Tuple[Any, int]:
         try:
             query = self.db.query(model).filter(or_(*filters["or"]), and_(*filters["and"]))

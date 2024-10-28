@@ -15,8 +15,9 @@ from app.utils import disallow
 
 router = APIRouter()
 
+
 @router.get("/", response_model=schemas.ActivitiesResponse)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def get_activity(
     search: Optional[str] = None,
     search_by: Optional[schemas.ActivitySearchBy] = None,
@@ -129,12 +130,12 @@ async def get_activity(
 
 
 @router.get("/activity-record", response_model=schemas.ActivityRecordResponse)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def get_activity_by_cw_unit_id(
-        cw_unit_id: str,
-        coin_id: str,
-        action_mode: str,
-        db: Session = Depends(deps.get_db_session),
+    cw_unit_id: str,
+    coin_id: str,
+    action_mode: str,
+    db: Session = Depends(deps.get_db_session),
 ) -> schemas.ActivityRecordResponse:
     """Get a single activity based on the unit's unitWarehouseId.
 
@@ -142,7 +143,6 @@ async def get_activity_by_cw_unit_id(
     """
 
     db_crud = crud.DBCrud(db=db)
-
 
     # fetch unit and related data from CADT
     cw_filters: Dict[str, str] = {"warehouseUnitId": cw_unit_id}
@@ -162,13 +162,13 @@ async def get_activity_by_cw_unit_id(
     if unit_with_metadata["marketplaceIdentifier"]:
         activity_filters["and"].append(models.Activity.asset_id == unit_with_metadata["marketplaceIdentifier"])
     else:
-        logger.warning(f"retrieved unit does not contain marketplace identifier. unable to get activity record")
+        logger.warning("retrieved unit does not contain marketplace identifier. unable to get activity record")
         return schemas.ActivityRecordResponse()
 
     activity_filters["and"].append(models.Activity.mode == action_mode)
     activity_filters["and"].append(models.Activity.coin_id == coin_id)
 
-    activities: [models.Activity]
+    activities = [models.Activity]
     total: int
 
     # fetch activities with filters, 'total' var ignored
@@ -182,11 +182,13 @@ async def get_activity_by_cw_unit_id(
         return schemas.ActivityRecordResponse()
 
     try:
-        activity = next((activity for activity in activities if activity.coin_id == coin_id and activity.mode == action_mode), None)
+        activity = next(
+            (activity for activity in activities if activity.coin_id == coin_id and activity.mode == action_mode), None
+        )
         if activity is None:
             return schemas.ActivityRecordResponse()
-    except:
-        logger.warning(f"an exception occurred while processing activity record")
+    except Exception:
+        logger.warning("an exception occurred while processing activity record")
         return schemas.ActivityRecordResponse()
 
     unit_with_metadata = unit_with_metadata.copy()

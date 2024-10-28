@@ -57,6 +57,7 @@ async def test_cat_tokenization_workflow(
     wallet_2: Wallet = env_2.xch_wallet
 
     fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+    assert fingerprint is not None
     result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
     root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
@@ -71,7 +72,7 @@ async def test_cat_tokenization_workflow(
         root_secret_key=root_secret_key,
         wallet_client=wallet_client_1,
     )
-    result = await climate_wallet_1.send_tokenization_transaction(
+    await climate_wallet_1.send_tokenization_transaction(
         to_puzzle_hash=await wallet_2.get_new_puzzlehash(),
         amount=amount,
         fee=fee,
@@ -151,6 +152,7 @@ async def test_cat_detokenization_workflow(
     wallet_2: Wallet = env_2.xch_wallet
 
     fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+    assert fingerprint is not None
     result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
     root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
@@ -163,7 +165,8 @@ async def test_cat_detokenization_workflow(
         root_secret_key=root_secret_key,
         wallet_client=wallet_client_1,
     )
-    result = await climate_wallet_1.send_tokenization_transaction(
+
+    await climate_wallet_1.send_tokenization_transaction(
         to_puzzle_hash=await wallet_2.get_new_puzzlehash(),
         amount=amount,
         fee=fee,
@@ -220,22 +223,22 @@ async def test_cat_detokenization_workflow(
         wallet_client=wallet_client_2,
         constants=climate_wallet_1.constants,
     )
-    result = await climate_wallet_2.create_detokenization_request(
+    detok_result = await climate_wallet_2.create_detokenization_request(
         amount=amount,
         fee=fee,
         wallet_id=env_2.wallet_aliases["cat"],
     )
-    content: str = result["content"]
+    content: str = detok_result["content"]
 
-    result = await ClimateWallet.parse_detokenization_request(
+    detok_result = await ClimateWallet.parse_detokenization_request(
         content=content,
     )
-    assert result["mode"] == GatewayMode.DETOKENIZATION
-    assert result["amount"] == amount
-    assert result["fee"] == fee
-    assert result["asset_id"] == climate_wallet_1.tail_program_hash
+    assert detok_result["mode"] == GatewayMode.DETOKENIZATION
+    assert detok_result["amount"] == amount
+    assert detok_result["fee"] == fee
+    assert detok_result["asset_id"] == climate_wallet_1.tail_program_hash
 
-    result = await climate_wallet_1.sign_and_send_detokenization_request(
+    detok_result = await climate_wallet_1.sign_and_send_detokenization_request(
         content=content,
     )
 
@@ -327,6 +330,7 @@ async def test_cat_permissionless_retirement_workflow(
     wallet_2: Wallet = env_2.xch_wallet
 
     fingerprint = (await wallet_client_1.get_logged_in_fingerprint()).fingerprint
+    assert fingerprint is not None
     result = await wallet_client_1.get_private_key(GetPrivateKey(fingerprint=fingerprint))
     root_secret_key: PrivateKey = master_sk_to_root_sk(result.private_key.sk)
 
@@ -335,7 +339,7 @@ async def test_cat_permissionless_retirement_workflow(
         root_secret_key=root_secret_key,
         wallet_client=wallet_client_1,
     )
-    result = await climate_wallet_1.send_tokenization_transaction(
+    await climate_wallet_1.send_tokenization_transaction(
         to_puzzle_hash=await wallet_2.get_new_puzzlehash(),
         amount=amount,
         fee=fee,
@@ -389,7 +393,7 @@ async def test_cat_permissionless_retirement_workflow(
     )
 
     test_address = "This is a fake address".encode()
-    result = await climate_wallet_2.send_permissionless_retirement_transaction(
+    await climate_wallet_2.send_permissionless_retirement_transaction(
         amount=amount,
         fee=fee,
         beneficiary_name=beneficiary_name,

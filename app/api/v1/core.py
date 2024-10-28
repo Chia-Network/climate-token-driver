@@ -4,7 +4,7 @@ from typing import Dict
 
 from fastapi import APIRouter
 
-from app.api.v1 import activities, cron, keys, tokens, transactions, organizations
+from app.api.v1 import activities, cron, keys, organizations, tokens, transactions
 
 router = APIRouter(
     prefix="/v1",
