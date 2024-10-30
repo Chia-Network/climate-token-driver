@@ -1,3 +1,0 @@
-[submodule "chia-blockchain"]
-	path = chia-blockchain
-	url = ../chia-blockchain.git
