@@ -1,3 +1,20 @@
+## 1.0.40 (2024-11-04)
+
+### Feat
+
+- added organizations passthrough resource feat: added org_uid query param to /activities
+- swapped asset id for coin_id in activities/activity-record feat: added coin id to activity class
+- swapped asset id for coin_id in activities/activity-record feat: added coin id to activity class
+- revised by-cw-unit-id endpoint to select by warehouseUnitId, activity mode, and asset id feat: renamed /activities/by-cw-unit-id to /activities/activity-record
+- revised by-cw-unit-id endpoint to select by warehouseUnitId, activity mode, and asset id feat: renamed /activities/by-cw-unit-id to /activities/activity-record
+- get activity by warehouseUnitId working
+- revised /by-cw-unit-id resource response fix: None type error when not climate data returned by CADT
+- added /activities/by-cw-unit-id resource
+
+### Fix
+
+- fixes needed for compatibility with chia-blockchain 2.4.4
+
 ## 1.0.39 (2024-04-05)
 
 ## 1.0.38 (2024-02-01)
@@ -136,7 +153,7 @@
 
 ### Fix
 
-- update climate warehouse and ui parameter names
+- update climate warehouse and ui  parameter names
 - add exit code for incorrect host configuration
 - format host conditional
 - require localhost unless running in explorer mode
