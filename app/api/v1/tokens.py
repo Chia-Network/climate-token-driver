@@ -1,12 +1,12 @@
 import json
 from typing import Any, Dict, Tuple
 
-from chia_rs import G1Element, G2Element
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
+from chia_rs import G1Element, G2Element
 from fastapi import APIRouter, Depends
 
 from app import schemas
@@ -25,7 +25,7 @@ router = APIRouter()
     "/",
     response_model=schemas.TokenizationTxResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def create_tokenization_tx(
     request: schemas.TokenizationTxRequest,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
@@ -105,7 +105,7 @@ async def create_tokenization_tx(
     "/{asset_id}/detokenize",
     response_model=schemas.DetokenizationTxResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def create_detokenization_tx(
     asset_id: str,
     request: schemas.DetokenizationTxRequest,
@@ -145,7 +145,7 @@ async def create_detokenization_tx(
     "/{asset_id}/request-detokenization",
     response_model=schemas.DetokenizationFileResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])
+@disallow([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])  # type: ignore[misc]
 async def create_detokenization_file(
     asset_id: str,
     request: schemas.DetokenizationFileRequest,
@@ -216,7 +216,7 @@ async def create_detokenization_file(
     "/parse-detokenization",
     response_model=schemas.DetokenizationFileParseResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.EXPLORER, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def parse_detokenization_file(
     content: str,
 ) -> schemas.DetokenizationFileParseResponse:
@@ -252,7 +252,7 @@ async def parse_detokenization_file(
     "/{asset_id}/permissionless-retire",
     response_model=schemas.PermissionlessRetirementTxResponse,
 )
-@disallow([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])
+@disallow([ExecutionMode.EXPLORER, ExecutionMode.REGISTRY])  # type: ignore[misc]
 async def create_permissionless_retirement_tx(
     asset_id: str,
     request: schemas.PermissionlessRetirementTxRequest,

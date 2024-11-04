@@ -4,6 +4,7 @@ from app.schemas.activity import (  # noqa: F401
     ActivitiesResponse,
     Activity,
     ActivityBase,
+    ActivityRecordResponse,
     ActivitySearchBy,
     ActivityWithCW,
 )

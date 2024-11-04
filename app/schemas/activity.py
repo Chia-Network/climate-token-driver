@@ -44,6 +44,7 @@ class Activity(ActivityBase):
     vintage_year: int
     sequence_num: int
     asset_id: bytes
+    coin_id: bytes
 
 
 class ActivityWithCW(ActivityBase):
@@ -57,3 +58,7 @@ class ActivityWithCW(ActivityBase):
 class ActivitiesResponse(BaseModel):
     activities: List[ActivityWithCW] = Field(default_factory=list)
     total: int = 0
+
+
+class ActivityRecordResponse(BaseModel):
+    activity: Optional[ActivityWithCW] = Field(default=None)

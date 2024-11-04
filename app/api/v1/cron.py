@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import List
+from typing import List, Optional
 
-from chia_rs import G1Element
 from chia.consensus.block_record import BlockRecord
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.util.byte_types import hexstr_to_bytes
+from chia_rs import G1Element
 from fastapi import APIRouter, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi_utils.tasks import repeat_every
@@ -29,7 +29,7 @@ lock = asyncio.Lock()
 
 
 @router.on_event("startup")
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def init_db() -> None:
     Engine = await get_engine_cls()
 
@@ -142,7 +142,7 @@ async def _scan_token_activity(
 
 @router.on_event("startup")
 @repeat_every(seconds=60, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def scan_token_activity() -> None:
     if lock.locked():
         return
@@ -182,19 +182,18 @@ async def _scan_blockchain_state(
     full_node_client: FullNodeRpcClient,
 ) -> None:
     state = await full_node_client.get_blockchain_state()
-    peak = state.get("peak")
+    peak_block_record: Optional[BlockRecord] = state["peak"]
 
-    if peak is None:
+    if peak_block_record is None:
         logger.warning("Full node is not synced")
         return
 
-    peak_block_record = BlockRecord.from_json_dict(peak)
     db_crud.update_block_state(peak_height=peak_block_record.height)
 
 
 @router.on_event("startup")
 @repeat_every(seconds=10, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def scan_blockchain_state() -> None:
     async with (
         deps.get_db_session_context() as db,

@@ -136,7 +136,7 @@
 
 ### Fix
 
-- update climate warehouse and ui  parameter names
+- update climate warehouse and ui parameter names
 - add exit code for incorrect host configuration
 - format host conditional
 - require localhost unless running in explorer mode

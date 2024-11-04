@@ -4,11 +4,11 @@ import dataclasses
 import enum
 from typing import Any, Dict, List, Optional
 
-from chia.types.announcement import Announcement
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.condition_opcodes import ConditionOpcode
+from chia.util.ints import uint64
+from chia.wallet.conditions import CreateCoinAnnouncement, CreatePuzzleAnnouncement, ReserveFee
 from chia.wallet.payment import Payment
 
 CLIMATE_WALLET_INDEX = 2
@@ -50,23 +50,23 @@ class ClimateTokenIndex(object):
 class TransactionRequest(object):
     coins: Optional[List[Coin]] = dataclasses.field(default=None)
     payments: List[Payment] = dataclasses.field(default_factory=list)
-    coin_announcements: List[Announcement] = dataclasses.field(default_factory=list)
-    puzzle_announcements: List[Announcement] = dataclasses.field(default_factory=list)
-    fee: int = dataclasses.field(default=0)
+    coin_announcements: List[CreateCoinAnnouncement] = dataclasses.field(default_factory=list)
+    puzzle_announcements: List[CreatePuzzleAnnouncement] = dataclasses.field(default_factory=list)
+    fee: uint64 = dataclasses.field(default=uint64(0))
 
     def to_program(self) -> Program:
         conditions = []
         for payment in self.payments:
-            conditions.append([ConditionOpcode.CREATE_COIN] + payment.as_condition_args())
+            conditions.append(payment.as_condition())
 
-        for announcement in self.coin_announcements:
-            conditions.append([ConditionOpcode.ASSERT_COIN_ANNOUNCEMENT, announcement.name()])
+        for coin_announcement in self.coin_announcements:
+            conditions.append(coin_announcement.to_program())
 
-        for announcement in self.puzzle_announcements:
-            conditions.append([ConditionOpcode.ASSERT_PUZZLE_ANNOUNCEMENT, announcement.name()])
+        for puz_announcement in self.puzzle_announcements:
+            conditions.append(puz_announcement.to_program())
 
         if self.fee:
-            conditions.append([ConditionOpcode.RESERVE_FEE, self.fee])
+            conditions.append(ReserveFee(self.fee).to_program())
 
         ret: Program = Program.to(conditions)
         return ret

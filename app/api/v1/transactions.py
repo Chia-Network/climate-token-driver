@@ -29,7 +29,7 @@ router = APIRouter()
     "/{transaction_id}",
     response_model=schemas.Transaction,
 )
-@disallow([ExecutionMode.EXPLORER])
+@disallow([ExecutionMode.EXPLORER])  # type: ignore[misc]
 async def get_transaction(
     transaction_id: str,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
@@ -40,7 +40,6 @@ async def get_transaction(
     """
 
     transaction_record: TransactionRecord = await wallet_rpc_client.get_transaction(
-        wallet_id=0,
         transaction_id=bytes32.from_hexstr(transaction_id),
     )
 
@@ -108,7 +107,7 @@ async def get_transactions(
     gateway_cat_puzzle: Program = construct_cat_puzzle(
         mod_code=CAT_MOD,
         limitations_program_hash=cat_info.limitations_program_hash,
-        inner_puzzle=gateway_puzzle,
+        inner_puzzle_or_hash=gateway_puzzle,
     )
     gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 

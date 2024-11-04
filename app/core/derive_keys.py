@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from chia_rs import PrivateKey
 from chia.wallet.derive_keys import _derive_path_unhardened
+from chia_rs import PrivateKey
 
 
 def master_sk_to_root_sk(master: PrivateKey) -> PrivateKey:

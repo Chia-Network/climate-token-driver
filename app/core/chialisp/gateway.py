@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-from chia.types.announcement import Announcement
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.coin_spend import CoinSpend
+from chia.types.coin_spend import CoinSpend, make_spend
 from chia.types.condition_opcodes import ConditionOpcode
+from chia.wallet.conditions import CreateCoinAnnouncement
 
 from app.core.chialisp.load_clvm import load_clvm_locally
 from app.core.chialisp.tail import (
@@ -35,10 +35,10 @@ def create_gateway_solution(
 def create_gateway_announcement(
     coin: Coin,
     conditions_program: Program,
-) -> Announcement:
-    return Announcement(
-        origin_info=coin.name(),
-        message=conditions_program.get_tree_hash(),
+) -> CreateCoinAnnouncement:
+    return CreateCoinAnnouncement(
+        coin_id=coin.name(),
+        msg=conditions_program.get_tree_hash(),
     )
 
 
@@ -94,7 +94,7 @@ def parse_gateway_spend(
         puzzle_hash: bytes32 = delegated_puzzle_mod.get_tree_hash()
         raise ValueError(f"Invalid delegated puzzle with hash {puzzle_hash.hex()}")
 
-    tail_spend = CoinSpend(
+    tail_spend = make_spend(
         coin=coin,
         puzzle_reveal=tail_program,
         solution=tail_solution,
