@@ -197,6 +197,13 @@ Only when in `explorer` mode, the following configurations are relevant:
   poetry install
   ```
 
+- Install node.js for linter using [nvm](https://github.com/nvm-sh/nvm)
+
+  ```sh
+  nvm install
+  nvm use
+  ```
+
 - Run the main script for development.
 
   ```sh
