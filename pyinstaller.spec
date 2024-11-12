@@ -2,7 +2,8 @@
 
 import importlib
 import pathlib
-from PyInstaller.utils.hooks import collect_submodules
+import sys
+from PyInstaller.utils.hooks import collect_submodules  
 
 ROOT = pathlib.Path(importlib.import_module("chia").__file__).absolute().parent.parent
 
@@ -13,12 +14,15 @@ datas.append(("./app/core/chialisp/*.hex", "./app/core/chialisp"))
 datas.append(("./.env", "./"))
 datas.append(("./config.yaml", "./"))
 
+bins = []
+if sys.platform == "win32":
+    bins.append((ROOT / "mpir_*.dll", "."))
+
 block_cipher = None
 
 a = Analysis(
     ["app/main.py"],
-    pathex=["./chia-blockchain"],
-    binaries=[],
+    binaries=bins,
     datas=datas,
     hiddenimports=[*collect_submodules("chia")],
     hookspath=[],
