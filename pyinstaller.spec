@@ -3,7 +3,7 @@
 import importlib
 import pathlib
 import sys
-from PyInstaller.utils.hooks import collect_submodules  
+from PyInstaller.utils.hooks import collect_submodules
 
 ROOT = pathlib.Path(importlib.import_module("chia").__file__).absolute().parent.parent
 
