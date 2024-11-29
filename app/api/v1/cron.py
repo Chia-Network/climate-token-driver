@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import asyncio
+import json
+from typing import List, Optional
 import logging
 from typing import List
 
-from blspy import G1Element
 from chia.consensus.block_record import BlockRecord
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.util.byte_types import hexstr_to_bytes
+from chia_rs import G1Element
 from fastapi import APIRouter, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi_utils.tasks import repeat_every
@@ -29,7 +31,7 @@ logger = logging.getLogger("ClimateToken")
 
 
 @router.on_event("startup")
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def init_db() -> None:
     Engine = await get_engine_cls()
 
@@ -41,7 +43,7 @@ async def init_db() -> None:
 
     Base.metadata.create_all(Engine)
 
-    async with deps.get_db_session() as db:
+    async with deps.get_db_session_context() as db:
         state = State(id=1, current_height=settings.BLOCK_START, peak_height=None)
         db_state = [jsonable_encoder(state)]
 
@@ -73,32 +75,68 @@ async def _scan_token_activity(
 
     logger.info(f"Scanning blocks {start_height} - {end_height} for activity")
 
-    climate_units = climate_warehouse.combine_climate_units_and_metadata(search={})
-    for unit in climate_units:
-        token = unit.get("token")
+    # Check if SCAN_ALL_ORGANIZATIONS is defined and True, otherwise treat as False
+    scan_all = getattr(settings, "SCAN_ALL_ORGANIZATIONS", False)
 
-        # is None or empty
-        if not token:
-            logger.warning(f"Can not get token in climate warehouse unit. unit:{unit}")
+    all_organizations = climate_warehouse.get_climate_organizations()
+    if not scan_all:
+        # Convert to a list of organizations where `isHome` is True
+        climate_organizations = [org for org in all_organizations.values() if org.get("isHome", False)]
+    else:
+        # Convert to a list of all organizations
+        climate_organizations = list(all_organizations.values())
+
+    for org in climate_organizations:
+        org_uid = org["orgUid"]
+        org_name = org["name"]
+
+        org_metadata = climate_warehouse.get_climate_organizations_metadata(org_uid)
+        if not org_metadata:
+            logger.warning(f"Cannot get metadata in CADT organization: {org_name}")
             continue
 
-        public_key = G1Element.from_bytes(hexstr_to_bytes(token["public_key"]))
+        for key, value_str in org_metadata.items():
+            try:
+                tokenization_dict = json.loads(value_str)
+                required_fields = [
+                    "org_uid",
+                    "warehouse_project_id",
+                    "vintage_year",
+                    "sequence_num",
+                    "public_key",
+                    "index",
+                ]
+                optional_fields = ["permissionless_retirement", "detokenization"]
 
-        activities: List[schemas.Activity] = await blockchain.get_activities(
-            org_uid=token["org_uid"],
-            warehouse_project_id=token["warehouse_project_id"],
-            vintage_year=token["vintage_year"],
-            sequence_num=token["sequence_num"],
-            public_key=public_key,
-            start_height=start_height,
-            end_height=end_height,
-            peak_height=state.peak_height,
-        )
+                if not all(field in tokenization_dict for field in required_fields) or not any(
+                    field in tokenization_dict for field in optional_fields
+                ):
+                    # not a tokenization record
+                    continue
 
-        if len(activities) == 0:
-            continue
+                public_key = G1Element.from_bytes(hexstr_to_bytes(tokenization_dict["public_key"]))
+                activities: List[schemas.Activity] = await blockchain.get_activities(
+                    org_uid=tokenization_dict["org_uid"],
+                    warehouse_project_id=tokenization_dict["warehouse_project_id"],
+                    vintage_year=tokenization_dict["vintage_year"],
+                    sequence_num=tokenization_dict["sequence_num"],
+                    public_key=public_key,
+                    start_height=state.current_height,
+                    end_height=end_height,
+                    peak_height=state.peak_height,
+                )
 
-        db_crud.batch_insert_ignore_activity(activities)
+                if len(activities) == 0:
+                    continue
+
+                db_crud.batch_insert_ignore_activity(activities)
+                logger.info(f"Activities for {org_name} and asset id: {key} added to the database.")
+
+            # This is causing logging for benign errors, so commenting out for now
+            # except json.JSONDecodeError as e:
+            # logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
+            except Exception as e:
+                logger.error(f"An error occurred for organization {org_name} under key {key}: {str(e)}")
 
     db_crud.update_block_state(current_height=target_start_height)
     return True
@@ -106,14 +144,14 @@ async def _scan_token_activity(
 
 @router.on_event("startup")
 @repeat_every(seconds=60, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def scan_token_activity() -> None:
     if lock.locked():
         return
 
     async with (
         lock,
-        deps.get_db_session() as db,
+        deps.get_db_session_context() as db,
         deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)
@@ -146,22 +184,21 @@ async def _scan_blockchain_state(
     full_node_client: FullNodeRpcClient,
 ) -> None:
     state = await full_node_client.get_blockchain_state()
-    peak = state.get("peak")
+    peak_block_record: Optional[BlockRecord] = state["peak"]
 
-    if peak is None:
+    if peak_block_record is None:
         logger.warning("Full node is not synced")
         return
 
-    peak_block_record = BlockRecord.from_json_dict(peak)
     db_crud.update_block_state(peak_height=peak_block_record.height)
 
 
 @router.on_event("startup")
 @repeat_every(seconds=10, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
+@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
 async def scan_blockchain_state() -> None:
     async with (
-        deps.get_db_session() as db,
+        deps.get_db_session_context() as db,
         deps.get_full_node_rpc_client() as full_node_client,
     ):
         db_crud = crud.DBCrud(db=db)

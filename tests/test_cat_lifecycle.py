@@ -2,21 +2,21 @@ from __future__ import annotations
 
 import logging
 import secrets
-from typing import Dict
+from typing import Dict, Tuple
 
 import pytest
-from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.clvm.spend_sim import SimClient, SpendSim
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.coin_spend import CoinSpend
+from chia.types.coin_spend import CoinSpend, make_spend
 from chia.types.mempool_inclusion_status import MempoolInclusionStatus
 from chia.types.spend_bundle import SpendBundle
 from chia.util.ints import uint64
 from chia.wallet.cat_wallet.cat_utils import CAT_MOD, SpendableCAT, unsigned_spend_bundle_for_spendable_cats
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
+from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 
 from app.core.chialisp.gateway import create_gateway_puzzle
 from app.core.chialisp.tail import create_tail_program
@@ -31,11 +31,10 @@ ZEROS = bytes32([0] * 32)
 
 
 class TestCATLifecycle:
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_cat_lifecycle(
         self,
-        sim_full_node: SpendSim,
-        sim_full_node_client: SimClient,
+        sim_utils: Tuple[SpendSim, SimClient],
     ) -> None:
         """
         In this test, we perform the following spends:
@@ -51,8 +50,7 @@ class TestCATLifecycle:
                         └─ (No output coin)
         """
 
-        node: SpendSim = sim_full_node
-        client: SimClient = sim_full_node_client
+        node, client = sim_utils
 
         root_secret_key: PrivateKey = AugSchemeMPL.key_gen(secrets.token_bytes(64))
         root_public_key: G1Element = root_secret_key.get_g1()
@@ -61,15 +59,15 @@ class TestCATLifecycle:
         melt_secret_key: PrivateKey = AugSchemeMPL.key_gen(secrets.token_bytes(64))
         melt_public_key: G1Element = melt_secret_key.get_g1()
 
-        public_key_to_secret_key: Dict[bytes, PrivateKey] = {
-            bytes(root_public_key): root_secret_key,
-            bytes(mint_public_key): mint_secret_key,
-            bytes(melt_public_key): melt_secret_key,
+        public_key_to_secret_key: Dict[G1Element, PrivateKey] = {
+            root_public_key: root_secret_key,
+            mint_public_key: mint_secret_key,
+            melt_public_key: melt_secret_key,
         }
 
         tail_program: Program = create_tail_program(
             public_key=root_public_key,
-            index=Program.to(["registry", "project", "vintage"]).get_tree_hash(),
+            index=Program.to(Program.to(["registry", "project", "vintage"]).get_tree_hash()),
         )
         tail_program_hash: bytes32 = tail_program.get_tree_hash()
 
@@ -117,7 +115,7 @@ class TestCATLifecycle:
 
         # xch spend
 
-        xch_coin_spend = CoinSpend(
+        xch_coin_spend = make_spend(
             coin=xch_coin,
             puzzle_reveal=xch_puzzle,
             solution=transaction_request.to_program(),

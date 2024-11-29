@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from blspy import G1Element
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32
+from chia_rs import G1Element
 
 from app.core.chialisp.load_clvm import load_clvm_locally
 from app.core.types import GatewayMode

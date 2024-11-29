@@ -7,15 +7,15 @@ from app.config import ExecutionMode, settings
 from app.utils import disallow
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_disallow() -> None:
     settings.MODE = ExecutionMode.DEV
 
-    @disallow([ExecutionMode.DEV])
+    @disallow([ExecutionMode.DEV])  # type: ignore[misc]
     async def disallow_dev() -> int:
         return 5
 
-    @disallow([ExecutionMode.REGISTRY])
+    @disallow([ExecutionMode.REGISTRY])  # type: ignore[misc]
     async def allow_dev() -> int:
         return 5
 

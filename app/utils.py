@@ -37,17 +37,17 @@ logger = logging.getLogger("ClimateToken")
 #     return decorator
 
 
-def disallow(modes: List[ExecutionMode]):
-    def _disallow(f: Callable):
+def disallow(modes: List[ExecutionMode]):  # type: ignore[no-untyped-def]
+    def _disallow(f: Callable):  # type: ignore[no-untyped-def, type-arg]
         if settings.MODE in modes:
 
-            async def _f(*args, **kargs):
+            async def _f(*args, **kargs):  # type: ignore[no-untyped-def]
                 return status.HTTP_405_METHOD_NOT_ALLOWED
 
         else:
 
             @functools.wraps(f)
-            async def _f(*args, **kargs):
+            async def _f(*args, **kargs):  # type: ignore[no-untyped-def]
                 return await f(*args, **kargs)
 
         return _f
