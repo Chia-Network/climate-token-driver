@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 import time
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -37,7 +38,8 @@ from app.core.climate_wallet.wallet_utils import create_gateway_request_and_spen
 from app.core.derive_keys import root_sk_to_gateway_sk
 from app.core.types import CLIMATE_WALLET_INDEX, ClimateTokenIndex, GatewayMode, TransactionRequest
 from app.core.utils import get_constants, get_created_signed_transactions, get_first_puzzle_hash, get_wallet_info_by_id
-from app.logger import logger
+
+logger = logging.getLogger("ClimateToken")
 
 
 @dataclasses.dataclass

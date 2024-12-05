@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import sys
 import traceback
 
@@ -11,7 +12,7 @@ from starlette.responses import Response
 
 from app.api import v1
 from app.config import ExecutionMode, settings
-from app.logger import log_config, logger
+from app.logger import initialize_logging
 from app.utils import wait_until_dir_exists
 
 app = FastAPI(
@@ -38,6 +39,8 @@ app.add_middleware(
 
 
 if __name__ == "__main__":
+    uvicorn_log_config = initialize_logging()
+    logger = logging.getLogger("ClimateToken")
     logger.info(f"Using settings {settings.dict()}")
     wait_until_dir_exists(str(settings.CHIA_ROOT))
 
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     elif settings.MODE == ExecutionMode.CLIENT:
         server_host = "127.0.0.1"
     else:
-        print(f"Invalid mode {settings.MODE}!")
+        logger.error(f"Invalid mode {settings.MODE}!")
         sys.exit(1)
 
     if settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV] or server_host in [
@@ -64,8 +67,8 @@ if __name__ == "__main__":
             host=server_host,
             port=settings.SERVER_PORT,
             log_level="info",
-            log_config=log_config,
+            log_config=uvicorn_log_config,
         )
     else:
-        print(f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode.")
+        logger.error(f"Climate Token Driver can only run on localhost in {settings.MODE.name} mode.")
         sys.exit(1)

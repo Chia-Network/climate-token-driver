@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import logging
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlencode, urlparse
 
@@ -17,9 +18,9 @@ from app.config import settings
 from app.core.climate_wallet.wallet import ClimateObserverWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
 from app.errors import ErrorCode
-from app.logger import logger
 
 error_code = ErrorCode()
+logger = logging.getLogger("ClimateToken")
 
 
 @dataclasses.dataclass
