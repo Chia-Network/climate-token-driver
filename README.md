@@ -151,7 +151,7 @@ The whole list of configurable variables are detailed in [config.py](app/config.
 - `MODE (environment variable)`: one of `dev`, `registry`, `client`, and `explorer`. In `dev` mode, the application essentially enables all functionalities (endpoints), while in the rest, some select endpoints will be allowed. Each mode has installers and executable binaries built and available on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page.
 - `CHIA_ROOT (environment variable)`: the root of Chia wallets on the local machine, typically `~/.chia/mainnet`.
 - `CONFIG_PATH (environment variable)`: the path of the `config.yaml` file, relative to `${CHIA_ROOT}`. Rarely needs to be changed.
-- `LOG_PATH`: the path this application write logs to, relative to `${CHIA_ROOT}`. Can also be set to `stdout`. 
+- `LOG_PATH`: the path this application write logs to, relative to `${CHIA_ROOT}`. Can also be set to `stdout`.
 - `CADT_API_SERVER_HOST`: the CADT API URL in the format of `scheme://domain:port/path`.
 - `CADT_API_KEY`: the CADT API key.
 
