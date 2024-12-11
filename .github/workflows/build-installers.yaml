@@ -220,7 +220,7 @@ jobs:
         if: matrix.os.matrix == 'linux'
 
       - name: Upload deb
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
@@ -228,7 +228,7 @@ jobs:
         if: matrix.os.matrix == 'linux' && matrix.preconfiguration.name == 'default'
 
       - name: Upload preconfigured deb
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.config.app-name }}-${{ matrix.preconfiguration.name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
@@ -236,7 +236,7 @@ jobs:
         if: matrix.os.matrix == 'linux' && matrix.preconfiguration.name != 'default'
 
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
@@ -244,7 +244,7 @@ jobs:
         if: matrix.preconfiguration.name == 'default'
 
       - name: Upload preconfigured binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.config.app-name }}-${{ matrix.preconfiguration.name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
@@ -279,7 +279,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
 
       - name: Upload artifact to pass apt data to release job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: APTDATA_${{ matrix.config.app-name }}
           path: APTDATA_${{ matrix.config.app-name }}.dat
@@ -310,7 +310,7 @@ jobs:
           echo "github.sha is ${{ github.sha }}"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Parse meta files for apt variables
         id: apt-metadata
