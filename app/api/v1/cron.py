@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from typing import List, Optional
 
 from chia.consensus.block_record import BlockRecord
@@ -19,13 +20,13 @@ from app.config import ExecutionMode, settings
 from app.db.base import Base
 from app.db.session import get_engine_cls
 from app.errors import ErrorCode
-from app.logger import logger
 from app.models import State
 from app.utils import disallow
 
 router = APIRouter()
 errorcode = ErrorCode()
 lock = asyncio.Lock()
+logger = logging.getLogger("ClimateToken")
 
 
 @router.on_event("startup")
