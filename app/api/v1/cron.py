@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import List, Optional
 import logging
-from typing import List
+from typing import List, Optional
 
 from chia.consensus.block_record import BlockRecord
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
