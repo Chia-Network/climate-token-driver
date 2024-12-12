@@ -1,3 +1,16 @@
+## 1.1.1 (2024-12-12)
+
+### Feat
+
+- support logging to log file or stdout
+
+### Fix
+
+- failing linter
+- linter errors
+- linter errors
+- merge inconsistencies
+
 ## 1.1.0 (2024-11-12)
 
 ## 1.0.40 (2024-11-04)
