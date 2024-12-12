@@ -86,8 +86,10 @@ jobs:
             electron-builder-options: --x64
         preconfiguration:
           - name: default
+            installer-string: ""
             cadt-api-server-host: "https://observer.climateactiondata.org/api"
           - name: testneta
+            installer-string: "-testneta"
             cadt-api-server-host: "https://chia-cadt-demo.chiamanaged.com/observer"
         exclude:
           - os:
@@ -173,7 +175,7 @@ jobs:
         run: |
           # no -p, we want to be sure this is clean so wildcards below don't get extra files
           mkdir artifacts/
-          cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}${{ matrix.os.executable-extension }}
+          cp ./dist/main${{ matrix.os.executable-extension }} ./artifacts/${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}${{ matrix.os.executable-extension }}
 
       - name: Test for secrets access
         id: check_secrets
@@ -197,7 +199,7 @@ jobs:
           sm_client_cert_file_b64: ${{ secrets.SM_CLIENT_CERT_FILE_B64 }}
           sm_client_cert_password: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
           sm_code_signing_cert_sha1_hash: ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }}
-          file: ./artifacts/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
+          file: ./artifacts/${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.exe
 
       - name: Create .deb Package
         env:
@@ -206,7 +208,7 @@ jobs:
           PLATFORM: ${{ matrix.arch.deb-platform }}
           APP_DESCRIPTION: ${{ matrix.config.app-description }}
         run: |
-          DEB_BASE="${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}"
+          DEB_BASE="${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}"
           mkdir -p deb/$DEB_BASE/opt/${{ matrix.config.app-name }}
           cp dist/main deb/$DEB_BASE/opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }}
           chmod +x deb/$DEB_BASE/opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }}
@@ -222,54 +224,37 @@ jobs:
       - name: Upload deb
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
+          name: ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
           path: ${{ github.workspace }}/deb/*.deb
           if-no-files-found: error
-        if: matrix.os.matrix == 'linux' && matrix.preconfiguration.name == 'default'
-
-      - name: Upload preconfigured deb
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.config.app-name }}-${{ matrix.preconfiguration.name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
-          path: ${{ github.workspace }}/deb/*.deb
-          if-no-files-found: error
-        if: matrix.os.matrix == 'linux' && matrix.preconfiguration.name != 'default'
+        if: matrix.os.matrix == 'linux'
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.config.app-name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
+          name: ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
           path: ${{ github.workspace }}/artifacts/*
           if-no-files-found: error
-        if: matrix.preconfiguration.name == 'default'
-
-      - name: Upload preconfigured binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.config.app-name }}-${{ matrix.preconfiguration.name }}-${{ matrix.os.artifact-os-name }}-${{ matrix.arch.artifact-name }}
-          path: ${{ github.workspace }}/artifacts/*
-          if-no-files-found: error
-        if: matrix.preconfiguration.name != 'default'
 
       - name: Create zip files for release
         uses: thedoctor0/zip-release@0.7.1
         with:
           type: "zip"
-          filename: ${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+          filename: ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
           directory: "artifacts"
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release executable
         uses: softprops/action-gh-release@v0.1.15
         with:
-          files: ./artifacts/${{ matrix.config.app-name }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+          files: ./artifacts/${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release debs
         uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
-            ${{ github.workspace }}/deb/${{ matrix.config.app-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
+            ${{ github.workspace }}/deb/${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
 
         # Only do for Intel builds as we know we build ARM and can pass that info along to the apt update automation
