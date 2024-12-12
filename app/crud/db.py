@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 from typing import Any, AnyStr, List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
@@ -10,7 +11,8 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.db.base import Base
 from app.errors import ErrorCode
-from app.logger import logger
+
+logger = logging.getLogger("ClimateToken")
 
 errorcode = ErrorCode()
 
