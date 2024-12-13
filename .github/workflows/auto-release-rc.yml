@@ -88,7 +88,8 @@ jobs:
 
           echo "Tag does not exist. Creating and pushing tag"
           rm -f CHANGELOG.md
-
+          cz changelog --unreleased-version=$version
+          git add CHANGELOG.md
           git commit -m "chore: Updating changelog for $version"
           git tag $version -m "Version $version"
           git push origin $version
