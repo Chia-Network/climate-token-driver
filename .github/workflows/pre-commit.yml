@@ -33,9 +33,6 @@ jobs:
           - major_dot_minor: "3.12"
 
     steps:
-      - name: Clean workspace
-        uses: Chia-Network/actions/clean-workspace@main
-
       - uses: Chia-Network/actions/git-mark-workspace-safe@main
 
       - name: disable git autocrlf
