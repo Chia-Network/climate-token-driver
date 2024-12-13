@@ -121,6 +121,7 @@ jobs:
           python-version: "3.10"
 
       - name: Create .env file
+        shell: bash
         run: |
           echo "MODE=${{ matrix.config.app-mode }}" > .env
           echo 'CHIA_ROOT="~/.chia/mainnet"' >> .env
@@ -129,6 +130,7 @@ jobs:
 
       - name: Apply preconfigurations
         if: matrix.preconfiguration.name != 'default'
+        shell: bash
         run: |
           perl -pi -e 's{CADT_API_SERVER_HOST:\ str\ =.*}{CADT_API_SERVER_HOST:\ str\ =\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' app/config.py
           perl -pi -e 's{CADT_API_SERVER_HOST:.*}{CADT_API_SERVER_HOST:\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' config.yaml
@@ -140,6 +142,7 @@ jobs:
 
       - name: Change the pyproject.toml version if an RC tag
         if: startsWith(github.ref, 'refs/tags/') && contains( github.ref, '-rc')
+        shell: bash
         run: |
           echo "Github ref: $GITHUB_REF"
           IFS='/' read -r base directory tag <<< "$GITHUB_REF"
@@ -299,6 +302,7 @@ jobs:
 
         # Only do for Intel builds as we know we build ARM and can pass that info along to the apt update automation
       - name: Create artifact with metadata for apt upload
+        shell: bash
         run: |
           echo "${{ matrix.config.app-name }}" > APTDATA_${{ matrix.config.app-name }}.dat
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default' && !contains( github.ref, '-rc')
@@ -339,6 +343,7 @@ jobs:
 
       - name: Parse meta files for apt variables
         id: apt-metadata
+        shell: bash
         run: |
           APPS_ARRAY="["
           DIRECTORIES="./APTDATA*"
