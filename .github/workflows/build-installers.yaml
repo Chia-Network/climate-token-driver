@@ -134,6 +134,20 @@ jobs:
           perl -pi -e 's{CADT_API_SERVER_HOST:.*}{CADT_API_SERVER_HOST:\ \"${{ matrix.preconfiguration.cadt-api-server-host }}\"}g' config.yaml
           cat config.yaml
 
+      - name: Install yq
+        if: startsWith(github.ref, 'refs/tags/') && contains( github.ref, '-rc')
+        run: pip install yq
+
+      - name: Change the pyproject.toml version if an RC tag
+        if: startsWith(github.ref, 'refs/tags/') && contains( github.ref, '-rc')
+        run: |
+          echo "Github ref: $GITHUB_REF"
+          IFS='/' read -r base directory tag <<< "$GITHUB_REF"
+          echo "Extracted tag is $tag"
+
+          cat pyproject.toml | tomlq --toml-output ".tool.poetry.version=\"${tag}\"" > pyproject.tmp
+          mv pyproject.tmp pyproject.toml
+
       - name: Create virtual environment
         uses: Chia-Network/actions/create-venv@main
         id: create-venv
@@ -244,15 +258,41 @@ jobs:
           directory: "artifacts"
         if: startsWith(github.ref, 'refs/tags/')
 
+      # RC release should not be set as latest
+      - name: Decide if release should be set as latest
+        id: is_latest
+        shell: bash
+        run: |
+          unset IS_LATEST
+
+          echo "Github ref is $GITHUB_REF"
+
+          if [[ "$GITHUB_REF" =~ "-rc" ]]; then
+            echo "release candidate tag matched"
+            IS_LATEST='false'
+            IS_PRERELEASE='true'
+          else
+            echo "main branch release matched"
+            IS_LATEST='true'
+            IS_PRERELEASE='false'
+          fi
+
+          echo "IS_LATEST=${IS_LATEST}" >> "$GITHUB_OUTPUT"
+          echo "IS_PRERELEASE=${IS_PRERELEASE}" >> "$GITHUB_OUTPUT"
+
       - name: Release executable
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@v2
         with:
+          prerelease: ${{steps.is_latest.outputs.IS_PRERELEASE}}
+          make_latest: "${{steps.is_latest.outputs.IS_LATEST}}"
           files: ./artifacts/${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
         if: startsWith(github.ref, 'refs/tags/')
 
       - name: Release debs
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@v2
         with:
+          prerelease: ${{steps.is_latest.outputs.IS_PRERELEASE}}
+          make_latest: "${{steps.is_latest.outputs.IS_LATEST}}"
           files: |
             ${{ github.workspace }}/deb/${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}-1_${{ matrix.arch.deb-platform }}.deb
         if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux'
@@ -261,7 +301,7 @@ jobs:
       - name: Create artifact with metadata for apt upload
         run: |
           echo "${{ matrix.config.app-name }}" > APTDATA_${{ matrix.config.app-name }}.dat
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default' && !contains( github.ref, '-rc')
 
       - name: Upload artifact to pass apt data to release job
         uses: actions/upload-artifact@v4
@@ -270,12 +310,12 @@ jobs:
           path: APTDATA_${{ matrix.config.app-name }}.dat
           if-no-files-found: error
           retention-days: 1
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default' && !contains( github.ref, '-rc')
 
   apt-upload:
     name: Trigger update in apt repo
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') && !contains( github.ref, '-rc')
     needs:
       - build
     steps:
