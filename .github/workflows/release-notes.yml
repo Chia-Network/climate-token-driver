@@ -14,9 +14,6 @@ jobs:
     name: Create release notes from changelog
     runs-on: ubuntu-latest
     steps:
-      - name: Clean workspace
-        uses: Chia-Network/actions/clean-workspace@main
-
       - name: Git checkout
         uses: actions/checkout@v4
         with:
