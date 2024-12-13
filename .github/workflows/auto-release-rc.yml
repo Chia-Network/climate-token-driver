@@ -1,0 +1,94 @@
+# Compares the version in pyproject.toml to tags on the repo. If the tag doesn't exist, a new tag is created, which
+# then triggers the normal "on tag" release automation in the build job
+name: Auto Tag RC
+
+on:
+  push:
+    branches:
+      - develop
+
+concurrency:
+  group: rc-release-check
+
+jobs:
+  check-version:
+    name: Check version increment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clean workspace
+        uses: Chia-Network/actions/clean-workspace@main
+
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+        with:
+          # Need PACKAGE_ADMIN_PAT token so when the tag is created, the tag automation runs
+          token: ${{ secrets.PACKAGE_ADMIN_PAT }}
+          fetch-depth: 0
+
+      # Install Python for commitizen, the automatic changelog tool
+      - name: Setup Python
+        uses: Chia-Network/actions/setup-python@main
+        with:
+          python-version: "3"
+
+      - name: Install commitizen
+        run: |
+          pip install -U commitizen
+
+      - name: Configure commit signing for ChiaAutomation
+        uses: Chia-Network/actions/commit-sign/gpg@main
+        with:
+          gpg_private_key: ${{ secrets.CHIA_AUTOMATION_PRIVATE_GPG_KEY }}
+          passphrase: ${{ secrets.CHIA_AUTOMATION_PRIVATE_GPG_PASSPHRASE }}
+
+      - name: Check for current version tag. Create if it doesn't exist. Create CHANGELOG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          stable_version=$(gh release list --limit 1 --order desc --exclude-pre-releases --json tagName --jq ".[].tagName")
+          echo "Latest release is $stable_version"
+          rc_version=$(gh release list --json tagName --jq ".[] | select(.tagName | test(\"${version}-rc*\")) | .tagName")
+          echo "Latest release candidate is $rc_version"
+
+          if [[ -z ${rc_version} ]]; then
+            # Extract the major, minor, and patch versions
+            IFS='.' read -r major minor patch <<< "$stable_version"
+
+            # Increment the patch version
+            new_patch=$((patch + 1))
+
+            # Construct the new version string
+            version="$major.$minor.$new_patch-rc1"
+
+            echo "New version: $version"
+
+          else
+            # Extract the major, minor, patch, and rc parts
+            IFS='.-' read -r major minor patch rc <<< "$rc_version"
+
+            # Extract just the number of the rc
+            rc_number="${rc#rc}"
+
+            # Increment the rc number
+            rc_number=$((rc_number +1))
+
+            # Construct the new version string
+            version="$major.$minor.$patch-rc$rc_number"
+
+            echo "New version: $version"
+
+          fi
+
+          if [ $(git tag -l "$version") ]; then
+            echo "$version tag exists, deleting..."
+            git tag -d $version
+            git push --delete origin $version
+          fi
+
+          echo "Tag does not exist. Creating and pushing tag"
+          # rm -f CHANGELOG.md
+          # cz changelog --unreleased-version=$version
+          # git add CHANGELOG.md
+          # git commit -m "chore: Updating changelog for $version"
+          git tag $version -m "Version $version"
+          git push origin $version

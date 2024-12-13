@@ -1,8 +1,40 @@
-## 1.0.33 (2023-10-12)
+## 1.1.2 (2024-12-12)
+
+### Feat
+
+- added organizations passthrough resource feat: added org_uid query param to /activities
+- swapped asset id for coin_id in activities/activity-record feat: added coin id to activity class
+- swapped asset id for coin_id in activities/activity-record feat: added coin id to activity class
+- revised by-cw-unit-id endpoint to select by warehouseUnitId, activity mode, and asset id feat: renamed /activities/by-cw-unit-id to /activities/activity-record
+- revised by-cw-unit-id endpoint to select by warehouseUnitId, activity mode, and asset id feat: renamed /activities/by-cw-unit-id to /activities/activity-record
+- get activity by warehouseUnitId working
+- revised /by-cw-unit-id resource response fix: None type error when not climate data returned by CADT
+- added /activities/by-cw-unit-id resource
+- paginate cadt request
+- add version to log output
+- add version to log output
+- optimized sub-optimal scan_token_activity cron
+- support logging to log file or stdout
 
 ### Fix
 
-- add missing max coin amount in select coin call
+- failing linter
+- linter errors
+- linter errors
+- merge inconsistencies
+- fixes needed for compatibility with chia-blockchain 2.4.4
+- issues with token pydantic classes and forward refs
+- issues with reading from DBs due to bad context manager code
+- activities scan
+- activities scan
+
+### Refactor
+
+- consolidate common functionality
+
+## 1.0.34 (2023-10-24)
+
+## 1.0.33 (2023-10-12)
 
 ## 1.0.32 (2023-10-11)
 
@@ -10,20 +42,21 @@
 
 ## 1.0.30 (2023-10-11)
 
-### Fix
-
-- derivation roots
-
 ## 1.0.29 (2023-10-05)
-
-### Fix
-
-- update the default cadt api host
 
 ## 1.0.28 (2023-10-03)
 
+### Feat
+
+- dont use meta_ prefix for cadt metadata
+
 ### Fix
 
+- Update code to interface with Chia 2.0.1+
+- meta_ prefix in tests
+- add missing max coin amount in select coin call
+- derivation roots
+- update the default cadt api host
 - rework wallet indexes
 - update default CADT API in config
 
@@ -104,9 +137,11 @@
 
 ## 1.0.4 (2023-06-09)
 
+## v1.0.1 (2023-05-30)
+
 ### Fix
 
-- update climate warehouse and ui parameter names
+- update climate warehouse and ui  parameter names
 - add exit code for incorrect host configuration
 - format host conditional
 - require localhost unless running in explorer mode
