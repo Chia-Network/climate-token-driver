@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - develop
-      - tna-in-releases2
 
 concurrency:
   group: rc-release-check
