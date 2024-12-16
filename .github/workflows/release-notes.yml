@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "**"
+      - "!*-rc*"
 
 permissions:
   contents: write
@@ -13,14 +14,11 @@ jobs:
     name: Create release notes from changelog
     runs-on: ubuntu-latest
     steps:
-      - name: Clean workspace
-        uses: Chia-Network/actions/clean-workspace@main
-
       - name: Git checkout
         uses: actions/checkout@v4
         with:
-          # Need PACKAGE_ADMIN_PAT token so when the tag is created, the tag automation runs
-          token: ${{ secrets.PACKAGE_ADMIN_PAT }}
+          # Need REPO_COMMIT token so when the tag is created, the tag automation runs
+          token: ${{ secrets.REPO_COMMIT }}
           fetch-depth: 0
 
       # Install Python for commitizen, the automatic changelog tool
@@ -41,4 +39,4 @@ jobs:
         uses: softprops/action-gh-release@v0.1.15
         with:
           body_path: INCREMENTAL.md
-          token: ${{ secrets.PACKAGE_ADMIN_PAT }}
+          token: ${{ secrets.REPO_COMMIT }}

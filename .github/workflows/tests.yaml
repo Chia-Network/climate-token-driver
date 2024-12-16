@@ -20,9 +20,6 @@ jobs:
       BLOCKS_AND_PLOTS_VERSION: 0.35.0
 
     steps:
-      - name: Clean workspace
-        uses: Chia-Network/actions/clean-workspace@main
-
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
