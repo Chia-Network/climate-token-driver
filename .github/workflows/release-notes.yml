@@ -36,7 +36,7 @@ jobs:
           cz changelog $GITHUB_REF_NAME --file-name=INCREMENTAL.md
 
       - name: Create release with the Changelog as release notes
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@v2.2.0
         with:
           body_path: INCREMENTAL.md
           token: ${{ secrets.REPO_COMMIT }}
