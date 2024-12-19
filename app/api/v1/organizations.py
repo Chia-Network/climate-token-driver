@@ -4,14 +4,14 @@ from fastapi import APIRouter
 
 from app import crud
 from app.config import ExecutionMode, settings
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 
 
 # pass through resource to expose organization data from cadt
 @router.get("/", response_model=Any)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_organizations() -> Any:
     all_organizations = crud.ClimateWareHouseCrud(
         url=settings.CADT_API_SERVER_HOST,

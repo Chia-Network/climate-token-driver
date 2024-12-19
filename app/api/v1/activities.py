@@ -11,14 +11,14 @@ from app.api import dependencies as deps
 from app.config import ExecutionMode, settings
 from app.core.types import GatewayMode
 from app.errors import ErrorCode
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 logger = logging.getLogger("ClimateToken")
 
 
 @router.get("/", response_model=schemas.ActivitiesResponse)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
     search: Optional[str] = None,
     search_by: Optional[schemas.ActivitySearchBy] = None,
@@ -131,7 +131,7 @@ async def get_activity(
 
 
 @router.get("/activity-record", response_model=schemas.ActivityRecordResponse)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity_by_cw_unit_id(
     cw_unit_id: str,
     coin_id: str,

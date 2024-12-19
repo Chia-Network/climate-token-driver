@@ -21,7 +21,7 @@ from app.db.base import Base
 from app.db.session import get_engine_cls
 from app.errors import ErrorCode
 from app.models import State
-from app.utils import disallow
+from app.utils import disallow_startup
 
 router = APIRouter()
 errorcode = ErrorCode()
@@ -30,7 +30,7 @@ logger = logging.getLogger("ClimateToken")
 
 
 @router.on_event("startup")
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_startup([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def init_db() -> None:
     Engine = await get_engine_cls()
 
@@ -143,7 +143,7 @@ async def _scan_token_activity(
 
 @router.on_event("startup")
 @repeat_every(seconds=60, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_startup([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def scan_token_activity() -> None:
     if lock.locked():
         return
@@ -194,7 +194,7 @@ async def _scan_blockchain_state(
 
 @router.on_event("startup")
 @repeat_every(seconds=10, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_startup([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def scan_blockchain_state() -> None:
     async with (
         deps.get_db_session_context() as db,
