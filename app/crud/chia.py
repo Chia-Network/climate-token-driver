@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from urllib.parse import urlencode, urlparse
 
 import requests
@@ -24,11 +24,11 @@ logger = logging.getLogger("ClimateToken")
 
 
 @dataclasses.dataclass
-class ClimateWareHouseCrud(object):
+class ClimateWareHouseCrud:
     url: str
     api_key: Optional[str]
 
-    def _headers(self) -> Dict[str, str]:
+    def _headers(self) -> dict[str, str]:
         headers = {}
 
         if self.api_key is not None:
@@ -36,7 +36,7 @@ class ClimateWareHouseCrud(object):
 
         return headers
 
-    def _get_paginated_data(self, path: str, search_params: Dict[str, Any]) -> List[Any]:
+    def _get_paginated_data(self, path: str, search_params: dict[str, Any]) -> list[Any]:
         """
         Generic function to retrieve paginated data from a given path.
 
@@ -96,7 +96,7 @@ class ClimateWareHouseCrud(object):
             logger.error("API Call Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("API Call Timeout")
 
-    def get_climate_units(self, search: Dict[str, Any]) -> Any:
+    def get_climate_units(self, search: dict[str, Any]) -> Any:
         """
         Retrieves all climate units using pagination and given search parameters.
 
@@ -152,7 +152,7 @@ class ClimateWareHouseCrud(object):
             logger.error("Call Climate API Timeout, ErrorMessage: " + str(e))
             raise error_code.internal_server_error("Call Climate API Timeout")
 
-    def combine_climate_units_and_metadata(self, search: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def combine_climate_units_and_metadata(self, search: dict[str, Any]) -> list[dict[str, Any]]:
         # units: [unit]
         units = self.get_climate_units(search)
         if len(units) == 0:
@@ -169,7 +169,7 @@ class ClimateWareHouseCrud(object):
             return []
 
         # metadata_by_id: {org_uid -> {meta_key -> meta_value}}
-        metadata_by_id: Dict[str, Dict[Any, Any]] = {}
+        metadata_by_id: dict[str, dict[Any, Any]] = {}
         for org_uid in organization_by_id.keys():
             metadata_by_id[org_uid] = self.get_climate_organizations_metadata(org_uid)
 
@@ -220,7 +220,7 @@ class ClimateWareHouseCrud(object):
 
 
 @dataclasses.dataclass
-class BlockChainCrud(object):
+class BlockChainCrud:
     full_node_client: FullNodeRpcClient
 
     async def get_challenge(self) -> str:
@@ -238,7 +238,7 @@ class BlockChainCrud(object):
         end_height: int,
         peak_height: int,
         mode: Optional[GatewayMode] = None,
-    ) -> List[schemas.Activity]:
+    ) -> list[schemas.Activity]:
         token_index = ClimateTokenIndex(
             org_uid=org_uid,
             warehouse_project_id=warehouse_project_id,
@@ -256,7 +256,7 @@ class BlockChainCrud(object):
             end_height=end_height,
         )
 
-        activities: List[schemas.Activity] = []
+        activities: list[schemas.Activity] = []
         for obj in activity_objs:
             coin_record: CoinRecord = obj["coin_record"]
             metadata = jsonable_encoder(obj["metadata"])

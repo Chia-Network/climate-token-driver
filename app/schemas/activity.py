@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic import Field, validator
 
@@ -16,7 +16,7 @@ class ActivitySearchBy(enum.Enum):
 
 
 class ActivityBase(BaseModel):
-    metadata: Dict[str, str]
+    metadata: dict[str, str]
     beneficiary_name: Optional[str]
     beneficiary_address: Optional[str]
     beneficiary_puzzle_hash: Optional[str]
@@ -32,7 +32,7 @@ class ActivityBase(BaseModel):
         if isinstance(v, GatewayMode):
             return v
         for mode in GatewayMode:
-            if (v == mode.name) or (v == mode.value):
+            if v in {mode.name, mode.value}:
                 return mode
 
         raise ValueError(f"Invalid mode {v}")
@@ -50,13 +50,13 @@ class Activity(ActivityBase):
 class ActivityWithCW(ActivityBase):
     token: TokenOnChain
 
-    cw_unit: Dict[str, Any]
-    cw_org: Dict[str, Any]
-    cw_project: Dict[str, Any]
+    cw_unit: dict[str, Any]
+    cw_org: dict[str, Any]
+    cw_project: dict[str, Any]
 
 
 class ActivitiesResponse(BaseModel):
-    activities: List[ActivityWithCW] = Field(default_factory=list)
+    activities: list[ActivityWithCW] = Field(default_factory=list)
     total: int = 0
 
 

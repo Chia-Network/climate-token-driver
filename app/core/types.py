@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
@@ -28,7 +28,7 @@ class GatewayMode(enum.Enum):
 
 
 @dataclasses.dataclass
-class ClimateTokenIndex(object):
+class ClimateTokenIndex:
     org_uid: str
     warehouse_project_id: str
     vintage_year: int
@@ -47,11 +47,11 @@ class ClimateTokenIndex(object):
 
 
 @dataclasses.dataclass(frozen=True)
-class TransactionRequest(object):
-    coins: Optional[List[Coin]] = dataclasses.field(default=None)
-    payments: List[Payment] = dataclasses.field(default_factory=list)
-    coin_announcements: List[CreateCoinAnnouncement] = dataclasses.field(default_factory=list)
-    puzzle_announcements: List[CreatePuzzleAnnouncement] = dataclasses.field(default_factory=list)
+class TransactionRequest:
+    coins: Optional[list[Coin]] = dataclasses.field(default=None)
+    payments: list[Payment] = dataclasses.field(default_factory=list)
+    coin_announcements: list[CreateCoinAnnouncement] = dataclasses.field(default_factory=list)
+    puzzle_announcements: list[CreatePuzzleAnnouncement] = dataclasses.field(default_factory=list)
     fee: uint64 = dataclasses.field(default=uint64(0))
 
     def to_program(self) -> Program:
@@ -72,7 +72,7 @@ class TransactionRequest(object):
         return ret
 
     @property
-    def additions(self) -> List[Dict[str, Any]]:
+    def additions(self) -> list[dict[str, Any]]:
         additions = []
         for payment in self.payments:
             memos = [bytes.decode(memo) for memo in payment.memos]

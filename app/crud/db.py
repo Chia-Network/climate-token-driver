@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import Any, AnyStr, List, Optional, Tuple
+from typing import Any, AnyStr, Optional
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, desc, insert, or_, update
@@ -18,7 +18,7 @@ errorcode = ErrorCode()
 
 
 @dataclasses.dataclass
-class DBCrudBase(object):
+class DBCrudBase:
     db: Session
 
     def create_object(self, model: Base) -> Base:
@@ -27,7 +27,7 @@ class DBCrudBase(object):
         self.db.refresh(model)
         return model
 
-    def batch_insert_ignore_db(self, table: AnyStr, models: List[Any]) -> bool:
+    def batch_insert_ignore_db(self, table: AnyStr, models: list[Any]) -> bool:
         try:
             s = insert(Base.metadata.tables[table]).prefix_with("OR IGNORE").values(models)
             self.db.execute(s)
@@ -66,7 +66,7 @@ class DBCrudBase(object):
 
     def select_activity_with_pagination(
         self, model: Any, filters: Any, order_by: Any, limit: Optional[int] = None, page: Optional[int] = None
-    ) -> Tuple[Any, int]:
+    ) -> tuple[Any, int]:
         try:
             query = self.db.query(model).filter(or_(*filters["or"]), and_(*filters["and"]))
 
@@ -93,7 +93,7 @@ class DBCrud(DBCrudBase):
 
     def batch_insert_ignore_activity(
         self,
-        activities: List[schemas.Activity],
+        activities: list[schemas.Activity],
     ) -> bool:
         db_activities = []
         for activity in activities:

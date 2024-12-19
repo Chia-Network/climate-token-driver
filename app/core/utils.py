@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
@@ -58,8 +58,8 @@ async def get_cat_wallet_info_by_asset_id(
     asset_id: Optional[bytes32],
     wallet_client: WalletRpcClient,
 ) -> Optional[WalletInfo]:
-    wallet_objs: List[Dict[str, Any]] = await wallet_client.get_wallets()
-    wallet_infos: List[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
+    wallet_objs: list[dict[str, Any]] = await wallet_client.get_wallets()
+    wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
     wallet_info: WalletInfo
     for wallet_info in wallet_infos:
@@ -79,8 +79,8 @@ async def get_wallet_info_by_id(
     wallet_id: int,
     wallet_client: WalletRpcClient,
 ) -> Optional[WalletInfo]:
-    wallet_objs: List[Dict[str, Any]] = await wallet_client.get_wallets()
-    wallet_infos: List[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
+    wallet_objs: list[dict[str, Any]] = await wallet_client.get_wallets()
+    wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
     wallet_info: WalletInfo
     for wallet_info in wallet_infos:
@@ -114,7 +114,7 @@ async def get_created_signed_transactions(
     transaction_request: TransactionRequest,
     wallet_id: int,
     wallet_client: WalletRpcClient,
-) -> List[TransactionRecord]:
+) -> list[TransactionRecord]:
     response = await wallet_client.create_signed_transactions(
         coins=transaction_request.coins,
         additions=transaction_request.additions,
