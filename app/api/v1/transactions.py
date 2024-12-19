@@ -1,4 +1,6 @@
-from __future__ import annotations
+# noqa: I002
+# ignore the required import["from __future__ import annotations"]
+# This import breaks everything - seems something to do with pydantic
 
 from typing import Optional
 
