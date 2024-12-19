@@ -108,10 +108,10 @@ def test_disallowed_startup() -> None:
     with anyio.from_thread.start_blocking_portal() as portal:
         test_client.portal = portal  # workaround anyio 4.0.0 incompat with TestClient
         test_client.stream_send = anyio.streams.stapled.StapledObjectStream(
-            *anyio.create_memory_object_stream(math.inf)
+            *anyio.create_memory_object_stream(math.inf)  # type: ignore[arg-type]
         )
         test_client.stream_receive = anyio.streams.stapled.StapledObjectStream(
-            *anyio.create_memory_object_stream(math.inf)
+            *anyio.create_memory_object_stream(math.inf)  # type: ignore[arg-type]
         )
         test_client.task = test_client.portal.start_task_soon(test_client.lifespan)
         test_client.portal.call(test_client.wait_startup)
@@ -135,10 +135,10 @@ def test_allowed_startup() -> None:
         with anyio.from_thread.start_blocking_portal() as portal:
             test_client.portal = portal  # workaround anyio 4.0.0 incompat with TestClient
             test_client.stream_send = anyio.streams.stapled.StapledObjectStream(
-                *anyio.create_memory_object_stream(math.inf)
+                *anyio.create_memory_object_stream(math.inf)  # type: ignore[arg-type]
             )
             test_client.stream_receive = anyio.streams.stapled.StapledObjectStream(
-                *anyio.create_memory_object_stream(math.inf)
+                *anyio.create_memory_object_stream(math.inf)  # type: ignore[arg-type]
             )
             test_client.task = test_client.portal.start_task_soon(test_client.lifespan)
             test_client.portal.call(test_client.wait_startup)

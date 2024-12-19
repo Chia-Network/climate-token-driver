@@ -131,7 +131,7 @@ async def get_activity(
 
 
 @router.get("/activity-record", response_model=schemas.ActivityRecordResponse)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity_by_cw_unit_id(
     cw_unit_id: str,
     coin_id: str,
