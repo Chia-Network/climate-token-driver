@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import INFINITE_COST, Program
@@ -32,14 +32,14 @@ def create_gateway_request_and_spend(
     origin_coin: Coin,
     amount: uint64,
     tail_program: Program,
-    coins: Optional[List[Coin]] = None,
+    coins: Optional[list[Coin]] = None,
     fee: int = 0,
-    memos: Optional[List[bytes]] = None,
+    memos: Optional[list[bytes]] = None,
     public_key: Optional[G1Element] = None,
     from_puzzle_hash: Optional[bytes32] = None,
     to_puzzle_hash: Optional[bytes32] = None,
-    key_value_pairs: Optional[List[Tuple[Any, Any]]] = None,
-) -> Tuple[TransactionRequest, CoinSpend]:
+    key_value_pairs: Optional[list[tuple[Any, Any]]] = None,
+) -> tuple[TransactionRequest, CoinSpend]:
     tail_program_hash: bytes32 = tail_program.get_tree_hash()
 
     gateway_puzzle: Program = create_gateway_puzzle()
@@ -61,7 +61,7 @@ def create_gateway_request_and_spend(
     lineage_proof: LineageProof = LineageProof()
     gateway_payment: Payment
     if from_puzzle_hash is None:
-        if mode in [GatewayMode.DETOKENIZATION, GatewayMode.PERMISSIONLESS_RETIREMENT]:
+        if mode in {GatewayMode.DETOKENIZATION, GatewayMode.PERMISSIONLESS_RETIREMENT}:
             raise ValueError(f"Mode {mode!s} requires specifying `from_puzzle_hash`!")
 
         gateway_payment = Payment(
@@ -89,7 +89,7 @@ def create_gateway_request_and_spend(
     )
 
     if key_value_pairs is None:
-        if mode in [GatewayMode.PERMISSIONLESS_RETIREMENT]:
+        if mode in {GatewayMode.PERMISSIONLESS_RETIREMENT}:
             raise ValueError(f"Mode {mode!s} requires specifying `key_value_pairs`!")
 
     delegated_solution = Program.to(key_value_pairs)
@@ -101,7 +101,7 @@ def create_gateway_request_and_spend(
     conditions.append(Program.to([ConditionOpcode.CREATE_COIN, None, -113, tail_program, tail_solution]))
 
     if to_puzzle_hash is None:
-        if mode in [GatewayMode.TOKENIZATION]:
+        if mode in {GatewayMode.TOKENIZATION}:
             raise ValueError(f"Mode {mode!s} requires specifying `to_puzzle_hash`!")
 
         extra_delta = -amount
@@ -141,8 +141,8 @@ def create_gateway_request_and_spend(
 def create_gateway_signature(
     coin_spend: CoinSpend,
     agg_sig_additional_data: bytes,
-    public_key_to_secret_key: Optional[Dict[G1Element, PrivateKey]] = None,
-    public_key_message_to_signature: Optional[Dict[Tuple[G1Element, bytes], G2Element]] = None,
+    public_key_to_secret_key: Optional[dict[G1Element, PrivateKey]] = None,
+    public_key_message_to_signature: Optional[dict[tuple[G1Element, bytes], G2Element]] = None,
     allow_missing: bool = False,
 ) -> G2Element:
     if public_key_to_secret_key is None:
@@ -157,7 +157,7 @@ def create_gateway_signature(
         INFINITE_COST,
     )
 
-    signatures: List[G2Element] = []
+    signatures: list[G2Element] = []
     for public_key, message in pkm_pairs_for_conditions_dict(
         conditions_dict,
         coin_spend.coin,

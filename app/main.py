@@ -58,10 +58,10 @@ if __name__ == "__main__":
         logger.error(f"Invalid mode {settings.MODE}!")
         sys.exit(1)
 
-    if settings.MODE in [ExecutionMode.EXPLORER, ExecutionMode.DEV] or server_host in [
+    if settings.MODE in {ExecutionMode.EXPLORER, ExecutionMode.DEV} or server_host in {
         "127.0.0.1",
         "localhost",
-    ]:
+    }:
         uvicorn.run(
             app,
             host=server_host,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from chia.consensus.coinbase import create_puzzlehash_for_pk
