@@ -1,13 +1,13 @@
 from typing import Optional
 
-from blspy import G1Element, PrivateKey
 from chia.consensus.coinbase import create_puzzlehash_for_pk
+from chia.rpc.wallet_request_types import GetPrivateKey
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.bech32m import decode_puzzle_hash, encode_puzzle_hash
-from chia.util.byte_types import hexstr_to_bytes
 from chia.util.ints import uint32
 from chia.wallet.derive_keys import master_sk_to_wallet_sk, master_sk_to_wallet_sk_unhardened
+from chia_rs import G1Element, PrivateKey
 from fastapi import APIRouter, Depends
 
 from app import schemas
@@ -29,11 +29,12 @@ async def get_key(
     prefix: str = "bls1238",
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
 ) -> schemas.Key:
-    fingerprint: int = await wallet_rpc_client.get_logged_in_fingerprint()
+    fingerprint = await wallet_rpc_client.get_logged_in_fingerprint()
+    assert fingerprint.fingerprint is not None
 
-    result = await wallet_rpc_client.get_private_key(fingerprint)
+    result = await wallet_rpc_client.get_private_key(GetPrivateKey(fingerprint.fingerprint))
 
-    secret_key = PrivateKey.from_bytes(hexstr_to_bytes(result["sk"]))
+    secret_key = result.private_key.sk
 
     wallet_secret_key: PrivateKey
     if hardened:

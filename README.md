@@ -1,52 +1,53 @@
 # Climate Token Driver Suite
 
+![Minimum Chia Version](https://raw.githubusercontent.com/Chia-Network/core-registry-api/main/minimumChiaVersion.svg)
 ![Tested Up to Chia Version](https://raw.githubusercontent.com/Chia-Network/core-registry-api/main/testedChiaVersion.svg)
 
 This application can run in 4 modes, each providing a separate application with a distinct use case:
 
-* **Chia Climate Tokenization**:
-  * Mode: Registry
-  * Use case: A registry would use this to tokenize carbon credits onto the Chia blockchain
-  * Port: 31312
-  * Application Name: climate-tokenization-chia
-  * *Only listens on localhost for connections from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)*
-* **Climate Explorer**:
-  * Mode: Explorer
-  * Use case: A registry (or interested observer) would use this to track all on-chain activity related to tokenized carbon credits
-  * Port: 31313
-  * Application Name: climate-explorer
-* **Climate Token Driver**:
-  * Mode: Client
-  * Use case: A carbon token holder could use this in conjunction with the [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet) to manage their tokenized carbon credits
-  * Port: 31314
-  * Application Name: climate-token-driver
-* **Dev Mode (for developers only!)**:
-  * Mode: Dev
-  * Use case: Developers are able to test the software without having to communicate with the blockchain
-  * Port: 31999
-  * Application Name: Only available from source builds
+- **Chia Climate Tokenization**:
+  - Mode: Registry
+  - Use case: A registry would use this to tokenize carbon credits onto the Chia blockchain
+  - Port: 31312
+  - Application Name: climate-tokenization-chia
+  - Only listens on localhost for connections from the [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)
+- **Climate Explorer**:
+  - Mode: Explorer
+  - Use case: A registry (or interested observer) would use this to track all on-chain activity related to tokenized carbon credits
+  - Port: 31313
+  - Application Name: climate-explorer
+- **Climate Token Driver**:
+  - Mode: Client
+  - Use case: A carbon token holder could use this in conjunction with the [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet) to manage their tokenized carbon credits
+  - Port: 31314
+  - Application Name: climate-token-driver
+- **Dev Mode (for developers only!)**:
+  - Mode: Dev
+  - Use case: Developers are able to test the software without having to communicate with the blockchain
+  - Port: 31999
+  - Application Name: Only available from source builds
 
-When compiling from source, the "mode" is controlled by the `.env` file.  Each application, or mode, is offered as precompiled binaries, appropriate for most users.
+When compiling from source, the "mode" is controlled by the `.env` file. Each application, or mode, is offered as precompiled binaries, appropriate for most users.
 
 ## Related Projects
 
-* [Chia Blockchain](https://github.com/Chia-Network/chia-blockchain)
-* [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)
-* [Climate Tokenization Engine User Interface](https://github.com/Chia-Network/Climate-Tokenization-Engine-UI)
-* [Climate Explorer UI](https://github.com/Chia-Network/climate-explorer-ui)
-* [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet)
-* [Climate Action Data Trust](https://github.com/Chia-Network/cadt)
-* [Climate Action Data Trust UI](https://github.com/Chia-Network/cadt-ui)
+- [Chia Blockchain](https://github.com/Chia-Network/chia-blockchain)
+- [Climate Tokenization Engine](https://github.com/Chia-Network/Climate-Tokenization-Engine)
+- [Climate Tokenization Engine User Interface](https://github.com/Chia-Network/Climate-Tokenization-Engine-UI)
+- [Climate Explorer UI](https://github.com/Chia-Network/climate-explorer-ui)
+- [Climate Wallet](https://github.com/Chia-Network/Climate-Wallet)
+- [Climate Action Data Trust](https://github.com/Chia-Network/cadt)
+- [Climate Action Data Trust UI](https://github.com/Chia-Network/cadt-ui)
 
 ## Hierarchy
 
 - `app`:
-    - `api`: API layer implementations
-    - `core`: service layer implementations
-    - `crud`: repository layer implementations
-    - `db`: database utilities
-    - `models`: database models
-    - `schemas`: schemas shared by all the layers
+  - `api`: API layer implementations
+  - `core`: service layer implementations
+  - `crud`: repository layer implementations
+  - `db`: database utilities
+  - `models`: database models
+  - `schemas`: schemas shared by all the layers
 - `tests`: pytest suites
 
 ## Installation and configuration
@@ -55,7 +56,7 @@ Precompiled executables are available for Mac, Windows, and Linux (both ARM and 
 
 ### Debian-based Linux Distros
 
-For users of Debian, Ubuntu, Mint, PopOS, and other Debian-based distributions, a .deb file is provided on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page.  This can be installed with
+For users of Debian, Ubuntu, Mint, PopOS, and other Debian-based distributions, a .deb file is provided on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page. This can be installed with
 
 ```sh
 dpkg -i package-filename.deb
@@ -96,7 +97,8 @@ sudo apt-get install climate-explorer-chia
 sudo systemctl start climate-tokenization-chia@<USERNAME>
 sudo systemctl start climate-explorer-chia@<USERNAME>
 ```
-For `<USERNAME>`, enter the user that Chia runs as (the user with the `.chia` directory in their home directory).  For example, if the `ubuntu` is where Chia runs, start Chia Climate Tokenization with `systemctl start climate-tokenization-chia@ubuntu`.
+
+For `<USERNAME>`, enter the user that Chia runs as (the user with the `.chia` directory in their home directory). For example, if the `ubuntu` is where Chia runs, start Chia Climate Tokenization with `systemctl start climate-tokenization-chia@ubuntu`.
 
 6.  Set the Chia Climate Tokenization and Climate Explorer to run at boot
 
@@ -104,7 +106,6 @@ For `<USERNAME>`, enter the user that Chia runs as (the user with the `.chia` di
 sudo systemctl enable climate-tokenization-chia@<USERNAME>
 sudo systemctl enable climate-explorer-chia@<USERNAME>
 ```
-
 
 ### From Source
 
@@ -138,7 +139,8 @@ sudo systemctl enable climate-explorer-chia@<USERNAME>
 ## Configurations
 
 Note there are two steps the application loads the configurations:
-1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, and `CONFIG_PATH`. Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}` and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the default *flavor* for the binary (though it is overridden by system environment variables).
+
+1. The application will first look for any environment variables set on the host machine for `MODE`, `CHIA_ROOT`, and `CONFIG_PATH`. Any variables not set on the host system will be loaded from the `.env` environment file, which is opened via `python-dotenv`, where `${CHIA_ROOT}` and `${CONFIG_PATH}` are pre-loaded. This file is not visible to end users in packaged binaries, and are suitable for binary builders to change the default _flavor_ for the binary (though it is overridden by system environment variables).
 
 1. Then, a `config.yaml` file located at `${CHIA_ROOT}/${CONFIG_PATH}` is loaded, which adds to the configurations after `.env`.
    This part of the configuration is free to change by end binary users.
@@ -149,7 +151,7 @@ The whole list of configurable variables are detailed in [config.py](app/config.
 - `MODE (environment variable)`: one of `dev`, `registry`, `client`, and `explorer`. In `dev` mode, the application essentially enables all functionalities (endpoints), while in the rest, some select endpoints will be allowed. Each mode has installers and executable binaries built and available on the [releases](https://github.com/Chia-Network/climate-token-driver/releases) page.
 - `CHIA_ROOT (environment variable)`: the root of Chia wallets on the local machine, typically `~/.chia/mainnet`.
 - `CONFIG_PATH (environment variable)`: the path of the `config.yaml` file, relative to `${CHIA_ROOT}`. Rarely needs to be changed.
-- `LOG_PATH`: the path this application write logs to, relative to `${CHIA_ROOT}`.
+- `LOG_PATH`: the path this application write logs to, relative to `${CHIA_ROOT}`. Can also be set to `stdout`.
 - `CADT_API_SERVER_HOST`: the CADT API URL in the format of `scheme://domain:port/path`.
 - `CADT_API_KEY`: the CADT API key.
 
@@ -174,7 +176,7 @@ As with `registry` mode, `client` mode is only designed to integrate with other 
 
 Only when in `explorer` mode, the following configurations are relevant:
 
-- `CLIMATE_EXPLORER_SERVER_HOST`: Network interface to bind the climate explorer to. Default is `0.0.0.0` as the Climate Explorer is intended to be a publicly available interface.  Can be set to `127.0.0.1` to be privately available only on localhost.
+- `CLIMATE_EXPLORER_SERVER_HOST`: Network interface to bind the climate explorer to. Default is `0.0.0.0` as the Climate Explorer is intended to be a publicly available interface. Can be set to `127.0.0.1` to be privately available only on localhost.
 - `CLIMATE_EXPLORER_PORT`: 31313 by default.
 - `DB_PATH`: the database this application writes to, relative to `${CHIA_ROOT}`.
 - `BLOCK_START`: the block to start scanning for climate token activities.
@@ -193,6 +195,13 @@ Only when in `explorer` mode, the following configurations are relevant:
   ```sh
   python -m virtualenv venv && source venv/bin/activate
   poetry install
+  ```
+
+- Install node.js for linter using [nvm](https://github.com/nvm-sh/nvm)
+
+  ```sh
+  nvm install
+  nvm use
   ```
 
 - Run the main script for development.
@@ -222,15 +231,18 @@ Only when in `explorer` mode, the following configurations are relevant:
   # first ensure the `MODE` is set to the `dev` for all tests to be discoverable, then
   python -m pytest ./tests
   ```
+
 ### Commiting
 
 [Signed commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) are required.
 
 ​This repo uses a [commit convention](https://www.conventionalcommits.org/en/v1.0.0/). A typical commit message might read:
 ​
+
 ```
     fix: correct home screen layout
 ```
+
 ​
 The first part of this is the commit "type". The most common types are "feat" for new features, and "fix" for bugfixes. Using these commit types helps us correctly manage our version numbers and changelogs. Since our release process calculates new version numbers from our commits it is very important to get this right.
 ​
@@ -249,10 +261,9 @@ The first part of this is the commit "type". The most common types are "feat" fo
 
 After the type and scope there should be a colon.
 
- ​
+​
 The "subject" of the commit follows. It should be a short indication of the change. The commit convention prefers that this is written in the present-imperative tense.
-
 
 #### Branch Layout
 
-All pull requests should be made against the `develop` branch.  Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.
+All pull requests should be made against the `develop` branch. Commits to the `main` branch will trigger a release, so the `main` branch is always the code in the latest release.

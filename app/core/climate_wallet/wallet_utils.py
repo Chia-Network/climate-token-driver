@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
 
-from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import INFINITE_COST, Program
 from chia.types.blockchain_format.sized_bytes import bytes32
@@ -18,6 +17,7 @@ from chia.wallet.cat_wallet.cat_utils import (
 )
 from chia.wallet.lineage_proof import LineageProof
 from chia.wallet.payment import Payment
+from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
 
 from app.core.chialisp.gateway import create_gateway_announcement, create_gateway_puzzle, create_gateway_solution
 from app.core.chialisp.load_clvm import load_clvm_locally
@@ -47,7 +47,7 @@ def create_gateway_request_and_spend(
     gateway_cat_puzzle: Program = construct_cat_puzzle(
         mod_code=CAT_MOD,
         limitations_program_hash=tail_program_hash,
-        inner_puzzle=gateway_puzzle,
+        inner_puzzle_or_hash=gateway_puzzle,
     )
     gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 
@@ -98,7 +98,7 @@ def create_gateway_request_and_spend(
     extra_delta: int = 0
     conditions = []
 
-    conditions.append([ConditionOpcode.CREATE_COIN, None, -113, tail_program, tail_solution])
+    conditions.append(Program.to([ConditionOpcode.CREATE_COIN, None, -113, tail_program, tail_solution]))
 
     if to_puzzle_hash is None:
         if mode in [GatewayMode.TOKENIZATION]:
@@ -107,7 +107,7 @@ def create_gateway_request_and_spend(
         extra_delta = -amount
 
     else:
-        conditions.append([ConditionOpcode.CREATE_COIN, to_puzzle_hash, amount, [to_puzzle_hash]])
+        conditions.append(Program.to([ConditionOpcode.CREATE_COIN, to_puzzle_hash, amount, [to_puzzle_hash]]))
 
     conditions_program = Program.to(conditions)
     gateway_announcement = create_gateway_announcement(
@@ -118,7 +118,7 @@ def create_gateway_request_and_spend(
         coins=coins,
         payments=[gateway_payment],
         coin_announcements=[gateway_announcement],
-        fee=fee,
+        fee=uint64(fee),
     )
 
     gateway_solution: Program = create_gateway_solution(
@@ -141,8 +141,8 @@ def create_gateway_request_and_spend(
 def create_gateway_signature(
     coin_spend: CoinSpend,
     agg_sig_additional_data: bytes,
-    public_key_to_secret_key: Optional[Dict[bytes, PrivateKey]] = None,
-    public_key_message_to_signature: Optional[Dict[Tuple[bytes, bytes], G2Element]] = None,
+    public_key_to_secret_key: Optional[Dict[G1Element, PrivateKey]] = None,
+    public_key_message_to_signature: Optional[Dict[Tuple[G1Element, bytes], G2Element]] = None,
     allow_missing: bool = False,
 ) -> G2Element:
     if public_key_to_secret_key is None:
@@ -176,7 +176,7 @@ def create_gateway_signature(
             if allow_missing:
                 continue
             else:
-                raise ValueError(f"Cannot sign for key {public_key.hex()} and message {message.hex()}")
+                raise ValueError(f"Cannot sign for key {bytes(public_key).hex()} and message {message.hex()}")
 
         signatures.append(signature)
 

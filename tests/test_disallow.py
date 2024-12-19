@@ -13,7 +13,7 @@ from app.config import ExecutionMode, settings
 from app.utils import disallow_route, disallow_startup
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_disallow() -> None:
     settings.MODE = ExecutionMode.DEV
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import logging
 import shutil
 import sys
 from pathlib import Path
@@ -8,6 +9,8 @@ from typing import Any, Dict, Optional
 
 import yaml
 from pydantic import BaseSettings, root_validator, validator
+
+logger = logging.getLogger("ClimateToken")
 
 
 class ExecutionMode(enum.Enum):
@@ -33,7 +36,7 @@ class Settings(BaseSettings):
     MODE: ExecutionMode
     CHIA_ROOT: Path = Path("~/.chia/mainnet")
     CONFIG_PATH: Path = Path("climate_token/config/config.yaml")
-    SERVER_PORT: Optional[int]
+    SERVER_PORT: Optional[int] = 31999
 
     # Visible configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
@@ -57,6 +60,7 @@ class Settings(BaseSettings):
     CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
     CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
     DEV_PORT: Optional[int] = None
+    SCAN_ALL_ORGANIZATIONS: Optional[bool] = False
 
     _instance: Optional[Settings] = None
 
@@ -66,7 +70,7 @@ class Settings(BaseSettings):
             cls._instance = get_settings()
         return cls._instance
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def configure_port(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if values["MODE"] == ExecutionMode.REGISTRY:
             values["SERVER_PORT"] = values.get("CLIMATE_TOKEN_REGISTRY_PORT", ServerPort.CLIMATE_TOKEN_REGISTRY.value)
@@ -79,7 +83,6 @@ class Settings(BaseSettings):
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
 
-        print(f"Set SERVER_PORT to {values['SERVER_PORT']}")
         return values
 
     @validator("CHIA_ROOT", pre=True)

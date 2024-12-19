@@ -51,7 +51,7 @@ class TestActivities:
             response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
-        assert response.json() == test_response
+        assert response.json() == test_response.dict()
 
     def test_activities_with_empty_db_then_success(
         self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
@@ -65,12 +65,13 @@ class TestActivities:
             fastapi_client.portal = portal  # workaround anyio 4.0.0 incompat with TextClient
             m.setattr(crud.BlockChainCrud, "get_challenge", mock_get_challenge)
             m.setattr(crud.DBCrud, "select_activity_with_pagination", mock_db_data)
+            m.setattr(crud.ClimateWareHouseCrud, "combine_climate_units_and_metadata", mock.MagicMock(return_value={}))
 
             params = urlencode({})
             response = fastapi_client.get("v1/activities/", params=params)
 
         assert response.status_code == fastapi.status.HTTP_200_OK
-        assert response.json() == test_response
+        assert response.json() == test_response.dict()
 
     def test_activities_then_success(self, fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
         test_activity_data = models.activity.Activity(
@@ -85,6 +86,7 @@ class TestActivities:
             vintage_year=2096,
             warehouse_project_id="c9b98579-debb-49f3-b417-0adbae4ed5c7",
             beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
+            beneficiary_address="bls12381uy38v0kyqaknlg6kl0lchd3ar7wh3dfv83th5qg5pn29t8hr99nq2vsjek",
             beneficiary_name="",
             metadata_={
                 "bn": "",
@@ -293,6 +295,7 @@ class TestActivities:
             vintage_year=2096,
             warehouse_project_id="c9b98579-debb-49f3-b417-0adbae4ed5c7",
             beneficiary_puzzle_hash="0xe122763ec4076d3fa356fbff8bb63d1f9d78b52c3c577a01140cd4559ee32966",
+            beneficiary_address="bls12381uy38v0kyqaknlg6kl0lchd3ar7wh3dfv83th5qg5pn29t8hr99nq2vsjek",
             beneficiary_name="",
             metadata_={
                 "bn": "",

@@ -1,12 +1,13 @@
 import json
+import logging
 from typing import Any, Dict, Tuple
 
-from blspy import G1Element, G2Element
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
+from chia_rs import G1Element, G2Element
 from fastapi import APIRouter, Depends
 
 from app import schemas
@@ -15,10 +16,10 @@ from app.config import ExecutionMode
 from app.core import utils
 from app.core.climate_wallet.wallet import ClimateWallet
 from app.core.types import ClimateTokenIndex, GatewayMode
-from app.logger import logger
 from app.utils import disallow_route
 
 router = APIRouter()
+logger = logging.getLogger("ClimateToken")
 
 
 @router.post(

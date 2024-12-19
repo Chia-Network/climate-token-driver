@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import enum
-from contextlib import asynccontextmanager
+import logging
+from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator, AsyncIterator
 
@@ -15,11 +16,15 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db.session import get_session_local_cls
-from app.logger import logger
+
+logger = logging.getLogger("ClimateToken")
 
 
-@asynccontextmanager
-async def get_db_session() -> AsyncIterator[Session]:
+def get_db_session_context() -> AbstractAsyncContextManager[Session]:
+    return asynccontextmanager(get_db_session)()
+
+
+async def get_db_session() -> Session:
     SessionLocal = await get_session_local_cls()
 
     db = SessionLocal()

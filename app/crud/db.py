@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 from typing import Any, AnyStr, List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
@@ -10,7 +11,8 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.db.base import Base
 from app.errors import ErrorCode
-from app.logger import logger
+
+logger = logging.getLogger("ClimateToken")
 
 errorcode = ErrorCode()
 
@@ -63,14 +65,21 @@ class DBCrudBase(object):
             raise errorcode.internal_server_error(message="Select DB Failure")
 
     def select_activity_with_pagination(
-        self, model: Any, filters: Any, order_by: Any, limit: int, page: int
+        self, model: Any, filters: Any, order_by: Any, limit: Optional[int] = None, page: Optional[int] = None
     ) -> Tuple[Any, int]:
         try:
             query = self.db.query(model).filter(or_(*filters["or"]), and_(*filters["and"]))
-            return (
-                (query.order_by(*order_by).limit(limit).offset((page - 1) * limit).all()),
-                query.count(),
-            )
+
+            if limit is not None and page is not None:
+                return (
+                    (query.order_by(*order_by).limit(limit).offset((page - 1) * limit).all()),
+                    query.count(),
+                )
+            else:
+                return (
+                    (query.order_by(*order_by).all()),
+                    query.count(),
+                )
         except Exception as e:
             logger.error(f"Select DB Failure:{e}")
             raise errorcode.internal_server_error(message="Select DB Failure")

@@ -4,7 +4,7 @@ name: Check Version Increment
 on:
   pull_request:
     branches:
-      - 'main'
+      - "main"
 
 concurrency:
   # SHA is added to the end if on `main` to let all main workflows run
@@ -16,16 +16,13 @@ jobs:
     name: Check version increment
     runs-on: ubuntu-latest
     steps:
-      - name: Clean workspace
-        uses: Chia-Network/actions/clean-workspace@main
-
       - name: Checkout current branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: branch-repo
 
       - name: Checkout main
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           path: main-repo
