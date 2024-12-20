@@ -3,7 +3,8 @@ from __future__ import annotations
 import dataclasses
 import logging
 import time
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from collections.abc import Iterator
+from typing import Any, Optional, Union
 
 from chia.consensus.constants import ConsensusConstants
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
@@ -43,7 +44,7 @@ logger = logging.getLogger("ClimateToken")
 
 
 @dataclasses.dataclass
-class ClimateWalletBase(object):
+class ClimateWalletBase:
     token_index: ClimateTokenIndex
     root_public_key: G1Element
 
@@ -65,9 +66,9 @@ class ClimateWalletBase(object):
 
 @dataclasses.dataclass
 class ClimateWallet(ClimateWalletBase):
-    mode_to_public_key: Optional[Dict[GatewayMode, G1Element]] = dataclasses.field(default=None, kw_only=True)
-    mode_to_secret_key: Optional[Dict[GatewayMode, PrivateKey]] = dataclasses.field(default=None, kw_only=True)
-    mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]]
+    mode_to_public_key: Optional[dict[GatewayMode, G1Element]] = dataclasses.field(default=None, kw_only=True)
+    mode_to_secret_key: Optional[dict[GatewayMode, PrivateKey]] = dataclasses.field(default=None, kw_only=True)
+    mode_to_message_and_signature: dict[GatewayMode, tuple[bytes, G2Element]]
 
     wallet_client: WalletRpcClient
     constants: ConsensusConstants
@@ -78,7 +79,7 @@ class ClimateWallet(ClimateWalletBase):
         token_index: ClimateTokenIndex,
         root_secret_key: PrivateKey,
         wallet_client: WalletRpcClient,
-    ) -> "ClimateWallet":
+    ) -> ClimateWallet:
         root_public_key: G1Element = root_secret_key.get_g1()
         token_index_hash: bytes32 = token_index.name()
         tail_program = create_tail_program(public_key=root_public_key, index=Program.to(token_index_hash))
@@ -88,9 +89,9 @@ class ClimateWallet(ClimateWalletBase):
         logger.info(f"  - Token index: {token_index_hash.hex()}")
         logger.info(f"  - Asset ID: {tail_program_hash.hex()}")
 
-        mode_to_public_key: Dict[GatewayMode, G1Element] = {}
-        mode_to_secret_key: Dict[GatewayMode, PrivateKey] = {}
-        mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {}
+        mode_to_public_key: dict[GatewayMode, G1Element] = {}
+        mode_to_secret_key: dict[GatewayMode, PrivateKey] = {}
+        mode_to_message_and_signature: dict[GatewayMode, tuple[bytes, G2Element]] = {}
         for mode in GatewayMode:
             secret_key: PrivateKey = root_sk_to_gateway_sk(root_secret_key)
             public_key: G1Element = secret_key.get_g1()
@@ -138,7 +139,7 @@ class ClimateWallet(ClimateWalletBase):
         return self.wallet_client is not None
 
     @property
-    def delegated_signatures(self) -> Dict[Tuple[G1Element, bytes], G2Element]:
+    def delegated_signatures(self) -> dict[tuple[G1Element, bytes], G2Element]:
         return {
             (self.root_public_key, message): signature
             for (
@@ -183,21 +184,21 @@ class ClimateWallet(ClimateWalletBase):
     async def _create_transaction(
         self,
         mode: GatewayMode,
-        coins: List[Coin],
+        coins: list[Coin],
         origin_coin: Coin,
         amount: int,
         fee: int = 0,
         from_puzzle_hash: Optional[bytes32] = None,
         to_puzzle_hash: Optional[bytes32] = None,
-        key_value_pairs: Optional[List[Tuple[Any, Any]]] = None,
+        key_value_pairs: Optional[list[tuple[Any, Any]]] = None,
         gateway_public_key: Optional[G1Element] = None,
-        public_key_to_secret_key: Optional[Dict[G1Element, PrivateKey]] = None,
+        public_key_to_secret_key: Optional[dict[G1Element, PrivateKey]] = None,
         allow_missing_signature: bool = False,
         wallet_id: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         unsigned_gateway_coin_spend: CoinSpend
         signature: G2Element
-        memos: List[bytes] = []
+        memos: list[bytes] = []
 
         (
             transaction_request,
@@ -242,7 +243,7 @@ class ClimateWallet(ClimateWalletBase):
                     add for add in tx.additions if add != unsigned_gateway_coin_spend.coin
                 ] + gateway_spend_bundle.additions()
             else:
-                spend_bundle = WalletSpendBundle.aggregate(([] if tx.spend_bundle is None else [tx.spend_bundle]))
+                spend_bundle = WalletSpendBundle.aggregate([] if tx.spend_bundle is None else [tx.spend_bundle])
                 additions = tx.additions
             removals = [rem for rem in tx.removals if rem not in additions]
             new_tx = dataclasses.replace(
@@ -268,13 +269,13 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         fee: int = 0,
         gateway_public_key: Optional[G1Element] = None,
-        gateway_key_values: Optional[Dict[str, Any]] = None,
+        gateway_key_values: Optional[dict[str, Any]] = None,
         wallet_id: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         self.check_user(is_registry=False)
         await self.check_wallet(wallet_id=wallet_id, wallet_type=WalletType.CAT)
 
-        coins: List[Coin] = await self.wallet_client.select_coins(
+        coins: list[Coin] = await self.wallet_client.select_coins(
             amount=amount,
             wallet_id=wallet_id,
             coin_selection_config=DEFAULT_TX_CONFIG.coin_selection_config,
@@ -326,7 +327,7 @@ class ClimateWallet(ClimateWalletBase):
 
         # we construct the actual transaction here
 
-        key_value_pairs: Optional[List[Tuple[str, Union[str, int]]]] = None
+        key_value_pairs: Optional[list[tuple[str, Union[str, int]]]] = None
         if gateway_key_values:
             key_value_pairs = [(key, value) for (key, value) in gateway_key_values.items()]
 
@@ -349,7 +350,7 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         fee: int = 0,
         wallet_id: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         self.check_user(is_registry=True)
         await self.check_wallet(wallet_id=wallet_id, wallet_type=WalletType.STANDARD_WALLET)
 
@@ -363,7 +364,7 @@ class ClimateWallet(ClimateWalletBase):
         gateway_public_key: G1Element = self.mode_to_public_key[mode]
         public_key_to_secret_key = {gateway_public_key: gateway_secret_key}
 
-        coins: List[Coin] = await self.wallet_client.select_coins(
+        coins: list[Coin] = await self.wallet_client.select_coins(
             amount=amount + fee,
             wallet_id=wallet_id,
             coin_selection_config=DEFAULT_TX_CONFIG.coin_selection_config,
@@ -389,7 +390,7 @@ class ClimateWallet(ClimateWalletBase):
             public_key_to_secret_key=public_key_to_secret_key,
             wallet_id=wallet_id,
         )
-        transaction_records: List[TransactionRecord] = result["transaction_records"]
+        transaction_records: list[TransactionRecord] = result["transaction_records"]
 
         await self.wallet_client.push_transactions(txs=transaction_records)
 
@@ -400,7 +401,7 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         fee: int = 0,
         wallet_id: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         mode = GatewayMode.DETOKENIZATION
         if self.mode_to_public_key is None:
             raise ValueError("No public keys provided for the registry!")
@@ -413,7 +414,7 @@ class ClimateWallet(ClimateWalletBase):
             gateway_public_key=gateway_public_key,
             wallet_id=wallet_id,
         )
-        transaction_records: List[TransactionRecord] = result["transaction_records"]
+        transaction_records: list[TransactionRecord] = result["transaction_records"]
         spend_bundle: SpendBundle = result["spend_bundle"]
         content: str = bech32_encode("detok", convertbits(bytes(spend_bundle), 8, 5))
 
@@ -436,7 +437,7 @@ class ClimateWallet(ClimateWalletBase):
     async def parse_detokenization_request(
         cls,
         content: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         (_, data) = bech32_decode(content, max_length=len(content))
         if data is None:
             raise ValueError("Invalid detokenization file!")
@@ -444,7 +445,7 @@ class ClimateWallet(ClimateWalletBase):
         data_bytes = bytes(convertbits(data, 5, 8, False))
         spend_bundle = SpendBundle.from_bytes(data_bytes)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "spend_bundle": spend_bundle,
         }
 
@@ -519,7 +520,7 @@ class ClimateWallet(ClimateWalletBase):
         self,
         content: str,
         wallet_id: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         self.check_user(is_registry=True)
 
         mode = GatewayMode.DETOKENIZATION
@@ -539,7 +540,7 @@ class ClimateWallet(ClimateWalletBase):
         unsigned_spend_bundle = SpendBundle.from_bytes(data_bytes)
 
         gateway_coin_spend: Optional[CoinSpend] = None
-        signatures: List[G2Element] = []
+        signatures: list[G2Element] = []
         for coin_spend in unsigned_spend_bundle.coin_spends:
             signature = create_gateway_signature(
                 coin_spend,
@@ -603,7 +604,7 @@ class ClimateWallet(ClimateWalletBase):
         fee: int = 0,
         beneficiary_puzzle_hash: Optional[bytes32] = None,
         wallet_id: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         mode = GatewayMode.PERMISSIONLESS_RETIREMENT
 
         if beneficiary_puzzle_hash is None:
@@ -622,7 +623,7 @@ class ClimateWallet(ClimateWalletBase):
                 "bp": beneficiary_puzzle_hash if beneficiary_puzzle_hash else b"",
             },
         )
-        transaction_records: List[TransactionRecord] = result["transaction_records"]
+        transaction_records: list[TransactionRecord] = result["transaction_records"]
 
         await self.wallet_client.push_transactions(txs=transaction_records)
 
@@ -638,8 +639,8 @@ class ClimateObserverWallet(ClimateWalletBase):
         mode: Optional[GatewayMode] = None,
         start_height: Optional[int] = None,
         end_height: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
-        modes: List[GatewayMode]
+    ) -> list[dict[str, Any]]:
+        modes: list[GatewayMode]
         if mode is None:
             modes = list(GatewayMode)
         else:
@@ -653,7 +654,7 @@ class ClimateObserverWallet(ClimateWalletBase):
         )
         gateway_cat_puzzle_hash: bytes32 = gateway_cat_puzzle.get_tree_hash()
 
-        coin_records: List[CoinRecord] = await self.full_node_client.get_coin_records_by_puzzle_hash(
+        coin_records: list[CoinRecord] = await self.full_node_client.get_coin_records_by_puzzle_hash(
             puzzle_hash=gateway_cat_puzzle_hash,
             start_height=start_height,
             end_height=end_height,
@@ -680,7 +681,7 @@ class ClimateObserverWallet(ClimateWalletBase):
             delegated_solution: Program = tail_solution.at("r")
             key_value_pairs: Program = delegated_solution.at("f")
 
-            metadata: Dict[str, str] = {}
+            metadata: dict[str, str] = {}
             for key_value_pair in key_value_pairs.as_iter():
                 if (not key_value_pair.listp()) or (key_value_pair.at("r").listp()):
                     logger.warning(f"Coin {coin.name()} has incorrect metadata structure")
@@ -690,12 +691,12 @@ class ClimateObserverWallet(ClimateWalletBase):
                 value_bytes = key_value_pair.at("r").as_atom()
 
                 key = key_bytes.decode()
-                if key in ["bp"]:
+                if key in {"bp"}:
                     value = f"0x{value_bytes.hex()}"
-                elif key in ["ba", "bn"]:
+                elif key in {"ba", "bn"}:
                     value = value_bytes.decode()
                 else:
-                    raise ValueError("Unknown key '{key}'!")
+                    raise ValueError(f"Unknown key '{key}'!")
 
                 metadata[key] = value
 

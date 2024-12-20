@@ -32,7 +32,7 @@ class TokenOnChainBase(Token):
     asset_id: bytes
 
     @classmethod
-    def parse_hexstr(cls, hexstr: str) -> "TokenOnChainBase":
+    def parse_hexstr(cls, hexstr: str) -> TokenOnChainBase:
         return cls.parse_raw(hexstr_to_bytes(hexstr).decode())
 
     def hexstr(self) -> str:

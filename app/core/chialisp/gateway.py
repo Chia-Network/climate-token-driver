@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import Optional
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
@@ -45,7 +45,7 @@ def create_gateway_announcement(
 def parse_gateway_spend(
     coin_spend: CoinSpend,
     is_cat: bool = True,
-) -> Tuple[GatewayMode, CoinSpend]:
+) -> tuple[GatewayMode, CoinSpend]:
     puzzle: Program = coin_spend.puzzle_reveal.to_program()
     solution: Program = coin_spend.solution.to_program()
     coin: Coin = coin_spend.coin

@@ -1,3 +1,7 @@
+# noqa: I002
+# ignore the required import["from __future__ import annotations"]
+# This import breaks everything - seems something to do with pydantic
+
 from typing import Any
 
 from fastapi import APIRouter

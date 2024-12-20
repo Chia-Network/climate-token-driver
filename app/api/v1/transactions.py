@@ -1,4 +1,8 @@
-from typing import List, Optional
+# noqa: I002
+# ignore the required import["from __future__ import annotations"]
+# This import breaks everything - seems something to do with pydantic
+
+from typing import Optional
 
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.coin import Coin
@@ -67,7 +71,7 @@ async def get_transactions(
     This endpoint is to be called by the client.
     """
 
-    transaction_records: List[TransactionRecord] = await wallet_rpc_client.get_transactions(
+    transaction_records: list[TransactionRecord] = await wallet_rpc_client.get_transactions(
         wallet_id=wallet_id,
         start=start,
         end=end,
@@ -76,10 +80,10 @@ async def get_transactions(
         to_address=to_address,
     )
 
-    wallet_objs: List[ChiaJsonObject] = await wallet_rpc_client.get_wallets(
+    wallet_objs: list[ChiaJsonObject] = await wallet_rpc_client.get_wallets(
         wallet_type=WalletType.CAT,
     )
-    wallet_infos: List[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
+    wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
     wallet_info: Optional[WalletInfo]
     cat_info: Optional[CATInfo] = None
@@ -130,8 +134,7 @@ async def get_transactions(
             raise ValueError(f"No coin with puzzle hash {gateway_cat_puzzle_hash.hex()}")
 
         mode: GatewayMode
-        tail_spend: CoinSpend
-        (mode, tail_spend) = parse_gateway_spend(coin_spend=coin_spend, is_cat=True)
+        (mode, _tail_spend) = parse_gateway_spend(coin_spend=coin_spend, is_cat=True)
 
         transaction = transaction_record.to_json_dict()
         transaction["type"] = CLIMATE_WALLET_INDEX + mode.to_int()
