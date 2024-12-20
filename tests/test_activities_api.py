@@ -11,6 +11,18 @@ from fastapi.testclient import TestClient
 
 from app import crud, models, schemas
 
+token_pub = "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315"
+pub2 = "0x8cba9cb11eed6e2a04843d94c9cabecc3f8eb3118f3a4c1dd5260684f462a8c886db5963f2dcac03f54a745a42777e7c"
+detok_pub = "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d"
+detok_sig = (
+    "0x842c093f865e2634099d321c4c9f5d540fb511012a9111929bec13c7e395cc6d9c3e68fc111763f13e9df50405e6eb27"
+    + "10bb553d7fa04097793bc327991d5d61584c4a10cdca304be5174d3778692ff2543f3bcc3a2c23db47704e6fc7399cc4"
+)
+retire_sig = (
+    "0xacadbbdeffddbb8a7d43355c719c814ca18a731846cb7e67157dd1b6af7d269d264224a70b19197561c53f2"
+    + "a916742eb0ed21972af0bb77c74751d988733737da3b2f590a97f45f4a0beb81263936628c323d610cafc12528ea3ca0068037738"
+)
+
 
 async def mock_get_challenge(x: crud.BlockChainCrud) -> str:
     return "testnet"
@@ -157,20 +169,20 @@ class TestActivities:
                             "vintage_year": 2096,
                             "sequence_num": 0,
                             "index": "0x37f12cf05c5d5b254ac8019fc3b02a07f98526d57b65920a785980ad925273b7",
-                            "public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",  # noqa: E501
+                            "public_key": token_pub,
                             "asset_id": "0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
                             "tokenization": {
                                 "mod_hash": "0x09bbb0ef739bdc4d37f0d0cec9c04453c40c264de8da8b2ce1edc3c1049406ce",
-                                "public_key": "0x8cba9cb11eed6e2a04843d94c9cabecc3f8eb3118f3a4c1dd5260684f462a8c886db5963f2dcac03f54a745a42777e7c",  # noqa: E501
+                                "public_key": pub2,
                             },
                             "detokenization": {
                                 "mod_hash": "0x7d7fabdcf5c6cd7cae533490dfd5f98da622657cc760cb5d96891aa2a04323c9",
-                                "public_key": "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d",  # noqa: E501
-                                "signature": "0x842c093f865e2634099d321c4c9f5d540fb511012a9111929bec13c7e395cc6d9c3e68fc111763f13e9df50405e6eb2710bb553d7fa04097793bc327991d5d61584c4a10cdca304be5174d3778692ff2543f3bcc3a2c23db47704e6fc7399cc4",  # noqa: E501
+                                "public_key": detok_pub,
+                                "signature": detok_sig,
                             },
                             "permissionless_retirement": {
                                 "mod_hash": "0xb19c88b1b53f2db24bfb9385ddb5854327baf08bd0d50c0e1b33ccd3a4c5dbb0",
-                                "signature": "0xacadbbdeffddbb8a7d43355c719c814ca18a731846cb7e67157dd1b6af7d269d264224a70b19197561c53f2a916742eb0ed21972af0bb77c74751d988733737da3b2f590a97f45f4a0beb81263936628c323d610cafc12528ea3ca0068037738",  # noqa: E501
+                                "signature": retire_sig,
                             },
                         }
                     ),
@@ -235,20 +247,20 @@ class TestActivities:
                     "vintage_year": 2096,
                     "sequence_num": 0,
                     "index": "0x37f12cf05c5d5b254ac8019fc3b02a07f98526d57b65920a785980ad925273b7",
-                    "public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",  # noqa: E501
+                    "public_key": token_pub,
                     "asset_id": "0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
                     "tokenization": {
                         "mod_hash": "0x09bbb0ef739bdc4d37f0d0cec9c04453c40c264de8da8b2ce1edc3c1049406ce",
-                        "public_key": "0x8cba9cb11eed6e2a04843d94c9cabecc3f8eb3118f3a4c1dd5260684f462a8c886db5963f2dcac03f54a745a42777e7c",  # noqa: E501
+                        "public_key": pub2,
                     },
                     "detokenization": {
                         "mod_hash": "0x7d7fabdcf5c6cd7cae533490dfd5f98da622657cc760cb5d96891aa2a04323c9",
-                        "public_key": "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d",  # noqa: E501
-                        "signature": "0x842c093f865e2634099d321c4c9f5d540fb511012a9111929bec13c7e395cc6d9c3e68fc111763f13e9df50405e6eb2710bb553d7fa04097793bc327991d5d61584c4a10cdca304be5174d3778692ff2543f3bcc3a2c23db47704e6fc7399cc4",  # noqa: E501
+                        "public_key": detok_pub,
+                        "signature": detok_sig,
                     },
                     "permissionless_retirement": {
                         "mod_hash": "0xb19c88b1b53f2db24bfb9385ddb5854327baf08bd0d50c0e1b33ccd3a4c5dbb0",
-                        "signature": "0xacadbbdeffddbb8a7d43355c719c814ca18a731846cb7e67157dd1b6af7d269d264224a70b19197561c53f2a916742eb0ed21972af0bb77c74751d988733737da3b2f590a97f45f4a0beb81263936628c323d610cafc12528ea3ca0068037738",  # noqa: E501
+                        "signature": retire_sig,
                     },
                 },
                 "project": {
@@ -310,20 +322,20 @@ class TestActivities:
             "vintage_year": 2096,
             "sequence_num": 0,
             "index": "0x37f12cf05c5d5b254ac8019fc3b02a07f98526d57b65920a785980ad925273b7",
-            "public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",  # noqa: E501
+            "public_key": token_pub,
             "asset_id": "0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
             "tokenization": {
                 "mod_hash": "0x09bbb0ef739bdc4d37f0d0cec9c04453c40c264de8da8b2ce1edc3c1049406ce",
-                "public_key": "0x8cba9cb11eed6e2a04843d94c9cabecc3f8eb3118f3a4c1dd5260684f462a8c886db5963f2dcac03f54a745a42777e7c",  # noqa: E501
+                "public_key": pub2,
             },
             "detokenization": {
                 "mod_hash": "0x7d7fabdcf5c6cd7cae533490dfd5f98da622657cc760cb5d96891aa2a04323c9",
-                "public_key": "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d",  # noqa: E501
-                "signature": "0x842c093f865e2634099d321c4c9f5d540fb511012a9111929bec13c7e395cc6d9c3e68fc111763f13e9df50405e6eb2710bb553d7fa04097793bc327991d5d61584c4a10cdca304be5174d3778692ff2543f3bcc3a2c23db47704e6fc7399cc4",  # noqa: E501
+                "public_key": detok_pub,
+                "signature": detok_sig,
             },
             "permissionless_retirement": {
                 "mod_hash": "0xb19c88b1b53f2db24bfb9385ddb5854327baf08bd0d50c0e1b33ccd3a4c5dbb0",
-                "signature": "0xacadbbdeffddbb8a7d43355c719c814ca18a731846cb7e67157dd1b6af7d269d264224a70b19197561c53f2a916742eb0ed21972af0bb77c74751d988733737da3b2f590a97f45f4a0beb81263936628c323d610cafc12528ea3ca0068037738",  # noqa: E501
+                "signature": retire_sig,
             },
         }
 
@@ -444,20 +456,20 @@ class TestActivities:
                     "vintage_year": 2096,
                     "sequence_num": 0,
                     "index": "0x37f12cf05c5d5b254ac8019fc3b02a07f98526d57b65920a785980ad925273b7",
-                    "public_key": "0x9650dc15356ba1fe3a48e50daa55ac3dfde5323226922c9bf09aae1bd9612105f323e573cfa0778c681467a0c62bc315",  # noqa: E501
+                    "public_key": token_pub,
                     "asset_id": "0x438f0630bebb927cbef0663b6b4bfb1820a754975e25a8ef20fb10b6c616c4de",
                     "tokenization": {
                         "mod_hash": "0x09bbb0ef739bdc4d37f0d0cec9c04453c40c264de8da8b2ce1edc3c1049406ce",
-                        "public_key": "0x8cba9cb11eed6e2a04843d94c9cabecc3f8eb3118f3a4c1dd5260684f462a8c886db5963f2dcac03f54a745a42777e7c",  # noqa: E501
+                        "public_key": pub2,
                     },
                     "detokenization": {
                         "mod_hash": "0x7d7fabdcf5c6cd7cae533490dfd5f98da622657cc760cb5d96891aa2a04323c9",
-                        "public_key": "0xb431835fe9fa64e9bea1bbab1d4bffd15d17d997f3754b2f97c8db43ea173a8b9fa79ac3a7d58c80111fbfdd4e485f0d",  # noqa: E501
-                        "signature": "0x842c093f865e2634099d321c4c9f5d540fb511012a9111929bec13c7e395cc6d9c3e68fc111763f13e9df50405e6eb2710bb553d7fa04097793bc327991d5d61584c4a10cdca304be5174d3778692ff2543f3bcc3a2c23db47704e6fc7399cc4",  # noqa: E501
+                        "public_key": detok_pub,
+                        "signature": detok_sig,
                     },
                     "permissionless_retirement": {
                         "mod_hash": "0xb19c88b1b53f2db24bfb9385ddb5854327baf08bd0d50c0e1b33ccd3a4c5dbb0",
-                        "signature": "0xacadbbdeffddbb8a7d43355c719c814ca18a731846cb7e67157dd1b6af7d269d264224a70b19197561c53f2a916742eb0ed21972af0bb77c74751d988733737da3b2f590a97f45f4a0beb81263936628c323d610cafc12528ea3ca0068037738",  # noqa: E501
+                        "signature": retire_sig,
                     },
                 },
                 "project": {
