@@ -171,6 +171,7 @@ jobs:
         uses: Chia-Network/actions/poetry@main
         with:
           python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+          poetry-version: "1.8.5"
 
       - name: Run pyinstaller
         run: python -m PyInstaller --clean pyinstaller.spec
