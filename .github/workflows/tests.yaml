@@ -43,6 +43,7 @@ jobs:
         uses: Chia-Network/actions/poetry@main
         with:
           poetry-command: "install --with dev"
+          poetry-version: "1.8.5"
 
       - name: Cache test blocks and plots
         uses: actions/cache@v3
