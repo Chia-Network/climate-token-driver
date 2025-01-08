@@ -37,7 +37,7 @@ optional = true
 pytest = "^7.1.2"
 commitizen = "^4.1.0"
 pytest-xdist = "^3.3.1"
-mypy = "1.11.1"
+mypy = "1.14.1"
 pre-commit = "3.7.1"
 pyupgrade = "3.16.0"
 ruff = ">=0.8.1"
