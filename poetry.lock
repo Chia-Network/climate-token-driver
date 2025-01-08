@@ -1169,19 +1169,23 @@ standard = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "htt
 
 [[package]]
 name = "fastapi-utils"
-version = "0.2.1"
+version = "0.8.0"
 description = "Reusable utilities for FastAPI"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "fastapi-utils-0.2.1.tar.gz", hash = "sha256:0e6c7fc1870b80e681494957abf65d4f4f42f4c7f70005918e9181b22f1bd759"},
-    {file = "fastapi_utils-0.2.1-py3-none-any.whl", hash = "sha256:dd0be7dc7f03fa681b25487a206651d99f2330d5a567fb8ab6cb5f8a06a29360"},
+    {file = "fastapi_utils-0.8.0-py3-none-any.whl", hash = "sha256:6c4d507a76bab9a016cee0c4fa3a4638c636b2b2689e39c62254b1b2e4e81825"},
+    {file = "fastapi_utils-0.8.0.tar.gz", hash = "sha256:eca834e80c09f85df30004fe5e861981262b296f60c93d5a1a1416fe4c784140"},
 ]
 
 [package.dependencies]
-fastapi = "*"
-pydantic = ">=1.0,<2.0"
-sqlalchemy = ">=1.3.12,<2.0.0"
+fastapi = ">=0.89,<1.0"
+psutil = ">=5,<6"
+pydantic = ">1.0,<3.0"
+
+[package.extras]
+all = ["pydantic-settings (>=2.0.1,<3.0.0)", "sqlalchemy (>=1.4,<3.0)", "typing-inspect (>=0.9.0,<0.10.0)"]
+session = ["sqlalchemy (>=1.4,<3.0)"]
 
 [[package]]
 name = "filelock"
@@ -3228,4 +3232,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "b111f89991be0dfc6b9803dd4317aef4e8de0fc9b97df1e4dbea1d904780ef53"
+content-hash = "4d8f0a32a370387de2f4ee6549d10fd863491425c8609434b260425b741ee1ec"
