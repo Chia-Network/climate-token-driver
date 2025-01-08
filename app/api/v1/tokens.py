@@ -1,6 +1,10 @@
+# noqa: I002
+# ignore the required import["from __future__ import annotations"]
+# This import breaks everything - seems something to do with pydantic
+
 import json
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.sized_bytes import bytes32
@@ -59,7 +63,7 @@ async def create_tokenization_tx(
     )
     (transaction_record, *_) = result["transaction_records"]
 
-    token_obj: Dict[str, Any] = {
+    token_obj: dict[str, Any] = {
         "index": wallet.token_index.name(),
         "public_key": bytes(wallet.root_public_key),
         "asset_id": wallet.tail_program_hash,
@@ -168,10 +172,10 @@ async def create_detokenization_file(
     )
     tail_metadata = token.detokenization
 
-    mode_to_public_key: Dict[GatewayMode, G1Element] = {
+    mode_to_public_key: dict[GatewayMode, G1Element] = {
         GatewayMode.DETOKENIZATION: G1Element.from_bytes(tail_metadata.public_key),
     }
-    mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {
+    mode_to_message_and_signature: dict[GatewayMode, tuple[bytes, G2Element]] = {
         GatewayMode.DETOKENIZATION: (
             tail_metadata.mod_hash,
             G2Element.from_bytes(tail_metadata.signature),
@@ -275,7 +279,7 @@ async def create_permissionless_retirement_tx(
     )
     tail_metadata = token.permissionless_retirement
 
-    mode_to_message_and_signature: Dict[GatewayMode, Tuple[bytes, G2Element]] = {
+    mode_to_message_and_signature: dict[GatewayMode, tuple[bytes, G2Element]] = {
         GatewayMode.PERMISSIONLESS_RETIREMENT: (
             tail_metadata.mod_hash,
             G2Element.from_bytes(tail_metadata.signature),

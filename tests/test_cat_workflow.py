@@ -310,7 +310,7 @@ async def test_cat_permissionless_retirement_workflow(
     token_index: ClimateTokenIndex,
     amount: int = 10,
     fee: int = 10,
-    beneficiary_name: bytes = "Ionia".encode(),
+    beneficiary_name: bytes = b"Ionia",
 ) -> None:
     env_1 = wallet_environments.environments[0]
     env_2 = wallet_environments.environments[1]
@@ -392,7 +392,7 @@ async def test_cat_permissionless_retirement_workflow(
         constants=climate_wallet_1.constants,
     )
 
-    test_address = "This is a fake address".encode()
+    test_address = b"This is a fake address"
     await climate_wallet_2.send_permissionless_retirement_transaction(
         amount=amount,
         fee=fee,

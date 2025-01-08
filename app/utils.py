@@ -4,7 +4,7 @@ import functools
 import logging
 import os
 import time
-from typing import Callable, List
+from typing import Callable
 
 from fastapi import status
 
@@ -37,7 +37,7 @@ logger = logging.getLogger("ClimateToken")
 #     return decorator
 
 
-def disallow(modes: List[ExecutionMode]):  # type: ignore[no-untyped-def]
+def disallow(modes: list[ExecutionMode]):  # type: ignore[no-untyped-def]
     def _disallow(f: Callable):  # type: ignore[no-untyped-def, type-arg]
         if settings.MODE in modes:
 

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import enum
 import logging
+from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
-from typing import AsyncGenerator, AsyncIterator
 
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.rpc.rpc_client import RpcClient
