@@ -1,5 +1,9 @@
+# noqa: I002
+# ignore the required import["from __future__ import annotations"]
+# This import breaks everything - seems something to do with pydantic
+
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
@@ -37,7 +41,7 @@ async def get_activity(
 
     db_crud = crud.DBCrud(db=db)
 
-    activity_filters: Dict[str, Any] = {"or": [], "and": []}
+    activity_filters: dict[str, Any] = {"or": [], "and": []}
     cw_filters = {}
     match search_by:
         case schemas.ActivitySearchBy.ONCHAIN_METADATA:
@@ -78,7 +82,7 @@ async def get_activity(
     if mode is not None:
         activity_filters["and"].append(models.Activity.mode.ilike(mode.name))
 
-    activities: List[models.Activity]
+    activities: list[models.Activity]
     total: int
 
     order_by_clause = []
@@ -100,7 +104,7 @@ async def get_activity(
         logger.warning(f"No data to get from activities. filters:{activity_filters} page:{page} limit:{limit}")
         return schemas.ActivitiesResponse()
 
-    activities_with_cw: List[schemas.ActivityWithCW] = []
+    activities_with_cw: list[schemas.ActivityWithCW] = []
     for activity in activities:
         unit = units.get(activity.asset_id)
         if unit is None:
@@ -146,7 +150,7 @@ async def get_activity_by_cw_unit_id(
     db_crud = crud.DBCrud(db=db)
 
     # fetch unit and related data from CADT
-    cw_filters: Dict[str, str] = {"warehouseUnitId": cw_unit_id}
+    cw_filters: dict[str, str] = {"warehouseUnitId": cw_unit_id}
 
     climate_data = crud.ClimateWareHouseCrud(
         url=settings.CADT_API_SERVER_HOST,
@@ -159,7 +163,7 @@ async def get_activity_by_cw_unit_id(
     unit_with_metadata = climate_data[0]
 
     # set filters to fetch activity data related to specified unit
-    activity_filters: Dict[str, Any] = {"or": [], "and": []}
+    activity_filters: dict[str, Any] = {"or": [], "and": []}
     if unit_with_metadata["marketplaceIdentifier"]:
         activity_filters["and"].append(models.Activity.asset_id == unit_with_metadata["marketplaceIdentifier"])
     else:
@@ -170,10 +174,10 @@ async def get_activity_by_cw_unit_id(
     activity_filters["and"].append(models.Activity.coin_id == coin_id)
 
     activities = [models.Activity]
-    total: int
+    _total: int
 
     # fetch activities with filters, 'total' var ignored
-    (activities, total) = db_crud.select_activity_with_pagination(
+    (activities, _total) = db_crud.select_activity_with_pagination(
         model=models.Activity,
         filters=activity_filters,
         order_by=[models.Activity.height.asc()],

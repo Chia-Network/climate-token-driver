@@ -5,7 +5,7 @@ import logging
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import yaml
 from pydantic import BaseSettings, root_validator, validator
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
         return cls._instance
 
     @root_validator(skip_on_failure=True)
-    def configure_port(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def configure_port(cls, values: dict[str, Any]) -> dict[str, Any]:
         if values["MODE"] == ExecutionMode.REGISTRY:
             values["SERVER_PORT"] = values.get("CLIMATE_TOKEN_REGISTRY_PORT", ServerPort.CLIMATE_TOKEN_REGISTRY.value)
         elif values["MODE"] == ExecutionMode.CLIENT:
@@ -90,7 +90,7 @@ class Settings(BaseSettings):
         return Path(v).expanduser()
 
     @validator("CONFIG_PATH", "LOG_PATH", "DB_PATH")
-    def prepend_root(cls, v: str, values: Dict[str, Any]) -> Path:
+    def prepend_root(cls, v: str, values: dict[str, Any]) -> Path:
         full_dir: Path = values["CHIA_ROOT"] / v
         parent: Path = full_dir.parent
         parent.mkdir(parents=True, exist_ok=True)
@@ -117,7 +117,7 @@ def get_settings() -> Settings:
         config_file.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(default_config_file, config_file)
 
-    with open(config_file, "r") as f:
+    with open(config_file) as f:
         settings_dict = yaml.safe_load(f)
 
     settings_dict = default_settings.dict() | (settings_dict or {})

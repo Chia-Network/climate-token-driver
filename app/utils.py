@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import time
-from typing import Any, Callable, Concatenate, Coroutine, List, ParamSpec, TypeVar
+from typing import Any, Callable, Concatenate, Coroutine, ParamSpec, TypeVar
 
 from fastapi import HTTPException
 
@@ -38,7 +38,7 @@ def disallow_route(
 
 
 def disallow_startup(
-    modes: List[ExecutionMode],
+    modes: list[ExecutionMode],
 ) -> Callable[
     [Callable[Concatenate[P], Coroutine[Any, Any, None]]],
     Callable[Concatenate[P], Coroutine[Any, Any, None]],
