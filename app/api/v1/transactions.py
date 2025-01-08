@@ -24,7 +24,7 @@ from app.config import ExecutionMode
 from app.core.chialisp.gateway import create_gateway_puzzle, parse_gateway_spend
 from app.core.types import CLIMATE_WALLET_INDEX, GatewayMode
 from app.schemas.types import ChiaJsonObject
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 
@@ -33,7 +33,7 @@ router = APIRouter()
     "/{transaction_id}",
     response_model=schemas.Transaction,
 )
-@disallow([ExecutionMode.EXPLORER])  # type: ignore[misc]
+@disallow_route([ExecutionMode.EXPLORER])
 async def get_transaction(
     transaction_id: str,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
