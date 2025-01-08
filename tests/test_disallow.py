@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict
+from typing import Any
 from urllib.parse import urlencode
 
 import anyio
@@ -39,14 +39,14 @@ def test_disallowed_route() -> None:
 
     @router.get("/disallow")
     @disallow_route([ExecutionMode.DEV])
-    async def get_disallow() -> Dict[str, str]:
+    async def get_disallow() -> dict[str, str]:
         return {
             "success": "true",
         }
 
     @router.get("/disallow2/")
     @disallow_route([ExecutionMode.DEV])
-    async def get_disallow2(id: int, timeout: int, why: str) -> Dict[str, Any]:
+    async def get_disallow2(id: int, timeout: int, why: str) -> dict[str, Any]:
         return {
             "id": id,
             "timeout": timeout,
@@ -56,14 +56,14 @@ def test_disallowed_route() -> None:
 
     @router.get("/allow")
     @disallow_route([ExecutionMode.EXPLORER])
-    async def get_allow() -> Dict[str, str]:
+    async def get_allow() -> dict[str, str]:
         return {
             "success": "true",
         }
 
     @router.get("/allow2")
     @disallow_route([ExecutionMode.EXPLORER])
-    async def get_allow2(id: int, timeout: int, why: str) -> Dict[str, Any]:
+    async def get_allow2(id: int, timeout: int, why: str) -> dict[str, Any]:
         return {
             "id": id,
             "timeout": timeout,

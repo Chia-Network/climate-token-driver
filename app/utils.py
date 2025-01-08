@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 import os
 import time
-from typing import Any, Callable, Concatenate, Coroutine, ParamSpec, TypeVar
+from collections.abc import Coroutine
+from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
 
 from fastapi import HTTPException
 
@@ -16,10 +17,13 @@ R = TypeVar("R")
 
 
 def disallow_route(
-    modes: List[ExecutionMode],
-) -> Callable[[Callable[Concatenate[P], Coroutine[Any, Any, R]]], Callable[Concatenate[P], Coroutine[Any, Any, R]],]:
+    modes: list[ExecutionMode],
+) -> Callable[
+    [Callable[Concatenate[P], Coroutine[Any, Any, R]]],
+    Callable[Concatenate[P], Coroutine[Any, Any, R]],
+]:
     def decorator(
-        f: Callable[Concatenate[P], Coroutine[Any, Any, R]]
+        f: Callable[Concatenate[P], Coroutine[Any, Any, R]],
     ) -> Callable[Concatenate[P], Coroutine[Any, Any, R]]:
         if settings.MODE in modes:
             # P.args & P.kwargs don't seem to work with fastapi decorators
@@ -44,7 +48,7 @@ def disallow_startup(
     Callable[Concatenate[P], Coroutine[Any, Any, None]],
 ]:
     def decorator(
-        f: Callable[Concatenate[P], Coroutine[Any, Any, None]]
+        f: Callable[Concatenate[P], Coroutine[Any, Any, None]],
     ) -> Callable[Concatenate[P], Coroutine[Any, Any, None]]:
         if settings.MODE in modes:
 
