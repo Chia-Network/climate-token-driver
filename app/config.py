@@ -54,7 +54,9 @@ class Settings(BaseSettings):
     CADT_API_SERVER_HOST: str = "https://observer.climateactiondata.org/api"
     CADT_API_KEY: Optional[str] = None
     CHIA_HOSTNAME: str = "localhost"
+    CHIA_FULL_NODE_HOSTNAME: Optional[str] = None
     CHIA_FULL_NODE_RPC_PORT: int = 8555
+    CHIA_WALLET_HOSTNAME: Optional[str] = None
     CHIA_WALLET_RPC_PORT: int = 9256
     CLIMATE_EXPLORER_PORT: Optional[int] = None
     CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
@@ -82,6 +84,12 @@ class Settings(BaseSettings):
             values["SERVER_PORT"] = values.get("DEV_PORT", ServerPort.DEV.value)
         else:
             raise ValueError(f"Invalid mode {values['MODE']}!")
+
+        # Set CHIA_FULL_NODE_HOSTNAME and CHIA_WALLET_HOSTNAME to CHIA_HOSTNAME if they are blank
+        if not values.get("CHIA_FULL_NODE_HOSTNAME"):
+            values["CHIA_FULL_NODE_HOSTNAME"] = values["CHIA_HOSTNAME"]
+        if not values.get("CHIA_WALLET_HOSTNAME"):
+            values["CHIA_WALLET_HOSTNAME"] = values["CHIA_HOSTNAME"]
 
         return values
 
