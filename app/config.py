@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     CADT_API_SERVER_HOST: str = "https://observer.climateactiondata.org/api"
     CADT_API_KEY: Optional[str] = None
     CHIA_HOSTNAME: str = "localhost"
+    CHIA_WALLET_HOSTNAME: Optional[str] = None
+    CHIA_FULL_NODE_HOSTNAME: Optional[str] = None
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
     CLIMATE_EXPLORER_PORT: Optional[int] = None
