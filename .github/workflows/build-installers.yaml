@@ -54,7 +54,7 @@ jobs:
             matrix: linux
             emoji: 🐧
             runs-on:
-              arm: [Linux, ARM64]
+              arm: [ubuntu-22.04-arm]
               intel: [ubuntu-latest]
             artifact-os-name: linux
             executable-extension: ""
@@ -185,9 +185,9 @@ jobs:
           echo "Tag is ${TAGNAME}"
           echo "github.sha is ${{ github.sha }}"
 
-      - name: Install j2
+      - name: Install jinjanator
         run: |
-          pip install j2cli
+          pip install jinjanator
 
       - name: Rename binary
         run: |
@@ -233,8 +233,8 @@ jobs:
           mkdir -p deb/$DEB_BASE/DEBIAN
           mkdir -p "deb/$DEB_BASE/etc/systemd/system"
           mkdir -p deb/$DEB_BASE/usr/local/bin
-          j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
-          j2 -o "deb/$DEB_BASE/etc/systemd/system/${{ matrix.config.app-name }}@.service" build-scripts/deb/systemd-template@.service.j2
+          jinjanate -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
+          jinjanate -o "deb/$DEB_BASE/etc/systemd/system/${{ matrix.config.app-name }}@.service" build-scripts/deb/systemd-template@.service.j2
           ln -s ../../../opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }} deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
           dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
         if: matrix.os.matrix == 'linux'
