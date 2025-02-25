@@ -394,7 +394,7 @@ class ClimateWallet(ClimateWalletBase):
         transaction_records: list[TransactionRecord] = result["transaction_records"]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
         )
 
         return result
@@ -426,7 +426,7 @@ class ClimateWallet(ClimateWalletBase):
         ]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
         )
 
         result.update(
@@ -594,7 +594,7 @@ class ClimateWallet(ClimateWalletBase):
         transaction_records = [transaction_record]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
         )
 
         return {
@@ -633,7 +633,7 @@ class ClimateWallet(ClimateWalletBase):
         transaction_records: list[TransactionRecord] = result["transaction_records"]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
         )
 
         return result
