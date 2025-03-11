@@ -4,7 +4,7 @@ import logging
 import secrets
 
 import pytest
-from chia.clvm.spend_sim import SimClient, SpendSim
+from chia._tests.util.spend_sim import SimClient, SpendSim
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.blockchain_format.sized_bytes import bytes32

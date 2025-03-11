@@ -8,6 +8,7 @@ from typing import Any, Optional, Union
 
 from chia.consensus.constants import ConsensusConstants
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
+from chia.rpc.wallet_request_types import PushTransactions
 from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
@@ -392,7 +393,9 @@ class ClimateWallet(ClimateWalletBase):
         )
         transaction_records: list[TransactionRecord] = result["transaction_records"]
 
-        await self.wallet_client.push_transactions(txs=transaction_records)
+        await self.wallet_client.push_transactions(
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+        )
 
         return result
 
@@ -422,7 +425,9 @@ class ClimateWallet(ClimateWalletBase):
             dataclasses.replace(transaction_record, spend_bundle=None) for transaction_record in transaction_records
         ]
 
-        await self.wallet_client.push_transactions(txs=transaction_records)
+        await self.wallet_client.push_transactions(
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+        )
 
         result.update(
             {
@@ -588,7 +593,9 @@ class ClimateWallet(ClimateWalletBase):
         )
         transaction_records = [transaction_record]
 
-        await self.wallet_client.push_transactions(txs=transaction_records)
+        await self.wallet_client.push_transactions(
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+        )
 
         return {
             "transaction_id": transaction_record.name,
@@ -625,7 +632,9 @@ class ClimateWallet(ClimateWalletBase):
         )
         transaction_records: list[TransactionRecord] = result["transaction_records"]
 
-        await self.wallet_client.push_transactions(txs=transaction_records)
+        await self.wallet_client.push_transactions(
+            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+        )
 
         return result
 
