@@ -24,7 +24,7 @@ pydantic = {version = "^1.10.21", extras = ["dotenv"]}
 chia-blockchain = "2.5.1"
 httpx = "^0.28.1"
 typing-inspect = "^0.9.0"
-types-pyyaml = "^6.0.12.20240917"
+types-pyyaml = "^6.0.12.20250326"
 types-requests = "^2.32.0.20241016"
 
 [tool.poetry.group.dev]
