@@ -65,7 +65,7 @@ if __name__ == "__main__":
         uvicorn.run(
             app,
             host=server_host,
-            port=settings.SERVER_PORT,
+            port=settings.SERVER_PORT if settings.SERVER_PORT is not None else 31999,
             log_level="info",
             log_config=uvicorn_log_config,
         )

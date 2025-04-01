@@ -58,4 +58,4 @@ def initialize_logging() -> dict[str, Any]:
             "datefmt": "%Y-%m-%d:%H:%M:%S",
         }
     )
-    return log_config  # type: ignore
+    return log_config
