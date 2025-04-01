@@ -3,8 +3,8 @@ from __future__ import annotations
 import logging
 import os
 import time
-from collections.abc import Coroutine
-from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
+from collections.abc import Callable, Coroutine
+from typing import Any, Concatenate, ParamSpec, TypeVar
 
 from fastapi import HTTPException
 
