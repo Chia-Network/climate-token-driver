@@ -58,6 +58,7 @@ jobs:
         uses: Chia-Network/actions/poetry@main
         with:
           poetry-command: "install --with dev"
+          poetry-version: "2.1.1"
 
       - env:
           CHIA_MANAGE_CLVM_CHECK_USE_CACHE: "false"

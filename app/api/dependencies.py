@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import enum
 import logging
+from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
-from typing import AsyncGenerator, AsyncIterator
 
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
 from chia.rpc.rpc_client import RpcClient
@@ -77,7 +77,7 @@ async def _get_rpc_client(
 async def get_wallet_rpc_client() -> AsyncIterator[WalletRpcClient]:
     async for _ in _get_rpc_client(
         node_type=NodeType.WALLET,
-        self_hostname=settings.CHIA_HOSTNAME,
+        self_hostname=settings.CHIA_WALLET_HOSTNAME if settings.CHIA_WALLET_HOSTNAME else settings.CHIA_HOSTNAME,
         rpc_port=settings.CHIA_WALLET_RPC_PORT,
         root_path=settings.CHIA_ROOT,
     ):
@@ -88,7 +88,7 @@ async def get_wallet_rpc_client() -> AsyncIterator[WalletRpcClient]:
 async def get_full_node_rpc_client() -> AsyncIterator[FullNodeRpcClient]:
     async for _ in _get_rpc_client(
         node_type=NodeType.FULL_NODE,
-        self_hostname=settings.CHIA_HOSTNAME,
+        self_hostname=settings.CHIA_FULL_NODE_HOSTNAME if settings.CHIA_FULL_NODE_HOSTNAME else settings.CHIA_HOSTNAME,
         rpc_port=settings.CHIA_FULL_NODE_RPC_PORT,
         root_path=settings.CHIA_ROOT,
     ):

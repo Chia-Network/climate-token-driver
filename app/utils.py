@@ -1,58 +1,65 @@
 from __future__ import annotations
 
-import functools
 import logging
 import os
 import time
-from typing import Callable, List
+from collections.abc import Callable, Coroutine
+from typing import Any, Concatenate, ParamSpec, TypeVar
 
-from fastapi import status
+from fastapi import HTTPException
 
 from app.config import ExecutionMode, settings
 
 logger = logging.getLogger("ClimateToken")
 
-# from typing import Any, Callable, Concatenate, Coroutine, List, ParamSpec, TypeVar
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
-# P = ParamSpec("P")
-# R = TypeVar("R")
+def disallow_route(
+    modes: list[ExecutionMode],
+) -> Callable[
+    [Callable[Concatenate[P], Coroutine[Any, Any, R]]],
+    Callable[Concatenate[P], Coroutine[Any, Any, R]],
+]:
+    def decorator(
+        f: Callable[Concatenate[P], Coroutine[Any, Any, R]],
+    ) -> Callable[Concatenate[P], Coroutine[Any, Any, R]]:
+        if settings.MODE in modes:
+            # P.args & P.kwargs don't seem to work with fastapi decorators
+            # see https://github.com/PrefectHQ/marvin/issues/625
+            # putting any parameters here in this call results in fastapi always returning 422
+            # if the request doesn't have the proper query parameters (literally "args" and "kwargs")
+            # using () allows the 405 error to be returned by fastapi regardless of query parameters
+            async def not_allowed() -> Any:
+                raise HTTPException(status_code=405, detail="Method not allowed")
+
+            return not_allowed  # type: ignore[return-value]
+
+        return f
+
+    return decorator
 
 
-# def disallow(
-#     modes: List[ExecutionMode],
-# ) -> Callable[[Callable[Concatenate[P], Coroutine[Any, Any, R]]], Callable[Concatenate[P], Coroutine[Any, Any, R]],]:
-#     def decorator(
-#         f: Callable[Concatenate[P], Coroutine[Any, Any, R]]
-#     ) -> Callable[Concatenate[P], Coroutine[Any, Any, R]]:
-#         if settings.MODE in modes:
-
-#             async def not_allowed(*args: P.args, **kwargs: P.kwargs) -> Any:
-#                 return status.HTTP_405_METHOD_NOT_ALLOWED
-
-#             return not_allowed
-
-#         return f
-
-#     return decorator
-
-
-def disallow(modes: List[ExecutionMode]):  # type: ignore[no-untyped-def]
-    def _disallow(f: Callable):  # type: ignore[no-untyped-def, type-arg]
+def disallow_startup(
+    modes: list[ExecutionMode],
+) -> Callable[
+    [Callable[Concatenate[P], Coroutine[Any, Any, None]]],
+    Callable[Concatenate[P], Coroutine[Any, Any, None]],
+]:
+    def decorator(
+        f: Callable[Concatenate[P], Coroutine[Any, Any, None]],
+    ) -> Callable[Concatenate[P], Coroutine[Any, Any, None]]:
         if settings.MODE in modes:
 
-            async def _f(*args, **kargs):  # type: ignore[no-untyped-def]
-                return status.HTTP_405_METHOD_NOT_ALLOWED
+            async def not_allowed(*args: P.args, **kwargs: P.kwargs) -> None:
+                return
 
-        else:
+            return not_allowed
 
-            @functools.wraps(f)
-            async def _f(*args, **kargs):  # type: ignore[no-untyped-def]
-                return await f(*args, **kargs)
+        return f
 
-        return _f
-
-    return _disallow
+    return decorator
 
 
 def wait_until_dir_exists(path: str, interval: int = 1) -> None:

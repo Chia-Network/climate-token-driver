@@ -1,3 +1,7 @@
+# noqa: I002
+# ignore the required import["from __future__ import annotations"]
+# This import breaks everything - seems something to do with pydantic
+
 from typing import Optional
 
 from chia.consensus.coinbase import create_puzzlehash_for_pk
@@ -13,7 +17,7 @@ from fastapi import APIRouter, Depends
 from app import schemas
 from app.api import dependencies as deps
 from app.config import ExecutionMode
-from app.utils import disallow
+from app.utils import disallow_route
 
 router = APIRouter()
 
@@ -22,7 +26,7 @@ router = APIRouter()
     "/",
     response_model=schemas.Key,
 )
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.EXPLORER])  # type: ignore[misc]
+@disallow_route([ExecutionMode.REGISTRY, ExecutionMode.EXPLORER])
 async def get_key(
     hardened: bool = False,
     derivation_index: int = 0,

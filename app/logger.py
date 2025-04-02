@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib.metadata
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import colorlog
 import uvicorn
@@ -26,7 +26,7 @@ def get_file_log_handler(formatter: logging.Formatter) -> ConcurrentRotatingFile
     return handler
 
 
-def initialize_logging() -> Dict[str, Any]:
+def initialize_logging() -> dict[str, Any]:
     log_date_format = "%Y-%m-%dT%H:%M:%S"
     file_log_formatter = logging.Formatter(
         fmt="%(asctime)s.%(msecs)03d %(name)s: %(levelname)-8s %(message)s",
@@ -58,4 +58,4 @@ def initialize_logging() -> Dict[str, Any]:
             "datefmt": "%Y-%m-%d:%H:%M:%S",
         }
     )
-    return log_config  # type: ignore
+    return log_config

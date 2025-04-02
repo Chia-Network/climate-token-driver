@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from chia.consensus.block_record import BlockRecord
 from chia.rpc.full_node_rpc_client import FullNodeRpcClient
@@ -21,7 +21,7 @@ from app.db.base import Base
 from app.db.session import get_engine_cls
 from app.errors import ErrorCode
 from app.models import State
-from app.utils import disallow
+from app.utils import disallow_startup
 
 router = APIRouter()
 errorcode = ErrorCode()
@@ -30,7 +30,7 @@ logger = logging.getLogger("ClimateToken")
 
 
 @router.on_event("startup")
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_startup([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def init_db() -> None:
     Engine = await get_engine_cls()
 
@@ -38,7 +38,7 @@ async def init_db() -> None:
         create_database(Engine.url)
         logger.info(f"Create database {Engine.url}")
 
-    logger.info(f"Database {Engine.url} exists: " f"{database_exists(Engine.url)}")
+    logger.info(f"Database {Engine.url} exists: {database_exists(Engine.url)}")
 
     Base.metadata.create_all(Engine)
 
@@ -114,7 +114,7 @@ async def _scan_token_activity(
                     continue
 
                 public_key = G1Element.from_bytes(hexstr_to_bytes(tokenization_dict["public_key"]))
-                activities: List[schemas.Activity] = await blockchain.get_activities(
+                activities: list[schemas.Activity] = await blockchain.get_activities(
                     org_uid=tokenization_dict["org_uid"],
                     warehouse_project_id=tokenization_dict["warehouse_project_id"],
                     vintage_year=tokenization_dict["vintage_year"],
@@ -135,7 +135,7 @@ async def _scan_token_activity(
             # except json.JSONDecodeError as e:
             # logger.error(f"Failed to parse JSON for key {key} in organization {org_name}: {str(e)}")
             except Exception as e:
-                logger.error(f"An error occurred for organization {org_name} under key {key}: {str(e)}")
+                logger.error(f"An error occurred for organization {org_name} under key {key}: {e!s}")
 
     db_crud.update_block_state(current_height=target_start_height)
     return True
@@ -143,7 +143,7 @@ async def _scan_token_activity(
 
 @router.on_event("startup")
 @repeat_every(seconds=60, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_startup([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def scan_token_activity() -> None:
     if lock.locked():
         return
@@ -194,7 +194,7 @@ async def _scan_blockchain_state(
 
 @router.on_event("startup")
 @repeat_every(seconds=10, logger=logger)
-@disallow([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])  # type: ignore[misc]
+@disallow_startup([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def scan_blockchain_state() -> None:
     async with (
         deps.get_db_session_context() as db,

@@ -54,7 +54,7 @@ jobs:
             matrix: linux
             emoji: 🐧
             runs-on:
-              arm: [Linux, ARM64]
+              arm: [ubuntu-22.04-arm]
               intel: [ubuntu-latest]
             artifact-os-name: linux
             executable-extension: ""
@@ -171,6 +171,7 @@ jobs:
         uses: Chia-Network/actions/poetry@main
         with:
           python-executable: ${{ steps.create-poetry-venv.outputs.python_executable }}
+          poetry-version: "2.1.1"
 
       - name: Run pyinstaller
         run: python -m PyInstaller --clean pyinstaller.spec
@@ -184,9 +185,9 @@ jobs:
           echo "Tag is ${TAGNAME}"
           echo "github.sha is ${{ github.sha }}"
 
-      - name: Install j2
+      - name: Install jinjanator
         run: |
-          pip install j2cli
+          pip install jinjanator
 
       - name: Rename binary
         run: |
@@ -232,8 +233,8 @@ jobs:
           mkdir -p deb/$DEB_BASE/DEBIAN
           mkdir -p "deb/$DEB_BASE/etc/systemd/system"
           mkdir -p deb/$DEB_BASE/usr/local/bin
-          j2 -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
-          j2 -o "deb/$DEB_BASE/etc/systemd/system/${{ matrix.config.app-name }}@.service" build-scripts/deb/systemd-template@.service.j2
+          jinjanate -o "deb/$DEB_BASE/DEBIAN/control" build-scripts/deb/control.j2
+          jinjanate -o "deb/$DEB_BASE/etc/systemd/system/${{ matrix.config.app-name }}@.service" build-scripts/deb/systemd-template@.service.j2
           ln -s ../../../opt/${{ matrix.config.app-name }}/${{ matrix.config.app-name }} deb/$DEB_BASE/usr/local/bin/${{ matrix.config.app-name }}
           dpkg-deb --build --root-owner-group "deb/$DEB_BASE"
         if: matrix.os.matrix == 'linux'
@@ -254,7 +255,7 @@ jobs:
           if-no-files-found: error
 
       - name: Create zip files for release
-        uses: thedoctor0/zip-release@0.7.1
+        uses: thedoctor0/zip-release@0.7.6
         with:
           type: "zip"
           filename: ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
@@ -305,7 +306,7 @@ jobs:
         shell: bash
         run: |
           echo "${{ matrix.config.app-name }}" > APTDATA_${{ matrix.config.app-name }}.dat
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default' && !contains( github.ref, '-rc')
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
 
       - name: Upload artifact to pass apt data to release job
         uses: actions/upload-artifact@v4
@@ -314,12 +315,12 @@ jobs:
           path: APTDATA_${{ matrix.config.app-name }}.dat
           if-no-files-found: error
           retention-days: 1
-        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default' && !contains( github.ref, '-rc')
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'linux' && matrix.config.add-to-apt == 'true' && matrix.arch.name == 'Intel' && matrix.preconfiguration.name == 'default'
 
   apt-upload:
     name: Trigger update in apt repo
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') && !contains( github.ref, '-rc')
+    if: startsWith(github.ref, 'refs/tags/')
     needs:
       - build
     steps:
@@ -327,7 +328,6 @@ jobs:
         id: repo-name
         run: |
           echo "REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d "/" -f 2)" >>$GITHUB_OUTPUT
-        if: startsWith(github.ref, 'refs/tags/')
 
       - name: Get tag name
         id: tag-name
@@ -337,6 +337,20 @@ jobs:
           echo "TAGNAME=${TAGNAME}" >> $GITHUB_OUTPUT
           echo "Tag is ${TAGNAME}"
           echo "github.sha is ${{ github.sha }}"
+
+      - name: Get glue project
+        id: glue-project
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" =~ "-rc" ]]; then
+            echo "release candidate tag matched"
+            GLUE_PROJECT='climate-tokenization-test'
+          else
+            echo "main branch release matched"
+            GLUE_PROJECT='climate-tokenization-test'
+          fi
+
+          echo "GLUE_PROJECT=${GLUE_PROJECT}" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -360,10 +374,9 @@ jobs:
           echo "APPLICATIONS=${APPS_ARRAY}" >> $GITHUB_OUTPUT
 
       - name: Trigger apt repo update
-        if: startsWith(github.ref, 'refs/tags/')
         uses: Chia-Network/actions/github/glue@main
         with:
           json_data: '{"climate_tokenization_repo":"${{ steps.repo-name.outputs.REPO_NAME }}","application_name":"${{ steps.apt-metadata.outputs.APPLICATIONS }}","release_version":"${{ steps.tag-name.outputs.TAGNAME }}","add_debian_version":"true","arm64":"available"}'
           glue_url: ${{ secrets.GLUE_API_URL }}
-          glue_project: "climate-tokenization"
+          glue_project: "${{steps.glue-project.outputs.GLUE_PROJECT}}"
           glue_path: "trigger"
