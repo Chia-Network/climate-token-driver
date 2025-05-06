@@ -55,7 +55,7 @@ jobs:
             emoji: 🐧
             runs-on:
               arm: [ubuntu-22.04-arm]
-              intel: [ubuntu-latest]
+              intel: [ubuntu-22.04]
             artifact-os-name: linux
             executable-extension: ""
           - name: macOS
