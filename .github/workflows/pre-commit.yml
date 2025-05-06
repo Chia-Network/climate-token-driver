@@ -23,7 +23,7 @@ jobs:
         os:
           - name: Linux
             matrix: linux
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-22.04
           - name: macOS
             matrix: macos
             runs-on: macos-13-arm64
