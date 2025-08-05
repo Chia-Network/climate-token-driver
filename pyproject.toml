@@ -36,7 +36,7 @@ optional = true
 # chia-blockchain = { path = "./chia-blockchain", develop = true }
 pytest = "^8.3.5"
 commitizen = "^4.6.2"
-pytest-xdist = "^3.3.1"
+pytest-xdist = "^3.8.0"
 mypy = "1.15.0"
 pre-commit = "4.2.0"
 pyupgrade = "3.19.1"
