@@ -39,7 +39,7 @@ commitizen = "^4.6.2"
 pytest-xdist = "^3.8.0"
 mypy = "1.15.0"
 pre-commit = "4.2.0"
-pyupgrade = "3.19.1"
+pyupgrade = "3.20.0"
 ruff = ">=0.8.1"
 
 [tool.commitizen]
