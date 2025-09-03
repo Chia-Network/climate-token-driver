@@ -256,11 +256,10 @@ jobs:
           if-no-files-found: error
 
       - name: Zip files for release
+        working-directory: ${{ github.workspace }}/artifacts
         shell: bash
         run: |
-          cd artifacts
           zip -r ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip *
-          cd ..
         if: startsWith(github.ref, 'refs/tags/')
 
       # RC release should not be set as latest
