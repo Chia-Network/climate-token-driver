@@ -359,7 +359,7 @@ jobs:
           echo "GLUE_PROJECT=${GLUE_PROJECT}" >> "$GITHUB_OUTPUT"
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
 
       - name: Parse meta files for apt variables
         id: apt-metadata
