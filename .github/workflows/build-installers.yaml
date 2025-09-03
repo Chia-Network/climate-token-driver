@@ -260,7 +260,13 @@ jobs:
         shell: bash
         run: |
           zip -r ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip *
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix != 'windows'
+
+      - name: Zip files for release (Windows)
+        working-directory: ${{ github.workspace }}/artifacts
+        run: |
+          Compress-Archive -Path * -Destination ${{ matrix.config.app-name }}${{ matrix.preconfiguration.installer-string }}_${{ matrix.os.artifact-os-name }}_${{ steps.tag-name.outputs.TAGNAME || github.sha }}_${{ matrix.arch.artifact-name }}.zip
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os.matrix == 'windows'
 
       # RC release should not be set as latest
       - name: Decide if release should be set as latest
