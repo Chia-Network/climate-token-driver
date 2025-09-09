@@ -1016,14 +1016,14 @@ development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
 
 [[package]]
 name = "commitizen"
-version = "4.8.2"
+version = "4.8.4"
 description = "Python commitizen client tool"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["dev"]
 files = [
-    {file = "commitizen-4.8.2-py3-none-any.whl", hash = "sha256:86cae0bd8e1da889389d828b30a5acb79b62f9290f9274b127ee9d8c189eb16c"},
-    {file = "commitizen-4.8.2.tar.gz", hash = "sha256:4fc73126c7300f715f11b85242550677722c57767b579100e869ccd45143e2c5"},
+    {file = "commitizen-4.8.4-py3-none-any.whl", hash = "sha256:8b9fe86a9ec4575765c1637882e8523a91a80bc58d3c1a6b5a62378053b2a8cf"},
+    {file = "commitizen-4.8.4.tar.gz", hash = "sha256:082dd895697ed548a8388e9e9ec69378089860402fbb02b464acd0a306130fca"},
 ]
 
 [package.dependencies]
@@ -1033,9 +1033,10 @@ colorama = ">=0.4.1,<1.0"
 decli = ">=0.6.0,<1.0"
 jinja2 = ">=2.10.3"
 packaging = ">=19"
+prompt_toolkit = "!=3.0.52"
 pyyaml = ">=3.08"
 questionary = ">=2.0,<3.0"
-termcolor = ">=1.1,<3"
+termcolor = ">=1.1.0,<4.0.0"
 tomlkit = ">=0.5.3,<1.0.0"
 typing-extensions = {version = ">=4.0.1,<5.0.0", markers = "python_version < \"3.11\""}
 
@@ -3390,4 +3391,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "0b78dee69abe65373ff4ef475023bccc1a0329eadca80d4a6fc6bdeec10ec5e4"
+content-hash = "a76059c0814c81cc23838b1481f648ea4e3808ea6f623da8d07be01c58cff885"
