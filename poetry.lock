@@ -685,14 +685,14 @@ dev = ["black (>=23.1.0)", "pytest (>=7.2.1)", "ruff (>=0.0.252)"]
 
 [[package]]
 name = "chia-blockchain"
-version = "2.5.1"
+version = "2.5.6"
 description = "Chia blockchain full node, farmer, timelord, and wallet."
 optional = false
 python-versions = "<4,>=3.9"
 groups = ["main"]
 files = [
-    {file = "chia_blockchain-2.5.1-py3-none-any.whl", hash = "sha256:a9d4125ec0d7dc22d43e0837f02f18446014ff97d0f6b6c38f419a077d698d9d"},
-    {file = "chia_blockchain-2.5.1.tar.gz", hash = "sha256:2fa73d833ddbc3bdeb71a513606f911b938dc5f22386d04e0ce41cdc329a8dae"},
+    {file = "chia_blockchain-2.5.6-py3-none-any.whl", hash = "sha256:dc42dcb4d43ec8ec56b1bd6117f053fcd926de9d2b3a8f2a606b13d0c24920f7"},
+    {file = "chia_blockchain-2.5.6.tar.gz", hash = "sha256:f9373aa968b0db12ba210b8d2264e5305f15187566d48337fc8bf508c2e45a4e"},
 ]
 
 [package.dependencies]
@@ -702,12 +702,13 @@ aiosqlite = ">=0.20.0"
 anyio = ">=4.6.2.post1"
 bitstring = ">=4.1.4"
 boto3 = ">=1.35.43"
-chia_rs = ">=0.18.0"
+chia-puzzles-py = ">=0.20.1"
+chia_rs = ">=0.27,<0.28"
 chiabip158 = ">=1.5.2"
 chiapos = ">=2.0.10"
 chiavdf = ">=1.1.10"
 click = ">=8.1.7"
-clvm = ">=0.9.11"
+clvm = ">=0.9.14"
 clvm_tools = ">=0.4.9"
 clvm_tools_rs = ">=0.1.45"
 colorama = ">=0.4.6"
@@ -732,39 +733,56 @@ watchdog = ">=4.0.1"
 zstd = {version = ">=1.5.5.1", markers = "python_version <= \"3.12\""}
 
 [package.extras]
-dev = ["aiohttp_cors (>=0.7.0)", "build (>=1.2.1)", "coverage (>=7.6.4)", "diff-cover (>=9.2.0)", "lxml (>=5.2.2)", "mypy (>=1.11.1)", "pre-commit (>=3.7.1)", "py3createtorrent (>=1.2.1)", "pyinstaller (>=6.9.0) ; python_version < \"3.13\"", "pytest (>=8.3.3)", "pytest-cov (>=5.0.0)", "pytest-mock (>=3.14.0)", "pytest-monitor (>=1.6.6) ; sys_platform == \"linux\"", "pytest-xdist (>=3.6.1)", "ruff (>=0.8.1)", "types-aiofiles (>=24.1.0.20240626)", "types-cryptography (>=3.3.23.2)", "types-pyyaml (>=6.0.12.20240917)", "types-setuptools (>=75.5.0.20241122)"]
+dev = ["aiohttp_cors (>=0.7.0)", "build (>=1.2.1)", "coverage (>=7.6.4)", "diff-cover (>=9.2.0)", "lxml (>=5.2.2)", "mypy (>=1.11.1)", "pre-commit (>=3.7.1)", "py3createtorrent (>=1.2.1)", "pyinstaller (>=6.9.0) ; python_version < \"3.13\"", "pytest (>=8.3.3)", "pytest-cov (>=5.0.0)", "pytest-mock (>=3.14.0)", "pytest-monitor (>=1.6.6) ; sys_platform == \"linux\"", "pytest-xdist (>=3.6.1)", "ruff (>=0.8.1)", "tach (>=0.29.0)", "types-aiofiles (>=24.1.0.20240626)", "types-cryptography (>=3.3.23.2)", "types-pyyaml (>=6.0.12.20240917)", "types-setuptools (>=75.5.0.20241122)"]
 legacy-keyring = ["keyrings.cryptfile (>=1.3.9)"]
-upnp = ["miniupnpc (>=2.2.2)"]
+upnp = ["miniupnpc (>=2.3.2,<3)"]
+
+[[package]]
+name = "chia-puzzles-py"
+version = "0.20.3"
+description = "A collection of the currently deployed ChiaLisp puzzles."
+optional = false
+python-versions = "<4.0,>=3.8"
+groups = ["main"]
+files = [
+    {file = "chia_puzzles_py-0.20.3-py3-none-any.whl", hash = "sha256:cf55c342ec7827d244aea9f3d3e2fc7079807de6ab6c82d93c5d612c7f2ac1d2"},
+    {file = "chia_puzzles_py-0.20.3.tar.gz", hash = "sha256:059c314c8ac6bb8f6f89bdb9855e55b716475b61ba953801e5fff22683534193"},
+]
+
+[package.dependencies]
+clvm-rs = ">=0.2.3,<0.3.0"
+clvm-tools-rs = ">=0.1.45,<0.2.0"
+pytest = ">=8.3.3,<9.0.0"
 
 [[package]]
 name = "chia-rs"
-version = "0.20.0"
+version = "0.27.0"
 description = "Code useful for implementing chia consensus."
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "chia_rs-0.20.0-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:06be5a69ba9c03b7abb2b354c6a110863213212436fa5afa66a615f520a58132"},
-    {file = "chia_rs-0.20.0-cp310-cp310-macosx_13_0_x86_64.whl", hash = "sha256:edf9083212a8a2dab725d2952769d862de22f7b04e90488362111354ceac7572"},
-    {file = "chia_rs-0.20.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:65a6030fec172fa01c1128d2b9097f620298dfa3c4c827b5efaf37390487dd28"},
-    {file = "chia_rs-0.20.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:c230174b7e0b569a210cfe59a2fae3e1a87508dd05752af3aaad1abb68322586"},
-    {file = "chia_rs-0.20.0-cp310-cp310-win_amd64.whl", hash = "sha256:831b541f0e8927d717a0e5c1897803be658e052395b49ef2ed488e9b18300b34"},
-    {file = "chia_rs-0.20.0-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:47e594e22c9ddafb3a2111474f0e834eefdd89dc589718f6127f12d8dca7cdea"},
-    {file = "chia_rs-0.20.0-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:9160586d99ea64e17a438c8465ba63d3f60218e857915fd88ae3b5707cd90be4"},
-    {file = "chia_rs-0.20.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:4a72b9491fd1434c89f71d30fc102b98fc6b4bdb9a5e0b063267bb03a31f5842"},
-    {file = "chia_rs-0.20.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:65cd12ce7f18488bc9a35d1557b27c5a5370d140dd363ae09ae9fbfad40b4bc6"},
-    {file = "chia_rs-0.20.0-cp311-cp311-win_amd64.whl", hash = "sha256:bf5bd988ea1b10d2ca8ab5f70ee3153ce022ae7dc5e22e5be8b267980a386ebb"},
-    {file = "chia_rs-0.20.0-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:60d67f80a171003f4596423c52ba2bf525f016b6613c687843535cdeb74d68ca"},
-    {file = "chia_rs-0.20.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:abc87ec3671dbdcba393903637669b6fce5853e7a218dc0a63eef5d2b1edd01c"},
-    {file = "chia_rs-0.20.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:8f30e039b0b5a3cf0e369bacccf94a9b5a5f4006b9b85088c9cdc6404cd55cfc"},
-    {file = "chia_rs-0.20.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:3e4b2c474ea83c996a5d13179de1ab1bf20df8d29a8a7a95318384b5b5c943af"},
-    {file = "chia_rs-0.20.0-cp312-cp312-win_amd64.whl", hash = "sha256:f8c6471f26e9f3aa49b71938670c483225886432b898f0aa057511be2d529cdc"},
-    {file = "chia_rs-0.20.0-cp39-cp39-macosx_13_0_arm64.whl", hash = "sha256:ef7b3d937ff3c1b4fbe962b5b268c7463bd1498554ce4bd27786f1e772d26df9"},
-    {file = "chia_rs-0.20.0-cp39-cp39-macosx_13_0_x86_64.whl", hash = "sha256:13cf9971c18d00945c567d4a726786b40d8bb4adcb881539a44075322fd8e4b8"},
-    {file = "chia_rs-0.20.0-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:6787a107dc2d9fec46bbd092dbd54366bd9e4199bfab40916abd48c71b867a1d"},
-    {file = "chia_rs-0.20.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:3390cb1cfb172ed866634eef9a8a3abbdce4d758f2800aae757af1b9a0057329"},
-    {file = "chia_rs-0.20.0-cp39-cp39-win_amd64.whl", hash = "sha256:3307959b4b6887525e33199f75911c8bf9ae7e22274ac39a618a1fc01f5a8e61"},
-    {file = "chia_rs-0.20.0.tar.gz", hash = "sha256:ee6d2ed40719a6e1847cac92646e844ac27780986a2319bf53ab948f77fde113"},
+    {file = "chia_rs-0.27.0-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:6f7305dbba01d85470815135ff4d25934ed21c9870c53a5a3c6ed9989c93adfe"},
+    {file = "chia_rs-0.27.0-cp310-cp310-macosx_13_0_x86_64.whl", hash = "sha256:6c1cc7ee4f8858f0f1647b3574f3a4b930c184c43f581ded562b33470110236e"},
+    {file = "chia_rs-0.27.0-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:4fe4f2fa4e1f7e80f17bf87a8b1b3f3012dfc600b42f7b443c989e200dd29acc"},
+    {file = "chia_rs-0.27.0-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:5de5a3db32c75d6dd8d8828c078a38400caa7a9330da24f5cfe935d21e74a6c0"},
+    {file = "chia_rs-0.27.0-cp310-cp310-win_amd64.whl", hash = "sha256:624d6d2f6e1de79711bb54d18e470392cb8345271173a8b541816e9d58631e80"},
+    {file = "chia_rs-0.27.0-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:4ae7d0e84fab83f0be88006dc0a00fe3b042c26a8b6cece584a136e879c516f6"},
+    {file = "chia_rs-0.27.0-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:271d94b32f9dc32fe53601c1aa70855019ead2b9da0e5b67a38ae87214601965"},
+    {file = "chia_rs-0.27.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:72f5bbeb0b6dbf6e05db33451c8adf9df25f97808846a3faf97cf7027e3dfe16"},
+    {file = "chia_rs-0.27.0-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:f435e59379e7244cf6b4f5b2701a859986bfed3adc1ad1ca2357b6ecc6d1a2da"},
+    {file = "chia_rs-0.27.0-cp311-cp311-win_amd64.whl", hash = "sha256:3fed290e15d9b43de30e24a108eb4141b35547fe6638d89bd987bba6f44bea06"},
+    {file = "chia_rs-0.27.0-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:52ac4d90cd8a926f951c4dcc5d477a392ee43ddb7dc34075f047044ca4337780"},
+    {file = "chia_rs-0.27.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:88ed91ab0da1b02f4f463aa1a9f9c6e1dfa6f315f6746ce8d105b081e5af87ff"},
+    {file = "chia_rs-0.27.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:24108c3c271c288d8c67a7e043ae4414b1f715a4a5a85817978871986ac8fdf8"},
+    {file = "chia_rs-0.27.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:69093f69c46f345b7c4c5b863024b0eb2792dfe20e528deb1d4aa27f90bab688"},
+    {file = "chia_rs-0.27.0-cp312-cp312-win_amd64.whl", hash = "sha256:c5e3a51a79c0abd1932be2c8a2c3a4723702b2ba367fa769046c4dfcbb000859"},
+    {file = "chia_rs-0.27.0-cp39-cp39-macosx_13_0_arm64.whl", hash = "sha256:35901a6c6042373226992c6bc6f3e3b88b8fc6acdb6a4bfaf84635a4b7ccb41f"},
+    {file = "chia_rs-0.27.0-cp39-cp39-macosx_13_0_x86_64.whl", hash = "sha256:7747b5e7738f70bd8e1c05ece5884fc7c717aec9aa9dd7036f5ac5fd3e9d0ee9"},
+    {file = "chia_rs-0.27.0-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:e97245a9ef89a08d68b7dc44201624bfd3aa401303da4ff48f04a052043e0ce0"},
+    {file = "chia_rs-0.27.0-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:1cbfff18f3d1200382b768ce042eff3309291dfd7b79910345358a047764f628"},
+    {file = "chia_rs-0.27.0-cp39-cp39-win_amd64.whl", hash = "sha256:da590ac41d389ee6bedc418f1277565c8e42d000d1ae29b1971698a519ad898a"},
+    {file = "chia_rs-0.27.0.tar.gz", hash = "sha256:7ce89cbc06a888eb05a84f190e399eca015caae340a3d65696d7c0cb16a374ab"},
 ]
 
 [package.dependencies]
@@ -913,23 +931,23 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "clvm"
-version = "0.9.11"
+version = "0.9.14"
 description = "[Contract Language | Chialisp] Virtual Machine"
 optional = false
 python-versions = "<4,>=3.8.1"
 groups = ["main"]
 files = [
-    {file = "clvm-0.9.11-py3-none-any.whl", hash = "sha256:d39df22eb32b2e9b7d39545787a8a68e18e944d551790d5da05211c8812c7111"},
-    {file = "clvm-0.9.11.tar.gz", hash = "sha256:60a644eea1c8d52a61654d4b063337b46983477d4243265e10287639e4625206"},
+    {file = "clvm-0.9.14-py3-none-any.whl", hash = "sha256:a95bb9fa9c331ced3fab934c5d04825afd0e1872bb0676777cb536d5c2bef970"},
+    {file = "clvm-0.9.14.tar.gz", hash = "sha256:4060beb0bd6f0f22cf75298503eb58aca45aa0d66f047531d382af5c22d59da7"},
 ]
 
 [package.dependencies]
-chia-rs = ">=0.2.13"
-importlib-metadata = ">=7.1,<8.0"
+chia_rs = ">=0.2.13"
+importlib_metadata = ">=7.1,<8.0"
 typing-extensions = ">=4.0,<5.0"
 
 [package.extras]
-dev = ["clvm-tools (>=0.4.4)", "mypy", "pytest", "setuptools", "types-setuptools"]
+dev = ["clvm_tools (>=0.4.4)", "mypy", "pytest", "setuptools", "types-setuptools"]
 
 [[package]]
 name = "clvm-rs"
@@ -1617,7 +1635,7 @@ version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
 optional = false
 python-versions = ">=3.7"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
@@ -2074,7 +2092,7 @@ version = "1.5.0"
 description = "plugin and hook calling mechanisms for python"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669"},
     {file = "pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"},
@@ -2341,7 +2359,7 @@ version = "2.19.2"
 description = "Pygments is a syntax highlighting package written in Python."
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b"},
     {file = "pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"},
@@ -2356,7 +2374,7 @@ version = "8.4.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79"},
     {file = "pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01"},
@@ -2974,7 +2992,7 @@ version = "2.2.1"
 description = "A lil' TOML parser"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 markers = "python_version == \"3.10\""
 files = [
     {file = "tomli-2.2.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:678e4fa69e4575eb77d103de3df8a895e1591b48e740211bd1067378c69e8249"},
@@ -3502,4 +3520,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "c0faf19a45dfd22c6c8e7437ace8c3bb566f908682731ca57dedc593790b03a6"
+content-hash = "daaa002f8537fd4473f35d645240aa9f4ef7fea2fa4fb5d5bb618778a551c1f9"
