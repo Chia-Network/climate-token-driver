@@ -4,10 +4,8 @@
 
 from typing import Optional
 
-from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.util.byte_types import hexstr_to_bytes
 from chia.wallet.cat_wallet.cat_info import CATInfo
@@ -16,6 +14,8 @@ from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.transaction_sorting import SortKey
 from chia.wallet.util.wallet_types import WalletType
 from chia.wallet.wallet_info import WalletInfo
+from chia.wallet.wallet_rpc_client import WalletRpcClient
+from chia_rs.sized_bytes import bytes32
 from fastapi import APIRouter, Depends
 
 from app import schemas

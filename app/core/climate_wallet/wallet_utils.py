@@ -2,22 +2,23 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+from chia.consensus.condition_tools import conditions_dict_for_solution, pkm_pairs_for_conditions_dict
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import INFINITE_COST, Program
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
 from chia.types.condition_opcodes import ConditionOpcode
-from chia.util.condition_tools import conditions_dict_for_solution, pkm_pairs_for_conditions_dict
-from chia.util.ints import uint64
 from chia.wallet.cat_wallet.cat_utils import (
     CAT_MOD,
     SpendableCAT,
     construct_cat_puzzle,
     unsigned_spend_bundle_for_spendable_cats,
 )
+from chia.wallet.conditions import CreateCoin
 from chia.wallet.lineage_proof import LineageProof
-from chia.wallet.payment import Payment
+from chia.wallet.util.tx_config import TXConfig
 from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
+from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint64
 
 from app.core.chialisp.gateway import create_gateway_announcement, create_gateway_puzzle, create_gateway_solution
 from app.core.chialisp.load_clvm import load_clvm_locally
@@ -32,6 +33,7 @@ def create_gateway_request_and_spend(
     origin_coin: Coin,
     amount: uint64,
     tail_program: Program,
+    tx_config: TXConfig,
     coins: Optional[list[Coin]] = None,
     fee: int = 0,
     memos: Optional[list[bytes]] = None,
@@ -59,12 +61,12 @@ def create_gateway_request_and_spend(
 
     memos = memos or []
     lineage_proof: LineageProof = LineageProof()
-    gateway_payment: Payment
+    gateway_payment: CreateCoin
     if from_puzzle_hash is None:
         if mode in {GatewayMode.DETOKENIZATION, GatewayMode.PERMISSIONLESS_RETIREMENT}:
             raise ValueError(f"Mode {mode!s} requires specifying `from_puzzle_hash`!")
 
-        gateway_payment = Payment(
+        gateway_payment = CreateCoin(
             puzzle_hash=gateway_cat_puzzle_hash,
             amount=amount,
             memos=memos,
@@ -76,7 +78,7 @@ def create_gateway_request_and_spend(
             inner_puzzle_hash=from_puzzle_hash,
             amount=uint64(origin_coin.amount),
         )
-        gateway_payment = Payment(
+        gateway_payment = CreateCoin(
             puzzle_hash=gateway_puzzle_hash,
             amount=amount,
             memos=memos,
@@ -115,6 +117,7 @@ def create_gateway_request_and_spend(
         conditions_program=conditions_program,
     )
     transaction_request = TransactionRequest(
+        tx_config=tx_config,
         coins=coins,
         payments=[gateway_payment],
         coin_announcements=[gateway_announcement],

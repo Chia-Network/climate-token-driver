@@ -5,8 +5,8 @@ import json
 import logging
 from typing import Optional
 
-from chia.consensus.block_record import BlockRecord
-from chia.rpc.full_node_rpc_client import FullNodeRpcClient
+from chia.consensus.block_record import BlockRecordProtocol
+from chia.full_node.full_node_rpc_client import FullNodeRpcClient
 from chia.util.byte_types import hexstr_to_bytes
 from chia_rs import G1Element
 from fastapi import APIRouter, HTTPException
@@ -183,7 +183,7 @@ async def _scan_blockchain_state(
     full_node_client: FullNodeRpcClient,
 ) -> None:
     state = await full_node_client.get_blockchain_state()
-    peak_block_record: Optional[BlockRecord] = state["peak"]
+    peak_block_record: Optional[BlockRecordProtocol] = state["peak"]
 
     if peak_block_record is None:
         logger.warning("Full node is not synced")

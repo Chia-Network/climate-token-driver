@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.bech32m import decode_puzzle_hash
+from chia_rs.sized_bytes import bytes32
 from pydantic import Field
 
 from app.config import settings

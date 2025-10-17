@@ -7,15 +7,16 @@ import pytest
 from chia._tests.util.spend_sim import SimClient, SpendSim
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend, make_spend
 from chia.types.mempool_inclusion_status import MempoolInclusionStatus
-from chia.types.spend_bundle import SpendBundle
-from chia.util.ints import uint64
 from chia.wallet.cat_wallet.cat_utils import CAT_MOD, SpendableCAT, unsigned_spend_bundle_for_spendable_cats
+from chia.wallet.conditions import CreateCoin
 from chia.wallet.lineage_proof import LineageProof
-from chia.wallet.payment import Payment
+from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
+from chia.wallet.wallet_spend_bundle import WalletSpendBundle
 from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
+from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint64
 
 from app.core.chialisp.gateway import create_gateway_puzzle
 from app.core.chialisp.tail import create_tail_program
@@ -99,6 +100,7 @@ class TestCATLifecycle:
             mode=mode,
             tail_program=tail_program,
             amount=tokenize_amount,
+            tx_config=DEFAULT_TX_CONFIG,
             public_key=mint_public_key,
             to_puzzle_hash=tokenize_to_puzzle_hash,
         )
@@ -107,7 +109,7 @@ class TestCATLifecycle:
             agg_sig_additional_data=node.defaults.AGG_SIG_ME_ADDITIONAL_DATA,
             public_key_to_secret_key=public_key_to_secret_key,
         )
-        gateway_spend_bundle = SpendBundle(
+        gateway_spend_bundle = WalletSpendBundle(
             coin_spends=[unsigned_gateway_coin_spend],
             aggregated_signature=signature,
         )
@@ -119,12 +121,12 @@ class TestCATLifecycle:
             puzzle_reveal=xch_puzzle,
             solution=transaction_request.to_program(),
         )
-        xch_spend_bundle = SpendBundle(
+        xch_spend_bundle = WalletSpendBundle(
             coin_spends=[xch_coin_spend],
             aggregated_signature=G2Element(),
         )
 
-        spend_bundle = SpendBundle.aggregate(
+        spend_bundle = WalletSpendBundle.aggregate(
             [
                 xch_spend_bundle,
                 gateway_spend_bundle,
@@ -146,9 +148,10 @@ class TestCATLifecycle:
         # cat spend
 
         transaction_request = TransactionRequest(
+            tx_config=DEFAULT_TX_CONFIG,
             payments=[
-                Payment(puzzle_hash=ACS_MOD_HASH, amount=detokenize_amount, memos=[]),
-                Payment(puzzle_hash=ACS_MOD_HASH, amount=retire_amount, memos=[]),
+                CreateCoin(puzzle_hash=ACS_MOD_HASH, amount=detokenize_amount),
+                CreateCoin(puzzle_hash=ACS_MOD_HASH, amount=retire_amount),
             ],
         )
         gateway_puzzle: Program = create_gateway_puzzle()
@@ -192,6 +195,7 @@ class TestCATLifecycle:
             mode=mode,
             tail_program=tail_program,
             amount=detokenize_amount,
+            tx_config=DEFAULT_TX_CONFIG,
             public_key=melt_public_key,
             from_puzzle_hash=ACS_MOD_HASH,
         )
@@ -200,7 +204,7 @@ class TestCATLifecycle:
             agg_sig_additional_data=node.defaults.AGG_SIG_ME_ADDITIONAL_DATA,
             public_key_to_secret_key=public_key_to_secret_key,
         )
-        gateway_spend_bundle = SpendBundle(
+        gateway_spend_bundle = WalletSpendBundle(
             coin_spends=[unsigned_gateway_coin_spend],
             aggregated_signature=signature,
         )
@@ -222,7 +226,7 @@ class TestCATLifecycle:
         )
         cat_spend_bundle = unsigned_spend_bundle_for_spendable_cats(CAT_MOD, [spendable_cat])
 
-        spend_bundle = SpendBundle.aggregate(
+        spend_bundle = WalletSpendBundle.aggregate(
             [
                 cat_spend_bundle,
                 gateway_spend_bundle,
@@ -248,6 +252,7 @@ class TestCATLifecycle:
             mode=mode,
             tail_program=tail_program,
             amount=retire_amount,
+            tx_config=DEFAULT_TX_CONFIG,
             from_puzzle_hash=ACS_MOD_HASH,
             key_value_pairs=[(b"b", ZEROS)],
         )
@@ -256,7 +261,7 @@ class TestCATLifecycle:
             agg_sig_additional_data=node.defaults.AGG_SIG_ME_ADDITIONAL_DATA,
             public_key_to_secret_key=public_key_to_secret_key,
         )
-        gateway_spend_bundle = SpendBundle(
+        gateway_spend_bundle = WalletSpendBundle(
             coin_spends=[unsigned_gateway_coin_spend],
             aggregated_signature=signature,
         )
@@ -278,7 +283,7 @@ class TestCATLifecycle:
         )
         cat_spend_bundle = unsigned_spend_bundle_for_spendable_cats(CAT_MOD, [spendable_cat])
 
-        spend_bundle = SpendBundle.aggregate(
+        spend_bundle = WalletSpendBundle.aggregate(
             [
                 cat_spend_bundle,
                 gateway_spend_bundle,

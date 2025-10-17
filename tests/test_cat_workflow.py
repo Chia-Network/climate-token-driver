@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 from chia._tests.environments.wallet import WalletStateTransition, WalletTestFramework
-from chia.rpc.wallet_request_types import GetPrivateKey
-from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.wallet.wallet import Wallet
+from chia.wallet.wallet_request_types import GetPrivateKey
+from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia_rs import PrivateKey
 
 from app.core.climate_wallet.wallet import ClimateObserverWallet, ClimateWallet
@@ -72,9 +72,12 @@ async def test_cat_tokenization_workflow(
         root_secret_key=root_secret_key,
         wallet_client=wallet_client_1,
     )
+    async with wallet_2.wallet_state_manager.new_action_scope(wallet_environments.tx_config, push=True) as action_scope:
+        wallet_2_ph = await action_scope.get_puzzle_hash(wallet_2.wallet_state_manager)
     await climate_wallet_1.send_tokenization_transaction(
-        to_puzzle_hash=await wallet_2.get_new_puzzlehash(),
+        to_puzzle_hash=wallet_2_ph,
         amount=amount,
+        tx_config=wallet_environments.tx_config,
         fee=fee,
     )
 
@@ -166,9 +169,13 @@ async def test_cat_detokenization_workflow(
         wallet_client=wallet_client_1,
     )
 
+    async with wallet_2.wallet_state_manager.new_action_scope(wallet_environments.tx_config, push=True) as action_scope:
+        wallet_2_ph = await action_scope.get_puzzle_hash(wallet_2.wallet_state_manager)
+
     await climate_wallet_1.send_tokenization_transaction(
-        to_puzzle_hash=await wallet_2.get_new_puzzlehash(),
+        to_puzzle_hash=wallet_2_ph,
         amount=amount,
+        tx_config=wallet_environments.tx_config,
         fee=fee,
     )
 
@@ -225,6 +232,7 @@ async def test_cat_detokenization_workflow(
     )
     detok_result = await climate_wallet_2.create_detokenization_request(
         amount=amount,
+        tx_config=wallet_environments.tx_config,
         fee=fee,
         wallet_id=env_2.wallet_aliases["cat"],
     )
@@ -339,9 +347,13 @@ async def test_cat_permissionless_retirement_workflow(
         root_secret_key=root_secret_key,
         wallet_client=wallet_client_1,
     )
+
+    async with wallet_2.wallet_state_manager.new_action_scope(wallet_environments.tx_config, push=True) as action_scope:
+        wallet_2_ph = await action_scope.get_puzzle_hash(wallet_2.wallet_state_manager)
     await climate_wallet_1.send_tokenization_transaction(
-        to_puzzle_hash=await wallet_2.get_new_puzzlehash(),
+        to_puzzle_hash=wallet_2_ph,
         amount=amount,
+        tx_config=wallet_environments.tx_config,
         fee=fee,
     )
 
@@ -395,6 +407,7 @@ async def test_cat_permissionless_retirement_workflow(
     test_address = b"This is a fake address"
     await climate_wallet_2.send_permissionless_retirement_transaction(
         amount=amount,
+        tx_config=wallet_environments.tx_config,
         fee=fee,
         beneficiary_name=beneficiary_name,
         beneficiary_address=test_address,

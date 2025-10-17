@@ -6,12 +6,13 @@ import json
 import logging
 from typing import Any
 
-from chia.rpc.wallet_rpc_client import WalletRpcClient
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend
-from chia.types.spend_bundle import SpendBundle
 from chia.util.byte_types import hexstr_to_bytes
+from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
+from chia.wallet.wallet_rpc_client import WalletRpcClient
+from chia.wallet.wallet_spend_bundle import WalletSpendBundle
 from chia_rs import G1Element, G2Element
+from chia_rs.sized_bytes import bytes32
 from fastapi import APIRouter, Depends
 
 from app import schemas
@@ -59,6 +60,7 @@ async def create_tokenization_tx(
     result = await wallet.send_tokenization_transaction(
         to_puzzle_hash=payment.to_puzzle_hash,
         amount=payment.amount,
+        tx_config=DEFAULT_TX_CONFIG,
         fee=payment.fee,
     )
     (transaction_record, *_) = result["transaction_records"]
@@ -204,6 +206,7 @@ async def create_detokenization_file(
 
     result = await wallet.create_detokenization_request(
         amount=payment.amount,
+        tx_config=DEFAULT_TX_CONFIG,
         fee=payment.fee,
         wallet_id=cat_wallet_info.id,
     )
@@ -233,7 +236,7 @@ async def parse_detokenization_file(
     result = await ClimateWallet.parse_detokenization_request(content=content)
     mode: GatewayMode = result["mode"]
     gateway_coin_spend: CoinSpend = result["gateway_coin_spend"]
-    spend_bundle: SpendBundle = result["spend_bundle"]
+    spend_bundle: WalletSpendBundle = result["spend_bundle"]
 
     token = schemas.TokenOnChainSimple(
         asset_id=result["asset_id"],
@@ -320,6 +323,7 @@ async def create_permissionless_retirement_tx(
 
     result = await wallet.send_permissionless_retirement_transaction(
         amount=payment.amount,
+        tx_config=DEFAULT_TX_CONFIG,
         fee=payment.fee,
         beneficiary_name=payment.beneficiary_name.encode(),
         beneficiary_address=payment.beneficiary_address.encode(),
