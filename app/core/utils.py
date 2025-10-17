@@ -5,20 +5,19 @@ from typing import Any, Optional
 
 from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
-from chia.rpc.wallet_request_types import GetPrivateKey
-from chia.rpc.wallet_rpc_client import WalletRpcClient
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.config import load_config
 from chia.util.default_root import DEFAULT_ROOT_PATH
-from chia.util.ints import uint32, uint64
 from chia.wallet.cat_wallet.cat_info import CATInfo
 from chia.wallet.derive_keys import master_sk_to_wallet_sk_unhardened
 from chia.wallet.puzzles.p2_delegated_puzzle_or_hidden_puzzle import puzzle_for_pk
 from chia.wallet.transaction_record import TransactionRecord
-from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
 from chia.wallet.util.wallet_types import WalletType
 from chia.wallet.wallet_info import WalletInfo
+from chia.wallet.wallet_request_types import GetPrivateKey
+from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia_rs import G1Element, PrivateKey
+from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint32, uint64
 
 from app.core.derive_keys import master_sk_to_root_sk
 from app.core.types import TransactionRequest
@@ -120,7 +119,7 @@ async def get_created_signed_transactions(
         additions=transaction_request.additions,
         fee=uint64(transaction_request.fee),
         wallet_id=wallet_id,
-        tx_config=DEFAULT_TX_CONFIG,
+        tx_config=transaction_request.tx_config,
         extra_conditions=(*transaction_request.coin_announcements, *transaction_request.puzzle_announcements),
     )
 

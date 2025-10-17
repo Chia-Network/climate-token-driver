@@ -7,32 +7,31 @@ from collections.abc import Iterator
 from typing import Any, Optional, Union
 
 from chia.consensus.constants import ConsensusConstants
-from chia.rpc.full_node_rpc_client import FullNodeRpcClient
-from chia.rpc.wallet_request_types import PushTransactions
-from chia.rpc.wallet_rpc_client import WalletRpcClient
+from chia.full_node.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_record import CoinRecord
 from chia.types.coin_spend import CoinSpend, make_spend
-from chia.types.spend_bundle import SpendBundle, estimate_fees
 from chia.util.bech32m import bech32_decode, bech32_encode, convertbits
-from chia.util.ints import uint32, uint64
 from chia.wallet.cat_wallet.cat_utils import (
     CAT_MOD,
     construct_cat_puzzle,
     get_innerpuzzle_from_puzzle,
     match_cat_puzzle,
 )
-from chia.wallet.conditions import ConditionValidTimes
-from chia.wallet.payment import Payment
+from chia.wallet.conditions import ConditionValidTimes, CreateCoin
+from chia.wallet.estimate_fees import estimate_fees
 from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.uncurried_puzzle import uncurry_puzzle
 from chia.wallet.util.compute_memos import compute_memos
-from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG
+from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG, TXConfig
 from chia.wallet.util.wallet_types import WalletType
+from chia.wallet.wallet_request_types import PushTransactions
+from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia.wallet.wallet_spend_bundle import WalletSpendBundle
 from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
+from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint32, uint64
 
 from app.core.chialisp.gateway import create_gateway_puzzle, parse_gateway_spend
 from app.core.chialisp.tail import create_delegated_puzzle, create_tail_program
@@ -188,6 +187,7 @@ class ClimateWallet(ClimateWalletBase):
         coins: list[Coin],
         origin_coin: Coin,
         amount: int,
+        tx_config: TXConfig,
         fee: int = 0,
         from_puzzle_hash: Optional[bytes32] = None,
         to_puzzle_hash: Optional[bytes32] = None,
@@ -208,6 +208,7 @@ class ClimateWallet(ClimateWalletBase):
             mode=mode,
             coins=coins,
             amount=uint64(amount),
+            tx_config=tx_config,
             fee=fee,
             memos=memos,
             origin_coin=origin_coin,
@@ -224,7 +225,7 @@ class ClimateWallet(ClimateWalletBase):
             public_key_message_to_signature=self.delegated_signatures,
             allow_missing=allow_missing_signature,
         )
-        gateway_spend_bundle = SpendBundle(
+        gateway_spend_bundle = WalletSpendBundle(
             coin_spends=[unsigned_gateway_coin_spend],
             aggregated_signature=signature,
         )
@@ -261,13 +262,16 @@ class ClimateWallet(ClimateWalletBase):
         return {
             "transaction_id": new_txs[0].name,
             "transaction_records": new_txs,
-            "spend_bundle": SpendBundle.aggregate([tx.spend_bundle for tx in new_txs if tx.spend_bundle is not None]),
+            "spend_bundle": WalletSpendBundle.aggregate(
+                [tx.spend_bundle for tx in new_txs if tx.spend_bundle is not None]
+            ),
         }
 
     async def _create_client_transaction(
         self,
         mode: GatewayMode,
         amount: int,
+        tx_config: TXConfig,
         fee: int = 0,
         gateway_public_key: Optional[G1Element] = None,
         gateway_key_values: Optional[dict[str, Any]] = None,
@@ -279,7 +283,7 @@ class ClimateWallet(ClimateWalletBase):
         coins: list[Coin] = await self.wallet_client.select_coins(
             amount=amount,
             wallet_id=wallet_id,
-            coin_selection_config=DEFAULT_TX_CONFIG.coin_selection_config,
+            coin_selection_config=tx_config.coin_selection_config,
         )
         if not len(coins):
             raise ValueError("Insufficient balance!")
@@ -300,12 +304,12 @@ class ClimateWallet(ClimateWalletBase):
         # this is a hack to get inner puzzle hash for `origin_coin`
 
         transaction_request = TransactionRequest(
+            tx_config=tx_config,
             coins=[origin_coin],
             payments=[
-                Payment(
+                CreateCoin(
                     puzzle_hash=bytes32(b"0" * 32),
                     amount=uint64(origin_coin.amount),
-                    memos=[],
                 )
             ],
             fee=uint64(0),
@@ -322,7 +326,7 @@ class ClimateWallet(ClimateWalletBase):
         if transaction_record.spend_bundle is None:
             raise ValueError("No spend bundle created!")
         coin_spend: CoinSpend = transaction_record.spend_bundle.coin_spends[0]
-        puzzle: Program = coin_spend.puzzle_reveal.to_program()
+        puzzle = Program.from_serialized(coin_spend.puzzle_reveal)
         inner_puzzle: Program = get_innerpuzzle_from_puzzle(puzzle)
         from_puzzle_hash: bytes32 = inner_puzzle.get_tree_hash()
 
@@ -337,6 +341,7 @@ class ClimateWallet(ClimateWalletBase):
             coins=coins,
             origin_coin=origin_coin,
             amount=amount,
+            tx_config=tx_config,
             fee=fee,
             from_puzzle_hash=from_puzzle_hash,
             key_value_pairs=key_value_pairs,
@@ -349,6 +354,7 @@ class ClimateWallet(ClimateWalletBase):
         self,
         to_puzzle_hash: bytes32,
         amount: int,
+        tx_config: TXConfig,
         fee: int = 0,
         wallet_id: int = 1,
     ) -> dict[str, Any]:
@@ -368,7 +374,7 @@ class ClimateWallet(ClimateWalletBase):
         coins: list[Coin] = await self.wallet_client.select_coins(
             amount=amount + fee,
             wallet_id=wallet_id,
-            coin_selection_config=DEFAULT_TX_CONFIG.coin_selection_config,
+            coin_selection_config=tx_config.coin_selection_config,
         )
         if not len(coins):
             raise ValueError("Insufficient balance!")
@@ -385,6 +391,7 @@ class ClimateWallet(ClimateWalletBase):
             coins=coins,
             origin_coin=origin_coin,
             amount=amount,
+            tx_config=tx_config,
             fee=fee,
             to_puzzle_hash=to_puzzle_hash,
             gateway_public_key=gateway_public_key,
@@ -394,7 +401,7 @@ class ClimateWallet(ClimateWalletBase):
         transaction_records: list[TransactionRecord] = result["transaction_records"]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), tx_config
         )
 
         return result
@@ -402,6 +409,7 @@ class ClimateWallet(ClimateWalletBase):
     async def create_detokenization_request(
         self,
         amount: int,
+        tx_config: TXConfig,
         fee: int = 0,
         wallet_id: int = 1,
     ) -> dict[str, Any]:
@@ -411,6 +419,7 @@ class ClimateWallet(ClimateWalletBase):
         gateway_public_key: G1Element = self.mode_to_public_key[mode]
 
         result = await self._create_client_transaction(
+            tx_config=tx_config,
             mode=mode,
             amount=amount,
             fee=fee,
@@ -418,7 +427,7 @@ class ClimateWallet(ClimateWalletBase):
             wallet_id=wallet_id,
         )
         transaction_records: list[TransactionRecord] = result["transaction_records"]
-        spend_bundle: SpendBundle = result["spend_bundle"]
+        spend_bundle: WalletSpendBundle = result["spend_bundle"]
         content: str = bech32_encode("detok", convertbits(bytes(spend_bundle), 8, 5))
 
         transaction_records = [
@@ -426,7 +435,7 @@ class ClimateWallet(ClimateWalletBase):
         ]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), tx_config
         )
 
         result.update(
@@ -448,7 +457,7 @@ class ClimateWallet(ClimateWalletBase):
             raise ValueError("Invalid detokenization file!")
 
         data_bytes = bytes(convertbits(data, 5, 8, False))
-        spend_bundle = SpendBundle.from_bytes(data_bytes)
+        spend_bundle = WalletSpendBundle.from_bytes(data_bytes)
 
         result: dict[str, Any] = {
             "spend_bundle": spend_bundle,
@@ -460,8 +469,8 @@ class ClimateWallet(ClimateWalletBase):
         gateway_coin_spend: Optional[CoinSpend] = None
         mode: Optional[GatewayMode] = None
         for coin_spend in spend_bundle.coin_spends:
-            puzzle: Program = coin_spend.puzzle_reveal.to_program()
-            solution: Program = coin_spend.solution.to_program()
+            puzzle = Program.from_serialized(coin_spend.puzzle_reveal)
+            solution = Program.from_serialized(coin_spend.solution)
             coin: Coin = coin_spend.coin
 
             puzzle_args: Optional[Iterator[Program]] = match_cat_puzzle(uncurry_puzzle(puzzle))
@@ -498,7 +507,7 @@ class ClimateWallet(ClimateWalletBase):
         for coin_spend in spend_bundle.coin_spends:
             coin = coin_spend.coin
             if coin.name() == origin_coin_id:
-                puzzle = coin_spend.puzzle_reveal.to_program()
+                puzzle = Program.from_serialized(coin_spend.puzzle_reveal)
                 puzzle_args = match_cat_puzzle(uncurry_puzzle(puzzle))
                 if puzzle_args is None:
                     raise ValueError("Did not match CAT - invalid detokenization request")
@@ -542,7 +551,7 @@ class ClimateWallet(ClimateWalletBase):
             raise ValueError("Invalid detokenization file!")
 
         data_bytes = bytes(convertbits(data, 5, 8, False))
-        unsigned_spend_bundle = SpendBundle.from_bytes(data_bytes)
+        unsigned_spend_bundle = WalletSpendBundle.from_bytes(data_bytes)
 
         gateway_coin_spend: Optional[CoinSpend] = None
         signatures: list[G2Element] = []
@@ -608,6 +617,7 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         beneficiary_name: bytes,
         beneficiary_address: bytes,
+        tx_config: TXConfig,
         fee: int = 0,
         beneficiary_puzzle_hash: Optional[bytes32] = None,
         wallet_id: int = 1,
@@ -622,6 +632,7 @@ class ClimateWallet(ClimateWalletBase):
         result = await self._create_client_transaction(
             mode=mode,
             amount=amount,
+            tx_config=tx_config,
             fee=fee,
             wallet_id=wallet_id,
             gateway_key_values={
@@ -633,7 +644,7 @@ class ClimateWallet(ClimateWalletBase):
         transaction_records: list[TransactionRecord] = result["transaction_records"]
 
         await self.wallet_client.push_transactions(
-            PushTransactions(transactions=transaction_records, sign=False), DEFAULT_TX_CONFIG
+            PushTransactions(transactions=transaction_records, sign=False), tx_config
         )
 
         return result
@@ -686,7 +697,7 @@ class ClimateObserverWallet(ClimateWalletBase):
             if mode not in modes:
                 continue
 
-            tail_solution: Program = tail_spend.solution.to_program()
+            tail_solution = Program.from_serialized(tail_spend.solution)
             delegated_solution: Program = tail_solution.at("r")
             key_value_pairs: Program = delegated_solution.at("f")
 

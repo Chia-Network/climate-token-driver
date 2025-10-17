@@ -4,14 +4,14 @@
 
 from typing import Optional
 
-from chia.consensus.coinbase import create_puzzlehash_for_pk
-from chia.rpc.wallet_request_types import GetPrivateKey
-from chia.rpc.wallet_rpc_client import WalletRpcClient
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.util.bech32m import decode_puzzle_hash, encode_puzzle_hash
-from chia.util.ints import uint32
 from chia.wallet.derive_keys import master_sk_to_wallet_sk, master_sk_to_wallet_sk_unhardened
+from chia.wallet.puzzles.p2_delegated_puzzle_or_hidden_puzzle import puzzle_hash_for_pk
+from chia.wallet.wallet_request_types import GetPrivateKey
+from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia_rs import G1Element, PrivateKey
+from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint32
 from fastapi import APIRouter, Depends
 
 from app import schemas
@@ -47,7 +47,7 @@ async def get_key(
         wallet_secret_key = master_sk_to_wallet_sk_unhardened(secret_key, uint32(derivation_index))
 
     wallet_public_key: G1Element = wallet_secret_key.get_g1()
-    puzzle_hash: bytes32 = create_puzzlehash_for_pk(wallet_public_key)
+    puzzle_hash: bytes32 = puzzle_hash_for_pk(wallet_public_key)
     wallet_address: str = encode_puzzle_hash(puzzle_hash, prefix)
 
     return schemas.Key(

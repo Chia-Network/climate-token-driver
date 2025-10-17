@@ -6,12 +6,12 @@ from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from pathlib import Path
 
-from chia.rpc.full_node_rpc_client import FullNodeRpcClient
+from chia.full_node.full_node_rpc_client import FullNodeRpcClient
 from chia.rpc.rpc_client import RpcClient
-from chia.rpc.wallet_rpc_client import WalletRpcClient
 from chia.util.config import load_config
 from chia.util.default_root import DEFAULT_ROOT_PATH
-from chia.util.ints import uint16
+from chia.wallet.wallet_rpc_client import WalletRpcClient
+from chia_rs.sized_ints import uint16
 from sqlalchemy.orm import Session
 
 from app.config import settings

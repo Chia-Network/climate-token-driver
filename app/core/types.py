@@ -6,10 +6,10 @@ from typing import Any, Optional
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
-from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.util.ints import uint64
-from chia.wallet.conditions import CreateCoinAnnouncement, CreatePuzzleAnnouncement, ReserveFee
-from chia.wallet.payment import Payment
+from chia.wallet.conditions import CreateCoin, CreateCoinAnnouncement, CreatePuzzleAnnouncement, ReserveFee
+from chia.wallet.util.tx_config import TXConfig
+from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint64
 
 CLIMATE_WALLET_INDEX = 2
 
@@ -48,8 +48,9 @@ class ClimateTokenIndex:
 
 @dataclasses.dataclass(frozen=True)
 class TransactionRequest:
+    tx_config: TXConfig
     coins: Optional[list[Coin]] = dataclasses.field(default=None)
-    payments: list[Payment] = dataclasses.field(default_factory=list)
+    payments: list[CreateCoin] = dataclasses.field(default_factory=list)
     coin_announcements: list[CreateCoinAnnouncement] = dataclasses.field(default_factory=list)
     puzzle_announcements: list[CreatePuzzleAnnouncement] = dataclasses.field(default_factory=list)
     fee: uint64 = dataclasses.field(default=uint64(0))
@@ -57,7 +58,7 @@ class TransactionRequest:
     def to_program(self) -> Program:
         conditions = []
         for payment in self.payments:
-            conditions.append(payment.as_condition())
+            conditions.append(payment.to_program())
 
         for coin_announcement in self.coin_announcements:
             conditions.append(coin_announcement.to_program())
@@ -75,7 +76,7 @@ class TransactionRequest:
     def additions(self) -> list[dict[str, Any]]:
         additions = []
         for payment in self.payments:
-            memos = [bytes.decode(memo) for memo in payment.memos]
+            memos = [bytes.decode(memo) for memo in (payment.memos if payment.memos is not None else [])]
 
             additions.append(
                 {

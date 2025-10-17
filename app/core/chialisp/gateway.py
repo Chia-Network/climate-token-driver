@@ -4,10 +4,10 @@ from typing import Optional
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
-from chia.types.blockchain_format.sized_bytes import bytes32
 from chia.types.coin_spend import CoinSpend, make_spend
 from chia.types.condition_opcodes import ConditionOpcode
 from chia.wallet.conditions import CreateCoinAnnouncement
+from chia_rs.sized_bytes import bytes32
 
 from app.core.chialisp.load_clvm import load_clvm_locally
 from app.core.chialisp.tail import (
@@ -46,8 +46,8 @@ def parse_gateway_spend(
     coin_spend: CoinSpend,
     is_cat: bool = True,
 ) -> tuple[GatewayMode, CoinSpend]:
-    puzzle: Program = coin_spend.puzzle_reveal.to_program()
-    solution: Program = coin_spend.solution.to_program()
+    puzzle = Program.from_serialized(coin_spend.puzzle_reveal)
+    solution = Program.from_serialized(coin_spend.solution)
     coin: Coin = coin_spend.coin
 
     if is_cat:
