@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class State(BaseModel):
-    id: Optional[int] = None
-    current_height: Optional[int] = None
-    block_height: Optional[int] = None
+    id: int | None = None
+    current_height: int | None = None
+    block_height: int | None = None

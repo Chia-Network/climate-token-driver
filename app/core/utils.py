@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
@@ -54,9 +54,9 @@ async def get_climate_secret_key(
 
 
 async def get_cat_wallet_info_by_asset_id(
-    asset_id: Optional[bytes32],
+    asset_id: bytes32 | None,
     wallet_client: WalletRpcClient,
-) -> Optional[WalletInfo]:
+) -> WalletInfo | None:
     wallet_objs: list[dict[str, Any]] = await wallet_client.get_wallets()
     wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
@@ -77,7 +77,7 @@ async def get_cat_wallet_info_by_asset_id(
 async def get_wallet_info_by_id(
     wallet_id: int,
     wallet_client: WalletRpcClient,
-) -> Optional[WalletInfo]:
+) -> WalletInfo | None:
     wallet_objs: list[dict[str, Any]] = await wallet_client.get_wallets()
     wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 

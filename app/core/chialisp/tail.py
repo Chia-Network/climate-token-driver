@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from chia.types.blockchain_format.program import Program
 from chia_rs import G1Element
 from chia_rs.sized_bytes import bytes32
@@ -45,7 +43,7 @@ def create_melt_all_by_anyone_program(
 def create_delegated_puzzle(
     mode: GatewayMode,
     gateway_puzzle_hash: bytes32,
-    public_key: Optional[G1Element] = None,
+    public_key: G1Element | None = None,
 ) -> Program:
     if mode == GatewayMode.TOKENIZATION:
         if public_key is None:

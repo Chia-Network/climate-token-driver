@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from app.schemas.core import BaseModel
 from app.schemas.types import ChiaJsonObject
 
@@ -17,5 +15,5 @@ class Transactions(BaseModel):
     end: int
     sort_key: str
     reverse: bool
-    to_address: Optional[str]
+    to_address: str | None
     transactions: list[ChiaJsonObject]

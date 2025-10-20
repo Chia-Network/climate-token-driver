@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-from typing import Any, Optional
+from typing import Any
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
@@ -49,7 +49,7 @@ class ClimateTokenIndex:
 @dataclasses.dataclass(frozen=True)
 class TransactionRequest:
     tx_config: TXConfig
-    coins: Optional[list[Coin]] = dataclasses.field(default=None)
+    coins: list[Coin] | None = dataclasses.field(default=None)
     payments: list[CreateCoin] = dataclasses.field(default_factory=list)
     coin_announcements: list[CreateCoinAnnouncement] = dataclasses.field(default_factory=list)
     puzzle_announcements: list[CreatePuzzleAnnouncement] = dataclasses.field(default_factory=list)
