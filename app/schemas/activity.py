@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any, Optional, Union
+from typing import Any
 
 from pydantic import Field, validator
 
@@ -17,9 +17,9 @@ class ActivitySearchBy(enum.Enum):
 
 class ActivityBase(BaseModel):
     metadata: dict[str, str]
-    beneficiary_name: Optional[str]
-    beneficiary_address: Optional[str]
-    beneficiary_puzzle_hash: Optional[str]
+    beneficiary_name: str | None
+    beneficiary_address: str | None
+    beneficiary_puzzle_hash: str | None
 
     coin_id: bytes
     height: int
@@ -28,7 +28,7 @@ class ActivityBase(BaseModel):
     timestamp: int
 
     @validator("mode")
-    def mode_from_str(cls, v: Union[str, GatewayMode]) -> GatewayMode:
+    def mode_from_str(cls, v: str | GatewayMode) -> GatewayMode:
         if isinstance(v, GatewayMode):
             return v
         for mode in GatewayMode:
@@ -61,4 +61,4 @@ class ActivitiesResponse(BaseModel):
 
 
 class ActivityRecordResponse(BaseModel):
-    activity: Optional[ActivityWithCW] = Field(default=None)
+    activity: ActivityWithCW | None = Field(default=None)

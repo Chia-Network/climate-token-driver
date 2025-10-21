@@ -5,7 +5,7 @@ import logging
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 from pydantic import BaseSettings, root_validator, validator
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     MODE: ExecutionMode
     CHIA_ROOT: Path = Path("~/.chia/mainnet")
     CONFIG_PATH: Path = Path("climate_token/config/config.yaml")
-    SERVER_PORT: Optional[int] = 31999
+    SERVER_PORT: int | None = 31999
 
     # Visible configs: configurable through config.yaml
     LOG_PATH: Path = Path("climate_token/log/debug.log")
@@ -52,19 +52,19 @@ class Settings(BaseSettings):
     # fee is in mojos
     DEFAULT_FEE: int = 1_000_000_000
     CADT_API_SERVER_HOST: str = "https://observer.climateactiondata.org/api"
-    CADT_API_KEY: Optional[str] = None
+    CADT_API_KEY: str | None = None
     CHIA_HOSTNAME: str = "localhost"
-    CHIA_WALLET_HOSTNAME: Optional[str] = None
-    CHIA_FULL_NODE_HOSTNAME: Optional[str] = None
+    CHIA_WALLET_HOSTNAME: str | None = None
+    CHIA_FULL_NODE_HOSTNAME: str | None = None
     CHIA_FULL_NODE_RPC_PORT: int = 8555
     CHIA_WALLET_RPC_PORT: int = 9256
-    CLIMATE_EXPLORER_PORT: Optional[int] = None
-    CLIMATE_TOKEN_CLIENT_PORT: Optional[int] = None
-    CLIMATE_TOKEN_REGISTRY_PORT: Optional[int] = None
-    DEV_PORT: Optional[int] = None
-    SCAN_ALL_ORGANIZATIONS: Optional[bool] = False
+    CLIMATE_EXPLORER_PORT: int | None = None
+    CLIMATE_TOKEN_CLIENT_PORT: int | None = None
+    CLIMATE_TOKEN_REGISTRY_PORT: int | None = None
+    DEV_PORT: int | None = None
+    SCAN_ALL_ORGANIZATIONS: bool | None = False
 
-    _instance: Optional[Settings] = None
+    _instance: Settings | None = None
 
     @classmethod
     def get_instance(cls) -> Settings:

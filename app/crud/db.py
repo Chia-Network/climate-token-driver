@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import Any, AnyStr, Optional
+from typing import Any, AnyStr
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, desc, insert, or_, update
@@ -65,7 +65,7 @@ class DBCrudBase:
             raise errorcode.internal_server_error(message="Select DB Failure")
 
     def select_activity_with_pagination(
-        self, model: Any, filters: Any, order_by: Any, limit: Optional[int] = None, page: Optional[int] = None
+        self, model: Any, filters: Any, order_by: Any, limit: int | None = None, page: int | None = None
     ) -> tuple[Any, int]:
         try:
             query = self.db.query(model).filter(or_(*filters["or"]), and_(*filters["and"]))
@@ -107,8 +107,8 @@ class DBCrud(DBCrudBase):
 
     def update_block_state(
         self,
-        peak_height: Optional[int] = None,
-        current_height: Optional[int] = None,
+        peak_height: int | None = None,
+        current_height: int | None = None,
     ) -> bool:
         state = models.State()
         if peak_height is not None:

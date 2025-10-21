@@ -2,7 +2,6 @@
 # ignore the required import["from __future__ import annotations"]
 # This import breaks everything - seems something to do with pydantic
 
-from typing import Optional
 
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
@@ -63,7 +62,7 @@ async def get_transactions(
     end: int = 50,
     sort_key: str = "CONFIRMED_AT_HEIGHT",
     reverse: bool = False,
-    to_address: Optional[str] = None,
+    to_address: str | None = None,
     wallet_rpc_client: WalletRpcClient = Depends(deps.get_wallet_rpc_client),
 ) -> schemas.Transactions:
     """Get transactions.
@@ -85,8 +84,8 @@ async def get_transactions(
     )
     wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
 
-    wallet_info: Optional[WalletInfo]
-    cat_info: Optional[CATInfo] = None
+    wallet_info: WalletInfo | None
+    cat_info: CATInfo | None = None
     for wallet_info in wallet_infos:
         if wallet_id == wallet_info.id:
             cat_info = CATInfo.from_bytes(hexstr_to_bytes(wallet_info.data))

@@ -4,7 +4,7 @@ import dataclasses
 import logging
 import time
 from collections.abc import Iterator
-from typing import Any, Optional, Union
+from typing import Any
 
 from chia.consensus.constants import ConsensusConstants
 from chia.full_node.full_node_rpc_client import FullNodeRpcClient
@@ -66,8 +66,8 @@ class ClimateWalletBase:
 
 @dataclasses.dataclass
 class ClimateWallet(ClimateWalletBase):
-    mode_to_public_key: Optional[dict[GatewayMode, G1Element]] = dataclasses.field(default=None, kw_only=True)
-    mode_to_secret_key: Optional[dict[GatewayMode, PrivateKey]] = dataclasses.field(default=None, kw_only=True)
+    mode_to_public_key: dict[GatewayMode, G1Element] | None = dataclasses.field(default=None, kw_only=True)
+    mode_to_secret_key: dict[GatewayMode, PrivateKey] | None = dataclasses.field(default=None, kw_only=True)
     mode_to_message_and_signature: dict[GatewayMode, tuple[bytes, G2Element]]
 
     wallet_client: WalletRpcClient
@@ -189,11 +189,11 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         tx_config: TXConfig,
         fee: int = 0,
-        from_puzzle_hash: Optional[bytes32] = None,
-        to_puzzle_hash: Optional[bytes32] = None,
-        key_value_pairs: Optional[list[tuple[Any, Any]]] = None,
-        gateway_public_key: Optional[G1Element] = None,
-        public_key_to_secret_key: Optional[dict[G1Element, PrivateKey]] = None,
+        from_puzzle_hash: bytes32 | None = None,
+        to_puzzle_hash: bytes32 | None = None,
+        key_value_pairs: list[tuple[Any, Any]] | None = None,
+        gateway_public_key: G1Element | None = None,
+        public_key_to_secret_key: dict[G1Element, PrivateKey] | None = None,
         allow_missing_signature: bool = False,
         wallet_id: int = 1,
     ) -> dict[str, Any]:
@@ -273,8 +273,8 @@ class ClimateWallet(ClimateWalletBase):
         amount: int,
         tx_config: TXConfig,
         fee: int = 0,
-        gateway_public_key: Optional[G1Element] = None,
-        gateway_key_values: Optional[dict[str, Any]] = None,
+        gateway_public_key: G1Element | None = None,
+        gateway_key_values: dict[str, Any] | None = None,
         wallet_id: int = 1,
     ) -> dict[str, Any]:
         self.check_user(is_registry=False)
@@ -332,7 +332,7 @@ class ClimateWallet(ClimateWalletBase):
 
         # we construct the actual transaction here
 
-        key_value_pairs: Optional[list[tuple[str, Union[str, int]]]] = None
+        key_value_pairs: list[tuple[str, str | int]] | None = None
         if gateway_key_values:
             key_value_pairs = [(key, value) for (key, value) in gateway_key_values.items()]
 
@@ -466,14 +466,14 @@ class ClimateWallet(ClimateWalletBase):
         gateway_puzzle: Program = create_gateway_puzzle()
 
         coin_spend: CoinSpend
-        gateway_coin_spend: Optional[CoinSpend] = None
-        mode: Optional[GatewayMode] = None
+        gateway_coin_spend: CoinSpend | None = None
+        mode: GatewayMode | None = None
         for coin_spend in spend_bundle.coin_spends:
             puzzle = Program.from_serialized(coin_spend.puzzle_reveal)
             solution = Program.from_serialized(coin_spend.solution)
             coin: Coin = coin_spend.coin
 
-            puzzle_args: Optional[Iterator[Program]] = match_cat_puzzle(uncurry_puzzle(puzzle))
+            puzzle_args: Iterator[Program] | None = match_cat_puzzle(uncurry_puzzle(puzzle))
 
             # gateway spend is a CAT
             if puzzle_args is None:
@@ -503,7 +503,7 @@ class ClimateWallet(ClimateWalletBase):
 
         origin_coin_id: bytes32 = gateway_coin_spend.coin.parent_coin_info
 
-        inner_puzzle_hash: Optional[bytes32] = None
+        inner_puzzle_hash: bytes32 | None = None
         for coin_spend in spend_bundle.coin_spends:
             coin = coin_spend.coin
             if coin.name() == origin_coin_id:
@@ -553,7 +553,7 @@ class ClimateWallet(ClimateWalletBase):
         data_bytes = bytes(convertbits(data, 5, 8, False))
         unsigned_spend_bundle = WalletSpendBundle.from_bytes(data_bytes)
 
-        gateway_coin_spend: Optional[CoinSpend] = None
+        gateway_coin_spend: CoinSpend | None = None
         signatures: list[G2Element] = []
         for coin_spend in unsigned_spend_bundle.coin_spends:
             signature = create_gateway_signature(
@@ -619,7 +619,7 @@ class ClimateWallet(ClimateWalletBase):
         beneficiary_address: bytes,
         tx_config: TXConfig,
         fee: int = 0,
-        beneficiary_puzzle_hash: Optional[bytes32] = None,
+        beneficiary_puzzle_hash: bytes32 | None = None,
         wallet_id: int = 1,
     ) -> dict[str, Any]:
         mode = GatewayMode.PERMISSIONLESS_RETIREMENT
@@ -656,9 +656,9 @@ class ClimateObserverWallet(ClimateWalletBase):
 
     async def get_activities(
         self,
-        mode: Optional[GatewayMode] = None,
-        start_height: Optional[int] = None,
-        end_height: Optional[int] = None,
+        mode: GatewayMode | None = None,
+        start_height: int | None = None,
+        end_height: int | None = None,
     ) -> list[dict[str, Any]]:
         modes: list[GatewayMode]
         if mode is None:

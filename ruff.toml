@@ -67,10 +67,6 @@ ignore = [
     "RUF009", # function-call-in-dataclass-default-argument
     # Should probably fix this
     "RUF029",
-    # Changes Optional to |
-    "UP045",
-    # Changes Union to |
-    "UP007"
 ]
 
 

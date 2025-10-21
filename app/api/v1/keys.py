@@ -2,7 +2,6 @@
 # ignore the required import["from __future__ import annotations"]
 # This import breaks everything - seems something to do with pydantic
 
-from typing import Optional
 
 from chia.util.bech32m import decode_puzzle_hash, encode_puzzle_hash
 from chia.wallet.derive_keys import master_sk_to_wallet_sk, master_sk_to_wallet_sk_unhardened
@@ -58,11 +57,11 @@ async def get_key(
 
 @router.get(
     "/parse",
-    response_model=Optional[schemas.Key],
+    response_model=schemas.Key | None,
 )
 async def parse_key(
     address: str,
-) -> Optional[schemas.Key]:
+) -> schemas.Key | None:
     try:
         puzzle_hash: bytes = decode_puzzle_hash(address)
     except ValueError:

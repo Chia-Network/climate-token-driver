@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from chia.util.bech32m import decode_puzzle_hash
 from chia_rs.sized_bytes import bytes32
 from pydantic import Field
@@ -16,7 +14,7 @@ class PaymentBase(BaseModel):
 
 
 class PaymentWithPayee(PaymentBase):
-    to_address: Optional[str] = Field(
+    to_address: str | None = Field(
         default=None,
         example="txch1clzn09v7lapulm7j8mwx9jaqh35uh7jzjeukpv7pj50tv80zze4s5060sx",
     )
@@ -37,7 +35,7 @@ class RetirementPaymentWithPayer(PaymentBase):
     beneficiary_address: str
 
     @property
-    def beneficiary_puzzle_hash(self) -> Optional[bytes32]:
+    def beneficiary_puzzle_hash(self) -> bytes32 | None:
         try:
             return decode_puzzle_hash(self.beneficiary_address)
         except ValueError:

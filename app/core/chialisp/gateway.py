@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
 from chia.types.coin_spend import CoinSpend, make_spend
@@ -58,7 +56,7 @@ def parse_gateway_spend(
 
     conditions: Program = puzzle.run(solution)
 
-    tail_program: Optional[Program] = None
+    tail_program: Program | None = None
     for condition in conditions.as_iter():
         opcode: bytes = condition.at("f").as_atom()
         if opcode != ConditionOpcode.CREATE_COIN:
@@ -83,7 +81,7 @@ def parse_gateway_spend(
     delegated_puzzle: Program = tail_solution.at("f")
     (delegated_puzzle_mod, _) = delegated_puzzle.uncurry()
 
-    mode: Optional[GatewayMode] = None
+    mode: GatewayMode | None = None
     if delegated_puzzle_mod == MINT_WITH_SIGNATURE_MOD:
         mode = GatewayMode.TOKENIZATION
     elif delegated_puzzle_mod == MELT_ALL_BY_ANYONE_MOD:

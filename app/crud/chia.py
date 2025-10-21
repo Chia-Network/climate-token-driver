@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlencode, urlparse
 
 import requests
@@ -26,7 +26,7 @@ logger = logging.getLogger("ClimateToken")
 @dataclasses.dataclass
 class ClimateWareHouseCrud:
     url: str
-    api_key: Optional[str]
+    api_key: str | None
 
     def _headers(self) -> dict[str, str]:
         headers = {}
@@ -237,7 +237,7 @@ class BlockChainCrud:
         start_height: int,
         end_height: int,
         peak_height: int,
-        mode: Optional[GatewayMode] = None,
+        mode: GatewayMode | None = None,
     ) -> list[schemas.Activity]:
         token_index = ClimateTokenIndex(
             org_uid=org_uid,

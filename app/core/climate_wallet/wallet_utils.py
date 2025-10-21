@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from chia.consensus.condition_tools import conditions_dict_for_solution, pkm_pairs_for_conditions_dict
 from chia.types.blockchain_format.coin import Coin
@@ -34,13 +34,13 @@ def create_gateway_request_and_spend(
     amount: uint64,
     tail_program: Program,
     tx_config: TXConfig,
-    coins: Optional[list[Coin]] = None,
+    coins: list[Coin] | None = None,
     fee: int = 0,
-    memos: Optional[list[bytes]] = None,
-    public_key: Optional[G1Element] = None,
-    from_puzzle_hash: Optional[bytes32] = None,
-    to_puzzle_hash: Optional[bytes32] = None,
-    key_value_pairs: Optional[list[tuple[Any, Any]]] = None,
+    memos: list[bytes] | None = None,
+    public_key: G1Element | None = None,
+    from_puzzle_hash: bytes32 | None = None,
+    to_puzzle_hash: bytes32 | None = None,
+    key_value_pairs: list[tuple[Any, Any]] | None = None,
 ) -> tuple[TransactionRequest, CoinSpend]:
     tail_program_hash: bytes32 = tail_program.get_tree_hash()
 
@@ -144,8 +144,8 @@ def create_gateway_request_and_spend(
 def create_gateway_signature(
     coin_spend: CoinSpend,
     agg_sig_additional_data: bytes,
-    public_key_to_secret_key: Optional[dict[G1Element, PrivateKey]] = None,
-    public_key_message_to_signature: Optional[dict[tuple[G1Element, bytes], G2Element]] = None,
+    public_key_to_secret_key: dict[G1Element, PrivateKey] | None = None,
+    public_key_message_to_signature: dict[tuple[G1Element, bytes], G2Element] | None = None,
     allow_missing: bool = False,
 ) -> G2Element:
     if public_key_to_secret_key is None:
@@ -166,7 +166,7 @@ def create_gateway_signature(
         coin_spend.coin,
         agg_sig_additional_data,
     ):
-        signature: Optional[G2Element] = None
+        signature: G2Element | None = None
 
         secret_key = public_key_to_secret_key.get(public_key)
         if secret_key is not None:

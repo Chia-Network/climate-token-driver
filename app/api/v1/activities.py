@@ -3,7 +3,7 @@
 # This import breaks everything - seems something to do with pydantic
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
@@ -24,13 +24,13 @@ logger = logging.getLogger("ClimateToken")
 @router.get("/", response_model=schemas.ActivitiesResponse)
 @disallow_route([ExecutionMode.REGISTRY, ExecutionMode.CLIENT])
 async def get_activity(
-    search: Optional[str] = None,
-    search_by: Optional[schemas.ActivitySearchBy] = None,
-    min_height: Optional[int] = None,
-    mode: Optional[GatewayMode] = None,
+    search: str | None = None,
+    search_by: schemas.ActivitySearchBy | None = None,
+    min_height: int | None = None,
+    mode: GatewayMode | None = None,
     page: int = 1,
     limit: int = 10,
-    org_uid: Optional[str] = None,
+    org_uid: str | None = None,
     sort: str = "desc",
     db: Session = Depends(deps.get_db_session),
 ) -> schemas.ActivitiesResponse:
