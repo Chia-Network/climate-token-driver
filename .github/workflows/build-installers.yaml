@@ -63,7 +63,7 @@ jobs:
             emoji: 🍎
             runs-on:
               arm: [macos-13-arm64]
-              intel: [macos-13]
+              intel: [macos-15-intel]
             artifact-os-name: macos
             executable-extension: ""
           - name: Windows
