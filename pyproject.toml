@@ -14,7 +14,7 @@ packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-fastapi = "0.124.0"
+fastapi = "0.125.0"
 uvicorn = "^0.38.0"
 SQLAlchemy = "^1.4.41"
 requests = "^2.32.5"
