@@ -62,7 +62,7 @@ jobs:
             matrix: macos
             emoji: 🍎
             runs-on:
-              arm: [macos-13-arm64]
+              arm: [macos-15]
               intel: [macos-15-intel]
             artifact-os-name: macos
             executable-extension: ""
