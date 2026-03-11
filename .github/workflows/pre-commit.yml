@@ -26,7 +26,7 @@ jobs:
             runs-on: ubuntu-22.04
           - name: macOS
             matrix: macos
-            runs-on: macos-13-arm64
+            runs-on: macos-15
         python:
           - major_dot_minor: "3.10"
           - major_dot_minor: "3.11"
