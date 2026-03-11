@@ -19,7 +19,7 @@ uvicorn = "^0.38.0"
 SQLAlchemy = "^1.4.41"
 requests = "^2.32.5"
 fastapi-utils = "^0.2.1"
-SQLAlchemy-Utils = "^0.42.0"
+SQLAlchemy-Utils = "^0.42.1"
 pydantic = {version = "^1.10.24", extras = ["dotenv"]}
 packaging = ">=24.0"
 chia-blockchain = "2.5.6"
