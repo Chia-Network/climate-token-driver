@@ -1097,14 +1097,14 @@ development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
 
 [[package]]
 name = "commitizen"
-version = "4.10.0"
+version = "4.13.9"
 description = "Python commitizen client tool"
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["dev"]
 files = [
-    {file = "commitizen-4.10.0-py3-none-any.whl", hash = "sha256:3fe56c168b30b30b84b8329cba6b132e77b4eb304a5460bbe2186aad0f78c966"},
-    {file = "commitizen-4.10.0.tar.gz", hash = "sha256:cc58067403b9eff21d0423b3d9a29bda05254bd51ad5bdd1fd0594bff31277e1"},
+    {file = "commitizen-4.13.9-py3-none-any.whl", hash = "sha256:d2af3d6a83cacec9d5200e17768942c5de6266f93d932c955986c60c4285f2db"},
+    {file = "commitizen-4.13.9.tar.gz", hash = "sha256:2b4567ed50555e10920e5bd804a6a4e2c42ec70bb74f14a83f2680fe9eaf9727"},
 ]
 
 [package.dependencies]
@@ -1115,12 +1115,12 @@ decli = ">=0.6.0,<1.0"
 deprecated = ">=1.2.13,<2"
 jinja2 = ">=2.10.3"
 packaging = ">=19"
-prompt_toolkit = "!=3.0.52"
-pyyaml = ">=3.08"
+prompt-toolkit = "!=3.0.52"
+pyyaml = ">=3.8"
 questionary = ">=2.0,<3.0"
 termcolor = ">=1.1.0,<4.0.0"
 tomlkit = ">=0.8.0,<1.0.0"
-typing-extensions = {version = ">=4.0.1,<5.0.0", markers = "python_version < \"3.11\""}
+typing-extensions = {version = ">=4.0.1,<5.0.0", markers = "python_full_version < \"3.11.0\""}
 
 [[package]]
 name = "concurrent-log-handler"
@@ -3587,4 +3587,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "2590ae96622500ffde18c9ac3b9f5648034329c1ff85619a343c4e460bea9b39"
+content-hash = "1a33bca9db863a0bd765987a16a6ed151d363343c0656d2163819db412128b69"
