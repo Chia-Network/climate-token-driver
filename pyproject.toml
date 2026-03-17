@@ -41,7 +41,7 @@ pytest-xdist = "^3.8.0"
 mypy = "1.15.0"
 pre-commit = "4.5.1"
 pyupgrade = "3.21.2"
-ruff = "0.14.10"
+ruff = "0.15.5"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
