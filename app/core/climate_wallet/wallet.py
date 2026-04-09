@@ -26,7 +26,7 @@ from chia.wallet.uncurried_puzzle import uncurry_puzzle
 from chia.wallet.util.compute_memos import compute_memos
 from chia.wallet.util.tx_config import DEFAULT_TX_CONFIG, TXConfig
 from chia.wallet.util.wallet_types import WalletType
-from chia.wallet.wallet_request_types import PushTransactions
+from chia.wallet.wallet_request_types import PushTransactions, SelectCoins
 from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia.wallet.wallet_spend_bundle import WalletSpendBundle
 from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
@@ -255,7 +255,7 @@ class ClimateWallet(ClimateWalletBase):
                 removals=removals,
                 type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
                 name=spend_bundle.name(),
-                memos=list(compute_memos(spend_bundle).items()),
+                memos=compute_memos(spend_bundle),
             )
             new_txs.append(new_tx)
 
@@ -280,11 +280,17 @@ class ClimateWallet(ClimateWalletBase):
         self.check_user(is_registry=False)
         await self.check_wallet(wallet_id=wallet_id, wallet_type=WalletType.CAT)
 
-        coins: list[Coin] = await self.wallet_client.select_coins(
-            amount=amount,
-            wallet_id=wallet_id,
-            coin_selection_config=tx_config.coin_selection_config,
+        select_response = await self.wallet_client.select_coins(
+            SelectCoins(
+                amount=uint64(amount),
+                wallet_id=uint32(wallet_id),
+                min_coin_amount=tx_config.coin_selection_config.min_coin_amount,
+                max_coin_amount=tx_config.coin_selection_config.max_coin_amount,
+                excluded_coin_amounts=tx_config.coin_selection_config.excluded_coin_amounts,
+                excluded_coin_ids=tx_config.coin_selection_config.excluded_coin_ids,
+            ),
         )
+        coins: list[Coin] = select_response.coins
         if not len(coins):
             raise ValueError("Insufficient balance!")
 
@@ -371,11 +377,17 @@ class ClimateWallet(ClimateWalletBase):
         gateway_public_key: G1Element = self.mode_to_public_key[mode]
         public_key_to_secret_key = {gateway_public_key: gateway_secret_key}
 
-        coins: list[Coin] = await self.wallet_client.select_coins(
-            amount=amount + fee,
-            wallet_id=wallet_id,
-            coin_selection_config=tx_config.coin_selection_config,
+        select_response = await self.wallet_client.select_coins(
+            SelectCoins(
+                amount=uint64(amount + fee),
+                wallet_id=uint32(wallet_id),
+                min_coin_amount=tx_config.coin_selection_config.min_coin_amount,
+                max_coin_amount=tx_config.coin_selection_config.max_coin_amount,
+                excluded_coin_amounts=tx_config.coin_selection_config.excluded_coin_amounts,
+                excluded_coin_ids=tx_config.coin_selection_config.excluded_coin_ids,
+            ),
         )
+        coins: list[Coin] = select_response.coins
         if not len(coins):
             raise ValueError("Insufficient balance!")
 
@@ -597,8 +609,9 @@ class ClimateWallet(ClimateWalletBase):
             trade_id=None,
             type=uint32(CLIMATE_WALLET_INDEX + mode.to_int()),
             name=spend_bundle.name(),
-            memos=list(compute_memos(spend_bundle).items()),
+            memos=compute_memos(spend_bundle),
             valid_times=ConditionValidTimes(),
+            to_address="",
         )
         transaction_records = [transaction_record]
 

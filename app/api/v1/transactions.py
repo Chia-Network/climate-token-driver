@@ -13,8 +13,15 @@ from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.transaction_sorting import SortKey
 from chia.wallet.util.wallet_types import WalletType
 from chia.wallet.wallet_info import WalletInfo
+from chia.wallet.wallet_request_types import (
+    GetTransaction,
+    GetTransactions,
+    GetWallets,
+    TransactionRecordWithMetadata,
+)
 from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia_rs.sized_bytes import bytes32
+from chia_rs.sized_ints import uint16, uint32
 from fastapi import APIRouter, Depends
 
 from app import schemas
@@ -22,7 +29,6 @@ from app.api import dependencies as deps
 from app.config import ExecutionMode
 from app.core.chialisp.gateway import create_gateway_puzzle, parse_gateway_spend
 from app.core.types import CLIMATE_WALLET_INDEX, GatewayMode
-from app.schemas.types import ChiaJsonObject
 from app.utils import disallow_route
 
 router = APIRouter()
@@ -42,9 +48,10 @@ async def get_transaction(
     This endpoint is to be called by the registry or the client.
     """
 
-    transaction_record: TransactionRecord = await wallet_rpc_client.get_transaction(
-        transaction_id=bytes32.from_hexstr(transaction_id),
+    transaction_response = await wallet_rpc_client.get_transaction(
+        GetTransaction(transaction_id=bytes32.from_hexstr(transaction_id)),
     )
+    transaction_record: TransactionRecord = transaction_response.transaction
 
     return schemas.Transaction(
         id=transaction_record.name,
@@ -70,19 +77,24 @@ async def get_transactions(
     This endpoint is to be called by the client.
     """
 
-    transaction_records: list[TransactionRecord] = await wallet_rpc_client.get_transactions(
-        wallet_id=wallet_id,
-        start=start,
-        end=end,
-        sort_key=SortKey[sort_key],
-        reverse=reverse,
-        to_address=to_address,
+    transactions_response = await wallet_rpc_client.get_transactions(
+        GetTransactions(
+            wallet_id=uint32(wallet_id),
+            start=uint32(start),
+            end=uint32(end),
+            sort_key=SortKey[sort_key].name,
+            reverse=reverse,
+            to_address=to_address,
+        ),
     )
+    transaction_records: list[TransactionRecordWithMetadata] = transactions_response.transactions
 
-    wallet_objs: list[ChiaJsonObject] = await wallet_rpc_client.get_wallets(
-        wallet_type=WalletType.CAT,
+    wallets_response = await wallet_rpc_client.get_wallets(
+        GetWallets(type=uint16(WalletType.CAT)),
     )
-    wallet_infos: list[WalletInfo] = [WalletInfo.from_json_dict(wallet_obj) for wallet_obj in wallet_objs]
+    wallet_infos: list[WalletInfo] = [
+        WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets
+    ]
 
     wallet_info: WalletInfo | None
     cat_info: CATInfo | None = None

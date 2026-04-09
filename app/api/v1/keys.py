@@ -35,7 +35,7 @@ async def get_key(
     fingerprint = await wallet_rpc_client.get_logged_in_fingerprint()
     assert fingerprint.fingerprint is not None
 
-    result = await wallet_rpc_client.get_private_key(GetPrivateKey(fingerprint.fingerprint))
+    result = await wallet_rpc_client.get_private_key(GetPrivateKey(fingerprint=fingerprint.fingerprint))
 
     secret_key = result.private_key.sk
 
