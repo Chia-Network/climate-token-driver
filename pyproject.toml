@@ -17,7 +17,7 @@ python = ">=3.10,<3.13"
 fastapi = "0.125.0"
 uvicorn = "^0.41.0"
 SQLAlchemy = "^1.4.41"
-requests = "^2.32.5"
+requests = "^2.33.0"
 fastapi-utils = "^0.2.1"
 SQLAlchemy-Utils = "^0.42.1"
 pydantic = {version = "^1.10.26", extras = ["dotenv"]}
