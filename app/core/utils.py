@@ -4,7 +4,8 @@ import logging
 
 from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
-from chia.util.config import load_config
+from chia.util.bech32m import encode_puzzle_hash
+from chia.util.config import load_config, selected_network_address_prefix
 from chia.util.default_root import DEFAULT_ROOT_PATH
 from chia.wallet.cat_wallet.cat_info import CATInfo
 from chia.wallet.derive_keys import master_sk_to_wallet_sk_unhardened
@@ -27,6 +28,12 @@ from app.core.derive_keys import master_sk_to_root_sk
 from app.core.types import TransactionRequest
 
 logger = logging.getLogger("ClimateToken")
+
+
+def puzzle_hash_to_address(puzzle_hash: bytes32) -> str:
+    config = load_config(root_path=DEFAULT_ROOT_PATH, filename="config.yaml")
+    prefix = selected_network_address_prefix(config)
+    return encode_puzzle_hash(puzzle_hash, prefix)
 
 
 async def get_constants(

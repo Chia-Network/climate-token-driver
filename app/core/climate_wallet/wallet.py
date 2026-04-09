@@ -10,7 +10,6 @@ from chia.consensus.constants import ConsensusConstants
 from chia.full_node.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
 from chia.types.blockchain_format.program import Program
-from chia.types.coin_record import CoinRecord
 from chia.types.coin_spend import CoinSpend, make_spend
 from chia.util.bech32m import bech32_decode, bech32_encode, convertbits
 from chia.wallet.cat_wallet.cat_utils import (
@@ -29,7 +28,7 @@ from chia.wallet.util.wallet_types import WalletType
 from chia.wallet.wallet_request_types import PushTransactions, SelectCoins
 from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia.wallet.wallet_spend_bundle import WalletSpendBundle
-from chia_rs import AugSchemeMPL, G1Element, G2Element, PrivateKey
+from chia_rs import AugSchemeMPL, CoinRecord, G1Element, G2Element, PrivateKey
 from chia_rs.sized_bytes import bytes32
 from chia_rs.sized_ints import uint32, uint64
 
@@ -38,7 +37,13 @@ from app.core.chialisp.tail import create_delegated_puzzle, create_tail_program
 from app.core.climate_wallet.wallet_utils import create_gateway_request_and_spend, create_gateway_signature
 from app.core.derive_keys import root_sk_to_gateway_sk
 from app.core.types import CLIMATE_WALLET_INDEX, ClimateTokenIndex, GatewayMode, TransactionRequest
-from app.core.utils import get_constants, get_created_signed_transactions, get_first_puzzle_hash, get_wallet_info_by_id
+from app.core.utils import (
+    get_constants,
+    get_created_signed_transactions,
+    get_first_puzzle_hash,
+    get_wallet_info_by_id,
+    puzzle_hash_to_address,
+)
 
 logger = logging.getLogger("ClimateToken")
 
@@ -611,7 +616,7 @@ class ClimateWallet(ClimateWalletBase):
             name=spend_bundle.name(),
             memos=compute_memos(spend_bundle),
             valid_times=ConditionValidTimes(),
-            to_address="",
+            to_address=puzzle_hash_to_address(gateway_coin_spend.coin.puzzle_hash),
         )
         transaction_records = [transaction_record]
 
