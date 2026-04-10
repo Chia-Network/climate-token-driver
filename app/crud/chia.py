@@ -9,8 +9,7 @@ from urllib.parse import urlencode, urlparse
 import requests
 from chia.full_node.full_node_rpc_client import FullNodeRpcClient
 from chia.types.blockchain_format.coin import Coin
-from chia.types.coin_record import CoinRecord
-from chia_rs import G1Element
+from chia_rs import CoinRecord, G1Element
 from fastapi.encoders import jsonable_encoder
 
 from app import schemas
