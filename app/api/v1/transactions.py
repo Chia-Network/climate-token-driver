@@ -9,7 +9,6 @@ from chia.types.coin_spend import CoinSpend
 from chia.util.byte_types import hexstr_to_bytes
 from chia.wallet.cat_wallet.cat_info import CATInfo
 from chia.wallet.cat_wallet.cat_utils import CAT_MOD, construct_cat_puzzle
-from chia.wallet.transaction_record import TransactionRecord
 from chia.wallet.transaction_sorting import SortKey
 from chia.wallet.util.wallet_types import WalletType
 from chia.wallet.wallet_info import WalletInfo
@@ -17,7 +16,6 @@ from chia.wallet.wallet_request_types import (
     GetTransaction,
     GetTransactions,
     GetWallets,
-    TransactionRecordWithMetadata,
 )
 from chia.wallet.wallet_rpc_client import WalletRpcClient
 from chia_rs.sized_bytes import bytes32
@@ -51,7 +49,7 @@ async def get_transaction(
     transaction_response = await wallet_rpc_client.get_transaction(
         GetTransaction(transaction_id=bytes32.from_hexstr(transaction_id)),
     )
-    transaction_record: TransactionRecord = transaction_response.transaction
+    transaction_record = transaction_response.transaction
 
     return schemas.Transaction(
         id=transaction_record.name,
@@ -87,14 +85,12 @@ async def get_transactions(
             to_address=to_address,
         ),
     )
-    transaction_records: list[TransactionRecordWithMetadata] = transactions_response.transactions
+    transaction_records = transactions_response.transactions
 
     wallets_response = await wallet_rpc_client.get_wallets(
-        GetWallets(type=uint16(WalletType.CAT)),
+        GetWallets(type=uint16(WalletType.CAT.value)),
     )
-    wallet_infos: list[WalletInfo] = [
-        WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets
-    ]
+    wallet_infos = [WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets]
 
     wallet_info: WalletInfo | None
     cat_info: CATInfo | None = None

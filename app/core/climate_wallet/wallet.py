@@ -295,7 +295,7 @@ class ClimateWallet(ClimateWalletBase):
                 excluded_coin_ids=tx_config.coin_selection_config.excluded_coin_ids,
             ),
         )
-        coins: list[Coin] = select_response.coins
+        coins = select_response.coins
         if not len(coins):
             raise ValueError("Insufficient balance!")
 
@@ -392,7 +392,7 @@ class ClimateWallet(ClimateWalletBase):
                 excluded_coin_ids=tx_config.coin_selection_config.excluded_coin_ids,
             ),
         )
-        coins: list[Coin] = select_response.coins
+        coins = select_response.coins
         if not len(coins):
             raise ValueError("Insufficient balance!")
 
@@ -597,6 +597,7 @@ class ClimateWallet(ClimateWalletBase):
         if gateway_coin_spend is None:
             raise ValueError("Invalid detokenization request: Could not find gateway coin spend!")
 
+        to_address = await puzzle_hash_to_address(gateway_coin_spend.coin.puzzle_hash, self.wallet_client)
         additions = spend_bundle.additions()
         transaction_record = TransactionRecord(
             confirmed_at_height=uint32(0),
@@ -616,7 +617,7 @@ class ClimateWallet(ClimateWalletBase):
             name=spend_bundle.name(),
             memos=compute_memos(spend_bundle),
             valid_times=ConditionValidTimes(),
-            to_address=puzzle_hash_to_address(gateway_coin_spend.coin.puzzle_hash),
+            to_address=to_address,
         )
         transaction_records = [transaction_record]
 

@@ -5,7 +5,7 @@ import logging
 from chia.consensus.constants import ConsensusConstants, replace_str_to_bytes
 from chia.consensus.default_constants import DEFAULT_CONSTANTS
 from chia.util.bech32m import encode_puzzle_hash
-from chia.util.config import load_config, selected_network_address_prefix
+from chia.util.config import load_config
 from chia.util.default_root import DEFAULT_ROOT_PATH
 from chia.wallet.cat_wallet.cat_info import CATInfo
 from chia.wallet.derive_keys import master_sk_to_wallet_sk_unhardened
@@ -30,9 +30,10 @@ from app.core.types import TransactionRequest
 logger = logging.getLogger("ClimateToken")
 
 
-def puzzle_hash_to_address(puzzle_hash: bytes32) -> str:
-    config = load_config(root_path=DEFAULT_ROOT_PATH, filename="config.yaml")
-    prefix = selected_network_address_prefix(config)
+async def puzzle_hash_to_address(puzzle_hash: bytes32, wallet_client: WalletRpcClient) -> str:
+    result = await wallet_client.fetch("get_network_info", {})
+    prefix = result.get("network_prefix", "txch")
+
     return encode_puzzle_hash(puzzle_hash, prefix)
 
 
@@ -69,9 +70,7 @@ async def get_cat_wallet_info_by_asset_id(
     wallet_client: WalletRpcClient,
 ) -> WalletInfo | None:
     wallets_response = await wallet_client.get_wallets(GetWallets())
-    wallet_infos: list[WalletInfo] = [
-        WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets
-    ]
+    wallet_infos = [WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets]
 
     wallet_info: WalletInfo
     for wallet_info in wallet_infos:
@@ -92,9 +91,7 @@ async def get_wallet_info_by_id(
     wallet_client: WalletRpcClient,
 ) -> WalletInfo | None:
     wallets_response = await wallet_client.get_wallets(GetWallets())
-    wallet_infos: list[WalletInfo] = [
-        WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets
-    ]
+    wallet_infos = [WalletInfo(id=w.id, name=w.name, type=w.type, data=w.data) for w in wallets_response.wallets]
 
     wallet_info: WalletInfo
     for wallet_info in wallet_infos:
